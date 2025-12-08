@@ -23,7 +23,12 @@ export class ProxyController {
   @All('auth/*')
   async handleAuthRequest(@Req() req: Request, @Body() body: any) {
     const url = `http://localhost:3001${req.originalUrl.replace('/api', '')}`;
-    return this.proxyService.forwardRequest(url, req.method, body, req.headers);
+    console.log(`[Proxy] Forwarding auth request to: ${url}`);
+
+    // Remove host and content-length headers to avoid conflicts
+    const { host, 'content-length': contentLength, ...headers } = req.headers;
+
+    return this.proxyService.forwardRequest(url, req.method, body, headers);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,11 +37,18 @@ export class ProxyController {
     const url = `http://localhost:3002${req.originalUrl.replace('/api', '')}`;
     // Inject User ID into headers
     const user = (req as any).user;
-    const headers = {
-      ...req.headers,
+    const { host, 'content-length': contentLength, ...headers } = req.headers;
+
+    const finalHeaders = {
+      ...headers,
       'x-user-id': user.userId,
     };
 
-    return this.proxyService.forwardRequest(url, req.method, body, headers);
+    return this.proxyService.forwardRequest(
+      url,
+      req.method,
+      body,
+      finalHeaders,
+    );
   }
 }
