@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  name          String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  wallets      Wallet[]
+  categories   Category[]
+  transactions Transaction[]
+  recurrences  Recurrence[]
+
+  @@map("users")
+}
+
+model Wallet {
+  id                  String    @id @default(uuid())
+  user_id             String
+  name                String
+  type                String // Enum handled as string or PG Enum, using string for simplicity initially
+  balance             Decimal   @default(0.0000) @db.Decimal(19, 4)
+  currency            String    @default("BRL")
+  is_active           Boolean   @default(true)
+  invoice_closing_day Int?
+  invoice_due_day     Int?
+  limit               Decimal?  @db.Decimal(19, 4)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
+
+  user         User          @relation(fields: [user_id], references: [id])
+  transactions Transaction[]
+  recurrences  Recurrence[]
+
+  @@map("wallets")
+}
+
+model Category {
+  id         String    @id @default(uuid())
+  user_id    String?
+  name       String
+  type       String // Enum: Receita, Despesa
+  icon       String?
+  color      String?
+  is_default Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  user         User?         @relation(fields: [user_id], references: [id])
+  transactions Transaction[]
+  recurrences  Recurrence[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id                 String    @id @default(uuid())
+  user_id            String
+  wallet_id          String
+  category_id        String
+  amount             Decimal   @db.Decimal(19, 4)
+  currency           String    @default("BRL")
+  date               DateTime
+  description        String?
+  status             String // Enum: Pendente, Pago, Cancelado
+  type               String // Enum: Receita, Despesa
+  tags               String[]
+  is_paid            Boolean   @default(false)
+  installment_number Int?
+  total_installments Int?
+  purchase_group_id  String?
+  recurrence_id      String?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  deleted_at         DateTime?
+
+  user       User        @relation(fields: [user_id], references: [id])
+  wallet     Wallet      @relation(fields: [wallet_id], references: [id])
+  category   Category    @relation(fields: [category_id], references: [id])
+  recurrence Recurrence? @relation(fields: [recurrence_id], references: [id])
+
+  @@map("transactions")
+}
+
+model Recurrence {
+  id             String    @id @default(uuid())
+  user_id        String
+  wallet_id      String
+  category_id    String
+  amount         Decimal   @db.Decimal(19, 4)
+  currency       String    @default("BRL")
+  description    String?
+  type           String // Enum: Receita, Despesa
+  frequency      String // Enum: MONTHLY, WEEKLY
+  start_date     DateTime
+  end_date       DateTime?
+  last_generated DateTime?
+  active         Boolean   @default(true)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  user         User          @relation(fields: [user_id], references: [id])
+  wallet       Wallet        @relation(fields: [wallet_id], references: [id])
+  category     Category      @relation(fields: [category_id], references: [id])
+  transactions Transaction[]
+
+  @@map("recurrences")
+}
