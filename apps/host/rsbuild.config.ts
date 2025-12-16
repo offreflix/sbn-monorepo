@@ -9,14 +9,34 @@ export default defineConfig({
   server: {
     port: 9000,
   },
+  dev: {
+    assetPrefix: 'http://localhost:9000',
+    hmr: true,
+  },
   tools: {
     rspack: {
       output: {
         uniqueName: 'host',
       },
+      watchOptions: {
+        ignored: [
+          '**/node_modules/**',
+          '**/@mf-types/**',
+          '**/dist/**',
+          '**/.turbo/**',
+          '**/.rsbuild/**',
+          '**/mf-manifest.json',
+          '**/*.log',
+        ],
+        aggregateTimeout: 300,
+        poll: false,
+      },
       plugins: [
         new ModuleFederationPlugin({
           name: 'host',
+          remotes: {
+            remote1: 'remote1@http://localhost:9001/mf-manifest.json',
+          },
           shared: {
             react: {
               version: dependencies.react,

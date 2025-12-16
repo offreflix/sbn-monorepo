@@ -9,10 +9,27 @@ export default defineConfig({
   server: {
     port: 9001,
   },
+  dev: {
+    assetPrefix: 'http://localhost:9001',
+    hmr: true,
+  },
   tools: {
     rspack: {
       output: {
         uniqueName: 'remote1',
+      },
+      watchOptions: {
+        ignored: [
+          '**/node_modules/**',
+          '**/@mf-types/**',
+          '**/dist/**',
+          '**/.turbo/**',
+          '**/.rsbuild/**',
+          '**/mf-manifest.json',
+          '**/*.log',
+        ],
+        aggregateTimeout: 300,
+        poll: false,
       },
       plugins: [
         new ModuleFederationPlugin({
