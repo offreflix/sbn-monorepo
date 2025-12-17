@@ -5,7 +5,7 @@ import {
   type RegisterRequest,
 } from '../types/auth'
 
-const API_BASE = 'http://localhost:3000/api/auth'
+const API_BASE = `${import.meta.env.VITE_API_BASE ?? 'http://localhost:3000'}/api/auth`
 
 async function handle<T>(res: Response): Promise<T> {
   const contentType = res.headers.get('content-type')

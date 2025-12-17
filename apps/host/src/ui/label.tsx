@@ -1,17 +1,13 @@
-import React from 'react'
-import { clsx } from 'clsx'
+import { cn } from '../lib/utils'
 
-export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement>
+export type LabelProps = React.ComponentProps<'label'>
 
-export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
-  ({ className, ...props }, ref) => (
+export function Label({ className, ...props }: LabelProps) {
+  return (
     <label
-      ref={ref}
-      className={clsx('text-sm font-medium text-foreground', className)}
+      data-slot="label"
+      className={cn('text-sm font-medium text-foreground', className)}
       {...props}
     />
-  ),
-)
-
-Label.displayName = 'Label'
-
+  )
+}

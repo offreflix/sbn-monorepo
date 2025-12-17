@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { DashboardPage } from './pages/Dashboard'
+import { FinanceRemotePage } from './pages/FinanceRemote'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 
@@ -37,6 +38,14 @@ function App() {
             element={
               <Protected>
                 <DashboardPage />
+              </Protected>
+            }
+          />
+          <Route
+            path="/finance"
+            element={
+              <Protected>
+                <FinanceRemotePage />
               </Protected>
             }
           />

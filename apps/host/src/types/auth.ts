@@ -25,4 +25,3 @@ export type AuthResponse = AuthTokens & {
 }
 
 export type RefreshResponse = AuthTokens
-

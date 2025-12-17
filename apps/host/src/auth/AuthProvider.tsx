@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { authApi } from '../api/auth'
-import type { AuthResponse, AuthTokens, User } from '../types/auth'
+import type { AuthTokens, User } from '../types/auth'
 
 type SessionState = {
   user: User | null
@@ -13,7 +20,11 @@ type AuthContextValue = {
   refreshToken: string | null
   loading: boolean
   login: (credentials: { email: string; password: string }) => Promise<void>
-  register: (payload: { name: string; email: string; password: string }) => Promise<void>
+  register: (payload: {
+    name: string
+    email: string
+    password: string
+  }) => Promise<void>
   logout: () => void
   refreshTokens: () => Promise<AuthTokens>
   authFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
@@ -25,21 +36,48 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 function loadSession(): SessionState {
   try {
+    if (typeof window === 'undefined' || !localStorage) {
+      return { user: null, tokens: null }
+    }
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { user: null, tokens: null }
     const parsed = JSON.parse(raw) as SessionState
     return parsed
-  } catch {
+  } catch (error) {
+    console.error('[Auth] Failed to load session:', error)
     return { user: null, tokens: null }
   }
 }
 
 function persistSession(session: SessionState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+  try {
+    if (typeof window === 'undefined' || !localStorage) {
+      console.warn('[Auth] localStorage not available')
+      return
+    }
+    const serialized = JSON.stringify(session)
+    localStorage.setItem(STORAGE_KEY, serialized)
+    // Debug: verificar se foi salvo
+    if (process.env.NODE_ENV === 'development') {
+      const verify = localStorage.getItem(STORAGE_KEY)
+      console.log('[Auth] Session saved to localStorage:', {
+        hasUser: !!session.user,
+        hasTokens: !!session.tokens,
+        tokenLength: session.tokens?.accessToken?.length || 0,
+        saved: verify !== null,
+        matches: verify === serialized,
+      })
+    }
+  } catch (error) {
+    console.error('[Auth] Failed to persist session:', error)
+  }
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState<SessionState>({ user: null, tokens: null })
+  const [session, setSession] = useState<SessionState>({
+    user: null,
+    tokens: null,
+  })
   const [loading, setLoading] = useState(true)
   const refreshPromise = useRef<Promise<AuthTokens> | null>(null)
 
@@ -48,13 +86,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false)
   }, [])
 
-  const applyAuthResponse = (resp: AuthResponse) => {
+  const applyAuthResponse = (resp: any) => {
+    // Backend retorna access_token (snake_case), precisamos mapear
+    const accessToken = resp.accessToken || resp.access_token
+    const refreshToken = resp.refreshToken || resp.refresh_token || null
+
+    if (!accessToken) {
+      console.error('[Auth] No access token in response:', resp)
+      throw new Error('Token de acesso não recebido do servidor')
+    }
+
     const nextSession: SessionState = {
       user: resp.user,
-      tokens: { accessToken: resp.accessToken, refreshToken: resp.refreshToken },
+      tokens: {
+        accessToken,
+        refreshToken: refreshToken || '', // Temporário: backend não retorna refreshToken ainda
+      },
     }
     setSession(nextSession)
     persistSession(nextSession)
+    // Debug: verificar se foi salvo
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Login/Register successful, session saved:', {
+        userId: resp.user?.id,
+        email: resp.user?.email,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        rawResponse: resp,
+      })
+    }
   }
 
   const logout = () => {
@@ -65,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshTokens = async () => {
     const stored = session.tokens?.refreshToken
-    if (!stored) {
+    if (!stored || stored === '') {
       logout()
       throw new Error('Sessão expirada')
     }
@@ -73,11 +133,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!refreshPromise.current) {
       refreshPromise.current = authApi
         .refresh(stored)
-        .then((tokens) => {
-          const next = { ...session, tokens }
-          setSession(next)
-          persistSession(next)
-          return tokens
+        .then((tokens: any) => {
+          // Backend pode retornar em snake_case, mapeamos para camelCase
+          const accessToken = tokens.accessToken || tokens.access_token
+          const refreshToken =
+            tokens.refreshToken || tokens.refresh_token || stored
+
+          const normalizedTokens: AuthTokens = {
+            accessToken,
+            refreshToken,
+          }
+
+          // Preserva o user ao atualizar os tokens
+          setSession((prev) => {
+            const next = { ...prev, tokens: normalizedTokens }
+            persistSession(next)
+            return next
+          })
+          return normalizedTokens
         })
         .finally(() => {
           refreshPromise.current = null
@@ -88,13 +161,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const login = async (credentials: { email: string; password: string }) => {
-    const resp = await authApi.login(credentials)
+    const resp = (await authApi.login(credentials)) as any
     applyAuthResponse(resp)
   }
 
-  const register = async (payload: { name: string; email: string; password: string }) => {
-    const resp = await authApi.register(payload)
-    applyAuthResponse(resp)
+  const register = async (payload: {
+    name: string
+    email: string
+    password: string
+  }) => {
+    // Register pode não retornar tokens, então fazemos login após registro
+    const registerResp = (await authApi.register(payload)) as any
+
+    // Se não tiver tokens, faz login automaticamente
+    if (!registerResp.accessToken && !registerResp.access_token) {
+      const loginResp = (await authApi.login({
+        email: payload.email,
+        password: payload.password,
+      })) as any
+      applyAuthResponse(loginResp)
+    } else {
+      applyAuthResponse(registerResp)
+    }
   }
 
   const authFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -142,4 +230,3 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth deve ser usado dentro de AuthProvider')
   return ctx
 }
-
