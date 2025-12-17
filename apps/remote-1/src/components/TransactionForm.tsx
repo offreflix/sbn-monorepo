@@ -2,22 +2,36 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { financeApi } from '../api/finance'
-import type { Wallet, Category, CreateTransactionRequest } from '../types/finance'
-import { Button } from '../ui/button'
+import type {
+  Wallet,
+  Category,
+  CreateTransactionRequest,
+} from '../types/finance'
+import { Button } from '@repo/ui'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../ui/form'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '../ui/form'
 import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 
 const transactionSchema = z.object({
   wallet_id: z.string().min(1, 'Selecione uma carteira'),
   category_id: z.string().min(1, 'Selecione uma categoria'),
-  amount: z.string().min(1, 'Valor é obrigatório').refine((val) => {
-    const num = parseFloat(val)
-    return !isNaN(num) && num > 0
-  }, 'Valor deve ser um número positivo'),
+  amount: z
+    .string()
+    .min(1, 'Valor é obrigatório')
+    .refine((val) => {
+      const num = parseFloat(val)
+      return !isNaN(num) && num > 0
+    }, 'Valor deve ser um número positivo'),
   date: z.string().min(1, 'Data é obrigatória'),
   description: z.string().optional(),
   type: z.enum(['Receita', 'Despesa']),
@@ -34,7 +48,12 @@ interface TransactionFormProps {
   onCancel: () => void
 }
 
-export function TransactionForm({ wallets, categories, onSuccess, onCancel }: TransactionFormProps) {
+export function TransactionForm({
+  wallets,
+  categories,
+  onSuccess,
+  onCancel,
+}: TransactionFormProps) {
   const [submitting, setSubmitting] = useState(false)
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -47,7 +66,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
   })
 
   const selectedType = form.watch('type')
-  const filteredCategories = categories.filter((cat) => cat.type === selectedType)
+  const filteredCategories = categories.filter(
+    (cat) => cat.type === selectedType
+  )
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
@@ -69,7 +90,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
       form.reset()
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao criar transação')
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao criar transação'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -98,7 +121,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                       <option value="Receita">Receita</option>
                     </select>
                   </FormControl>
-                  <FormMessage>{form.formState.errors.type?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.type?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -122,7 +147,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                       ))}
                     </select>
                   </FormControl>
-                  <FormMessage>{form.formState.errors.wallet_id?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.wallet_id?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -147,7 +174,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                       ))}
                     </select>
                   </FormControl>
-                  <FormMessage>{form.formState.errors.category_id?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.category_id?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -159,9 +188,16 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                 <FormItem>
                   <FormLabel>Valor</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.amount?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.amount?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -175,7 +211,9 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.date?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.date?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -187,9 +225,14 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
                 <FormItem>
                   <FormLabel>Descrição (opcional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Compra no supermercado" {...field} />
+                    <Input
+                      placeholder="Ex: Compra no supermercado"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage>{form.formState.errors.description?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.description?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -213,7 +256,12 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
             />
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={submitting}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
@@ -226,4 +274,3 @@ export function TransactionForm({ wallets, categories, onSuccess, onCancel }: Tr
     </Card>
   )
 }
-

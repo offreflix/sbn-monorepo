@@ -1,9 +1,19 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
-import { Button } from '../ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@repo/ui'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,7 +21,20 @@ import { financeApi } from '../api/finance'
 import type { CreateCategoryRequest } from '../types/finance'
 import { toast } from 'sonner'
 
-const EMOJI_OPTIONS = ['🍔', '🚗', '🏥', '🎮', '💰', '💼', '🏠', '✈️', '📚', '💳', '🎬', '🛒']
+const EMOJI_OPTIONS = [
+  '🍔',
+  '🚗',
+  '🏥',
+  '🎮',
+  '💰',
+  '💼',
+  '🏠',
+  '✈️',
+  '📚',
+  '💳',
+  '🎬',
+  '🛒',
+]
 const COLOR_OPTIONS = [
   { name: 'Vermelho', value: '#ef4444' },
   { name: 'Laranja', value: '#f59e0b' },
@@ -38,7 +61,11 @@ interface CreateCategoryModalProps {
   onSuccess: () => void
 }
 
-export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCategoryModalProps) {
+export function CreateCategoryModal({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreateCategoryModalProps) {
   const [submitting, setSubmitting] = useState(false)
   const [selectedEmoji, setSelectedEmoji] = useState('🍔')
   const [selectedColor, setSelectedColor] = useState('#ef4444')
@@ -67,7 +94,9 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
       setSelectedColor('#ef4444')
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao criar categoria')
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao criar categoria'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -78,21 +107,34 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Criar Nova Categoria</DialogTitle>
-          <DialogDescription>Adicione uma nova categoria para organizar suas transações.</DialogDescription>
+          <DialogDescription>
+            Adicione uma nova categoria para organizar suas transações.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome da Categoria</Label>
-            <Input id="name" {...form.register('name')} placeholder="Ex: Alimentação" />
+            <Input
+              id="name"
+              {...form.register('name')}
+              placeholder="Ex: Alimentação"
+            />
             {form.formState.errors.name && (
-              <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+              <p className="text-sm text-destructive">
+                {form.formState.errors.name.message}
+              </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="type">Tipo</Label>
-            <Select value={form.watch('type')} onValueChange={(value) => form.setValue('type', value as 'Receita' | 'Despesa')}>
+            <Select
+              value={form.watch('type')}
+              onValueChange={(value) =>
+                form.setValue('type', value as 'Receita' | 'Despesa')
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
@@ -112,7 +154,9 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
                   type="button"
                   onClick={() => setSelectedEmoji(emoji)}
                   className={`h-12 w-12 rounded-lg border-2 text-2xl transition-all hover:scale-110 ${
-                    selectedEmoji === emoji ? 'border-primary bg-primary/10' : 'border-border'
+                    selectedEmoji === emoji
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border'
                   }`}
                 >
                   {emoji}
@@ -130,7 +174,9 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
                   type="button"
                   onClick={() => setSelectedColor(color.value)}
                   className={`h-12 rounded-lg border-2 transition-all hover:scale-105 ${
-                    selectedColor === color.value ? 'border-foreground ring-2 ring-offset-2' : 'border-border'
+                    selectedColor === color.value
+                      ? 'border-foreground ring-2 ring-offset-2'
+                      : 'border-border'
                   }`}
                   style={{ backgroundColor: color.value }}
                   title={color.name}
@@ -140,7 +186,12 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
@@ -152,4 +203,3 @@ export function CreateCategoryModal({ open, onOpenChange, onSuccess }: CreateCat
     </Dialog>
   )
 }
-

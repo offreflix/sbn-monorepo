@@ -3,9 +3,22 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Button } from '../ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
+import { Button } from '@repo/ui'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@repo/ui'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form'
 import { Input } from '../ui/input'
 import { useAuth } from '../auth/AuthProvider'
 import { z } from 'zod'
@@ -98,7 +111,10 @@ export const LoginPage = () => {
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Não tem conta?{' '}
-            <Link to="/register" className="font-medium text-primary hover:underline">
+            <Link
+              to="/register"
+              className="font-medium text-primary hover:underline"
+            >
               Criar conta
             </Link>
           </p>
@@ -107,4 +123,3 @@ export const LoginPage = () => {
     </div>
   )
 }
-

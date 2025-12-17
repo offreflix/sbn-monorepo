@@ -1,5 +1,7 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@source "../../../packages/ui";
+
+@import 'tw-animate-css';
 
 :root {
   --background: oklch(0.98 0.002 264);
@@ -81,5 +83,10 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
 }

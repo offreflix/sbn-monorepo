@@ -1,6 +1,12 @@
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Button } from '@repo/ui'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@repo/ui'
 import { Header } from '../components/Header'
 
 export const DashboardPage = () => {
@@ -15,14 +21,14 @@ export const DashboardPage = () => {
           <CardHeader>
             <CardTitle>Financeiro</CardTitle>
             <CardDescription>
-              Este shell carregará o microfrontend de finanças (remote) quando navegarmos para a
-              rota correspondente.
+              Este shell carregará o microfrontend de finanças (remote) quando
+              navegarmos para a rota correspondente.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Por enquanto, este é um placeholder. Use o menu para navegar ou avance com a integração
-              do remote de finanças.
+              Por enquanto, este é um placeholder. Use o menu para navegar ou
+              avance com a integração do remote de finanças.
             </p>
             <Button onClick={() => navigate('/dashboard')}>Recarregar</Button>
           </CardContent>
@@ -31,4 +37,3 @@ export const DashboardPage = () => {
     </div>
   )
 }
-

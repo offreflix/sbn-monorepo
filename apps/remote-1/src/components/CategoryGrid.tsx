@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { Card } from '../ui/card'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
+import { Card, Badge, Button } from '@repo/ui'
 import { Plus } from 'lucide-react'
 import { CreateCategoryModal } from './CreateCategoryModal'
 import type { Category } from '../types/finance'
@@ -17,7 +15,11 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="gap-2">
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          size="sm"
+          className="gap-2"
+        >
           <Plus className="h-4 w-4" />
           Nova Categoria
         </Button>
@@ -25,7 +27,9 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {categories.length === 0 ? (
-          <p className="col-span-full text-center text-muted-foreground py-8">Nenhuma categoria encontrada</p>
+          <p className="col-span-full text-center text-muted-foreground py-8">
+            Nenhuma categoria encontrada
+          </p>
         ) : (
           categories.map((category) => (
             <Card
@@ -43,8 +47,15 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
                     {category.icon || '💰'}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{category.name}</h3>
-                    <Badge variant={category.type === 'Receita' ? 'default' : 'secondary'} className="mt-1">
+                    <h3 className="font-semibold text-foreground">
+                      {category.name}
+                    </h3>
+                    <Badge
+                      variant={
+                        category.type === 'Receita' ? 'default' : 'secondary'
+                      }
+                      className="mt-1"
+                    >
                       {category.type}
                     </Badge>
                   </div>
@@ -66,4 +77,3 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
     </div>
   )
 }
-

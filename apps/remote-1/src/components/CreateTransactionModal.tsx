@@ -1,25 +1,42 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog'
-import { Button } from '../ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@repo/ui'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Switch } from '../ui/switch'
 import { Textarea } from '../ui/textarea'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { financeApi } from '../api/finance'
-import type { Wallet, Category, CreateTransactionRequest } from '../types/finance'
+import type {
+  Wallet,
+  Category,
+  CreateTransactionRequest,
+} from '../types/finance'
 import { toast } from 'sonner'
 
 const transactionSchema = z.object({
   wallet_id: z.string().min(1, 'Selecione uma carteira'),
   category_id: z.string().min(1, 'Selecione uma categoria'),
-  amount: z.string().min(1, 'Valor é obrigatório').refine((val) => {
-    const num = parseFloat(val)
-    return !isNaN(num) && num > 0
-  }, 'Valor deve ser um número positivo'),
+  amount: z
+    .string()
+    .min(1, 'Valor é obrigatório')
+    .refine((val) => {
+      const num = parseFloat(val)
+      return !isNaN(num) && num > 0
+    }, 'Valor deve ser um número positivo'),
   date: z.string().min(1, 'Data é obrigatória'),
   description: z.string().optional(),
   type: z.enum(['Receita', 'Despesa']),
@@ -58,8 +75,11 @@ export function CreateTransactionModal({
   })
 
   const selectedType = form.watch('type')
-  const filteredCategories = categories.filter((cat) => cat.type === selectedType)
-  const hasInstallments = form.watch('installment_number') && form.watch('total_installments')
+  const filteredCategories = categories.filter(
+    (cat) => cat.type === selectedType
+  )
+  const hasInstallments =
+    form.watch('installment_number') && form.watch('total_installments')
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
@@ -74,8 +94,12 @@ export function CreateTransactionModal({
         status: data.status || 'Pendente',
         is_paid: data.is_paid || false,
         currency: 'BRL',
-        installment_number: data.installment_number ? parseInt(data.installment_number) : undefined,
-        total_installments: data.total_installments ? parseInt(data.total_installments) : undefined,
+        installment_number: data.installment_number
+          ? parseInt(data.installment_number)
+          : undefined,
+        total_installments: data.total_installments
+          ? parseInt(data.total_installments)
+          : undefined,
       }
 
       await financeApi.transactions.create(payload)
@@ -83,7 +107,9 @@ export function CreateTransactionModal({
       form.reset()
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao criar transação')
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao criar transação'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -94,7 +120,9 @@ export function CreateTransactionModal({
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Nova Transação</DialogTitle>
-          <DialogDescription>Registre uma nova receita ou despesa.</DialogDescription>
+          <DialogDescription>
+            Registre uma nova receita ou despesa.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
@@ -140,7 +168,9 @@ export function CreateTransactionModal({
                 {...form.register('amount')}
               />
               {form.formState.errors.amount && (
-                <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p>
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.amount.message}
+                </p>
               )}
             </div>
 
@@ -148,7 +178,9 @@ export function CreateTransactionModal({
               <Label htmlFor="date">Data</Label>
               <Input id="date" type="date" {...form.register('date')} />
               {form.formState.errors.date && (
-                <p className="text-sm text-destructive">{form.formState.errors.date.message}</p>
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.date.message}
+                </p>
               )}
             </div>
           </div>
@@ -171,7 +203,9 @@ export function CreateTransactionModal({
               </SelectContent>
             </Select>
             {form.formState.errors.wallet_id && (
-              <p className="text-sm text-destructive">{form.formState.errors.wallet_id.message}</p>
+              <p className="text-sm text-destructive">
+                {form.formState.errors.wallet_id.message}
+              </p>
             )}
           </div>
 
@@ -197,7 +231,9 @@ export function CreateTransactionModal({
               </SelectContent>
             </Select>
             {form.formState.errors.category_id && (
-              <p className="text-sm text-destructive">{form.formState.errors.category_id.message}</p>
+              <p className="text-sm text-destructive">
+                {form.formState.errors.category_id.message}
+              </p>
             )}
           </div>
 
@@ -254,7 +290,12 @@ export function CreateTransactionModal({
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
@@ -266,4 +307,3 @@ export function CreateTransactionModal({
     </Dialog>
   )
 }
-

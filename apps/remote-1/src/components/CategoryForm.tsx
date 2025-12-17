@@ -3,10 +3,27 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { financeApi } from '../api/finance'
 import type { CreateCategoryRequest, CategoryType } from '../types/finance'
-import { Button } from '../ui/button'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@repo/ui'
 import { Input } from '../ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../ui/form'
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '../ui/form'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
@@ -25,7 +42,20 @@ interface CategoryFormProps {
   onCancel: () => void
 }
 
-const commonIcons = ['💰', '🍔', '🚗', '🏠', '💊', '🎮', '📱', '👕', '🎬', '✈️', '🍕', '☕']
+const commonIcons = [
+  '💰',
+  '🍔',
+  '🚗',
+  '🏠',
+  '💊',
+  '🎮',
+  '📱',
+  '👕',
+  '🎬',
+  '✈️',
+  '🍕',
+  '☕',
+]
 
 export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
   const [submitting, setSubmitting] = useState(false)
@@ -53,7 +83,9 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
       form.reset()
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao criar categoria')
+      toast.error(
+        error instanceof Error ? error.message : 'Erro ao criar categoria'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -87,16 +119,23 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo</FormLabel>
-                  <FormControl>
-                    <select
-                      {...field}
-                      className="flex h-10 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
-                    >
-                      <option value="Despesa">Despesa</option>
-                      <option value="Receita">Receita</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage>{form.formState.errors.type?.message}</FormMessage>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Despesa">Despesa</SelectItem>
+                      <SelectItem value="Receita">Receita</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage>
+                    {form.formState.errors.type?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -128,7 +167,9 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                       </div>
                     </div>
                   </FormControl>
-                  <FormMessage>{form.formState.errors.icon?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.icon?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -150,7 +191,9 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                       <Input placeholder="#3b82f6" {...field} />
                     </div>
                   </FormControl>
-                  <FormMessage>{form.formState.errors.color?.message}</FormMessage>
+                  <FormMessage>
+                    {form.formState.errors.color?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -168,13 +211,20 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                       className="h-4 w-4 rounded border-border"
                     />
                   </FormControl>
-                  <FormLabel className="!mt-0">Marcar como categoria padrão</FormLabel>
+                  <FormLabel className="!mt-0">
+                    Marcar como categoria padrão
+                  </FormLabel>
                 </FormItem>
               )}
             />
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={submitting}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
@@ -187,4 +237,3 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
     </Card>
   )
 }
-

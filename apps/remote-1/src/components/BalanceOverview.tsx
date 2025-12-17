@@ -1,4 +1,4 @@
-import { Card } from '../ui/card'
+import { Card } from '@repo/ui'
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface BalanceOverviewProps {
@@ -7,7 +7,11 @@ interface BalanceOverviewProps {
   totalExpenses: number
 }
 
-export function BalanceOverview({ totalBalance, totalIncome, totalExpenses }: BalanceOverviewProps) {
+export function BalanceOverview({
+  totalBalance,
+  totalIncome,
+  totalExpenses,
+}: BalanceOverviewProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -23,8 +27,12 @@ export function BalanceOverview({ totalBalance, totalIncome, totalExpenses }: Ba
             <Wallet className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">Saldo Total</p>
-            <p className="text-2xl font-bold text-foreground">{formatCurrency(totalBalance)}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Saldo Total
+            </p>
+            <p className="text-2xl font-bold text-foreground">
+              {formatCurrency(totalBalance)}
+            </p>
           </div>
         </div>
       </Card>
@@ -35,8 +43,12 @@ export function BalanceOverview({ totalBalance, totalIncome, totalExpenses }: Ba
             <TrendingUp className="h-6 w-6 text-emerald-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">Receitas</p>
-            <p className="text-2xl font-bold text-emerald-600">{formatCurrency(totalIncome)}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Receitas
+            </p>
+            <p className="text-2xl font-bold text-emerald-600">
+              {formatCurrency(totalIncome)}
+            </p>
           </div>
         </div>
       </Card>
@@ -47,12 +59,15 @@ export function BalanceOverview({ totalBalance, totalIncome, totalExpenses }: Ba
             <TrendingDown className="h-6 w-6 text-red-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-muted-foreground">Despesas</p>
-            <p className="text-2xl font-bold text-red-600">{formatCurrency(totalExpenses)}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Despesas
+            </p>
+            <p className="text-2xl font-bold text-red-600">
+              {formatCurrency(totalExpenses)}
+            </p>
           </div>
         </div>
       </Card>
     </div>
   )
 }
-

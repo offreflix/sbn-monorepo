@@ -21,7 +21,8 @@
     "react-router-dom": "^7.1.2",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.4",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@repo/ui": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "^1.6.14",

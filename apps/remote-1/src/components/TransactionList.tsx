@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { Card } from '../ui/card'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
+import { Card, Badge, Button } from '@repo/ui'
 import { ArrowUpRight, ArrowDownRight, Clock, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -15,7 +13,12 @@ interface TransactionListProps {
   onRefresh: () => void
 }
 
-export function TransactionList({ transactions, wallets, categories, onRefresh }: TransactionListProps) {
+export function TransactionList({
+  transactions,
+  wallets,
+  categories,
+  onRefresh,
+}: TransactionListProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const formatCurrency = (value: string) => {
@@ -27,10 +30,18 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
 
   const getStatusBadge = (status: string, is_paid: boolean) => {
     if (status === 'Pago' && is_paid) {
-      return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">Pago</Badge>
+      return (
+        <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">
+          Pago
+        </Badge>
+      )
     }
     if (status === 'Pendente') {
-      return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20">Pendente</Badge>
+      return (
+        <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20">
+          Pendente
+        </Badge>
+      )
     }
     if (status === 'Cancelado') {
       return <Badge variant="destructive">Cancelado</Badge>
@@ -41,7 +52,11 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setIsCreateModalOpen(true)} size="sm" className="gap-2">
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          size="sm"
+          className="gap-2"
+        >
           <Plus className="h-4 w-4" />
           Nova Transação
         </Button>
@@ -50,10 +65,14 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
       <Card className="p-6">
         <div className="space-y-4">
           {transactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Nenhuma transação encontrada</p>
+            <p className="text-center text-muted-foreground py-8">
+              Nenhuma transação encontrada
+            </p>
           ) : (
             transactions.map((transaction) => {
-              const category = categories.find((c) => c.id === transaction.category_id)
+              const category = categories.find(
+                (c) => c.id === transaction.category_id
+              )
               const wallet = wallets.find((w) => w.id === transaction.wallet_id)
               return (
                 <div
@@ -80,32 +99,44 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
                         <h4 className="font-semibold text-foreground">
                           {transaction.description || 'Sem descrição'}
                         </h4>
-                        {transaction.installment_number && transaction.total_installments && (
-                          <span className="text-xs text-muted-foreground">
-                            {transaction.installment_number}/{transaction.total_installments}x
-                          </span>
-                        )}
+                        {transaction.installment_number &&
+                          transaction.total_installments && (
+                            <span className="text-xs text-muted-foreground">
+                              {transaction.installment_number}/
+                              {transaction.total_installments}x
+                            </span>
+                          )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         {category && (
                           <>
                             <div
                               className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: category.color || '#3b82f6' }}
+                              style={{
+                                backgroundColor: category.color || '#3b82f6',
+                              }}
                             />
-                            <span className="text-sm text-muted-foreground">{category.name}</span>
+                            <span className="text-sm text-muted-foreground">
+                              {category.name}
+                            </span>
                           </>
                         )}
                         {wallet && (
                           <>
-                            <span className="text-sm text-muted-foreground">•</span>
-                            <span className="text-sm text-muted-foreground">{wallet.name}</span>
+                            <span className="text-sm text-muted-foreground">
+                              •
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {wallet.name}
+                            </span>
                           </>
                         )}
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {format(new Date(transaction.date), 'dd MMM', { locale: ptBR })}
+                          {format(new Date(transaction.date), 'dd MMM', {
+                            locale: ptBR,
+                          })}
                         </span>
                       </div>
                     </div>
@@ -115,7 +146,9 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
                     {getStatusBadge(transaction.status, transaction.is_paid)}
                     <p
                       className={`text-lg font-bold ${
-                        transaction.type === 'Receita' ? 'text-emerald-600' : 'text-red-600'
+                        transaction.type === 'Receita'
+                          ? 'text-emerald-600'
+                          : 'text-red-600'
                       }`}
                     >
                       {transaction.type === 'Receita' ? '+' : '-'}
@@ -142,4 +175,3 @@ export function TransactionList({ transactions, wallets, categories, onRefresh }
     </div>
   )
 }
-
