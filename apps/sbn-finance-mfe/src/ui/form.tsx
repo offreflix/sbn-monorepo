@@ -6,6 +6,8 @@ import {
   type FieldValues,
   type SubmitHandler,
   type UseFormReturn,
+  type ControllerRenderProps,
+  type Path,
 } from 'react-hook-form'
 import { clsx } from 'clsx'
 
@@ -29,17 +31,20 @@ export function Form<TFieldValues extends FieldValues>({
   )
 }
 
-export function FormField<TFieldValues extends FieldValues>({
+export function FormField<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues> = Path<TFieldValues>,
+>({
   name,
   form,
   render,
 }: {
-  name: keyof TFieldValues & string
+  name: TName
   form: UseFormReturn<TFieldValues>
   render: (fieldProps: {
-    field: ReturnType<typeof form.register>
+    field: ControllerRenderProps<TFieldValues, TName>
     fieldState: ControllerFieldState
-  }) => React.ReactNode
+  }) => React.ReactElement
 }) {
   return (
     <Controller
@@ -50,15 +55,27 @@ export function FormField<TFieldValues extends FieldValues>({
   )
 }
 
-export const FormItem = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+export const FormItem = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={clsx('space-y-2', className)} {...props} />
 )
 
-export const FormLabel = ({ className, ...props }: React.HTMLAttributes<HTMLLabelElement>) => (
-  <label className={clsx('text-sm font-medium text-foreground', className)} {...props} />
+export const FormLabel = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLLabelElement>) => (
+  <label
+    className={clsx('text-sm font-medium text-foreground', className)}
+    {...props}
+  />
 )
 
-export const FormControl = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+export const FormControl = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={clsx('space-y-1', className)} {...props} />
 )
 
@@ -66,4 +83,3 @@ export const FormMessage = ({ children }: { children?: React.ReactNode }) => {
   if (!children) return null
   return <p className="text-sm text-destructive">{children}</p>
 }
-

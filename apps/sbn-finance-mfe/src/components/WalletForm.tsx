@@ -31,8 +31,8 @@ const walletSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   type: z.string().min(1, 'Tipo é obrigatório'),
   currency: z.string().optional(),
-  invoice_closing_day: z.string().optional(),
-  invoice_due_day: z.string().optional(),
+  invoiceClosingDay: z.string().optional(),
+  invoiceDueDay: z.string().optional(),
   limit: z.string().optional(),
 })
 
@@ -60,11 +60,11 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
         name: data.name,
         type: data.type,
         currency: data.currency || 'BRL',
-        invoice_closing_day: data.invoice_closing_day
-          ? parseInt(data.invoice_closing_day)
+        invoiceClosingDay: data.invoiceClosingDay
+          ? parseInt(data.invoiceClosingDay)
           : undefined,
-        invoice_due_day: data.invoice_due_day
-          ? parseInt(data.invoice_due_day)
+        invoiceDueDay: data.invoiceDueDay
+          ? parseInt(data.invoiceDueDay)
           : undefined,
         limit: data.limit || undefined,
       }
@@ -113,10 +113,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo" />
@@ -149,7 +146,11 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                 <FormItem>
                   <FormLabel>Moeda</FormLabel>
                   <FormControl>
-                    <Input placeholder="BRL" {...field} />
+                    <Input
+                      placeholder="BRL"
+                      {...field}
+                      value={field.value || 'BRL'}
+                    />
                   </FormControl>
                   <FormMessage>
                     {form.formState.errors.currency?.message}
@@ -160,7 +161,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                name="invoice_closing_day"
+                name="invoiceClosingDay"
                 form={form}
                 render={({ field }) => (
                   <FormItem>
@@ -172,17 +173,18 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                         max="31"
                         placeholder="Ex: 10"
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage>
-                      {form.formState.errors.invoice_closing_day?.message}
+                      {form.formState.errors.invoiceClosingDay?.message}
                     </FormMessage>
                   </FormItem>
                 )}
               />
 
               <FormField
-                name="invoice_due_day"
+                name="invoiceDueDay"
                 form={form}
                 render={({ field }) => (
                   <FormItem>
@@ -194,10 +196,11 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                         max="31"
                         placeholder="Ex: 15"
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage>
-                      {form.formState.errors.invoice_due_day?.message}
+                      {form.formState.errors.invoiceDueDay?.message}
                     </FormMessage>
                   </FormItem>
                 )}

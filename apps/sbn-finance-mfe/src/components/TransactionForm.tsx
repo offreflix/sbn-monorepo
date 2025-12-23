@@ -9,7 +9,7 @@ import type {
 } from '../types/finance'
 import { Button } from '@repo/ui'
 import { Input } from '../ui/input'
-import { Label } from '../ui/label'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
 import {
   Form,
@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from '../ui/form'
 import { toast } from 'sonner'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const transactionSchema = z.object({
   walletId: z.string().min(1, 'Selecione uma carteira'),

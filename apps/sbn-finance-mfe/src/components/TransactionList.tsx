@@ -1,10 +1,29 @@
 import { useState } from 'react'
 import { Card, Badge, Button } from '@repo/ui'
-import { ArrowUpRight, ArrowDownRight, Clock, Plus } from 'lucide-react'
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  Plus,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CreateTransactionModal } from './CreateTransactionModal'
 import type { Transaction, Wallet, Category } from '../types/finance'
+import { financeApi } from '../api/finance'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -20,6 +39,10 @@ export function TransactionList({
   onRefresh,
 }: TransactionListProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null)
+  const [transactionToDelete, setTransactionToDelete] =
+    useState<Transaction | null>(null)
 
   const formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -49,11 +72,32 @@ export function TransactionList({
     return <Badge variant="secondary">{status}</Badge>
   }
 
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsCreateModalOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!transactionToDelete) return
+    try {
+      await financeApi.transactions.delete(transactionToDelete.id)
+      toast.success('Transação excluída com sucesso')
+      onRefresh()
+    } catch (error) {
+      toast.error('Erro ao excluir transação')
+    } finally {
+      setTransactionToDelete(null)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => {
+            setEditingTransaction(null)
+            setIsCreateModalOpen(true)
+          }}
           size="sm"
           className="gap-2"
         >
@@ -77,7 +121,7 @@ export function TransactionList({
               return (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors group"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -154,6 +198,25 @@ export function TransactionList({
                       {transaction.type === 'Receita' ? '+' : '-'}
                       {formatCurrency(transaction.amount)}
                     </p>
+
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleEdit(transaction)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setTransactionToDelete(transaction)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )
@@ -164,14 +227,43 @@ export function TransactionList({
 
       <CreateTransactionModal
         open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
+        onOpenChange={(open) => {
+          setIsCreateModalOpen(open)
+          if (!open) setEditingTransaction(null)
+        }}
         wallets={wallets}
         categories={categories}
+        initialData={editingTransaction}
         onSuccess={() => {
           setIsCreateModalOpen(false)
+          setEditingTransaction(null)
           onRefresh()
         }}
       />
+
+      <AlertDialog
+        open={!!transactionToDelete}
+        onOpenChange={() => setTransactionToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Transação</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta transação? Esta ação não pode
+              ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

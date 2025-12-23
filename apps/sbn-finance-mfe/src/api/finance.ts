@@ -36,9 +36,7 @@ async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const message = data?.message || data?.error || res.statusText
     throw new Error(
-      typeof message === 'string'
-        ? message
-        : 'Erro ao comunicar com o servidor',
+      typeof message === 'string' ? message : 'Erro ao comunicar com o servidor'
     )
   }
 
@@ -163,6 +161,15 @@ export const financeApi = {
       request<Transaction>('/api/finance/transactions', {
         method: 'POST',
         body: JSON.stringify(payload),
+      }),
+    update: (id: string, payload: Partial<CreateTransactionRequest>) =>
+      request<Transaction>(`/api/finance/transactions/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      request<void>(`/api/finance/transactions/${id}`, {
+        method: 'DELETE',
       }),
   },
 

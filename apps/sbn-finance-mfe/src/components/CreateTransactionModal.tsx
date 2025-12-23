@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import {
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
-import { Textarea } from '../ui/textarea'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,12 +23,13 @@ import type {
   Wallet,
   Category,
   CreateTransactionRequest,
+  Transaction,
 } from '../types/finance'
 import { toast } from 'sonner'
 
 const transactionSchema = z.object({
-  wallet_id: z.string().min(1, 'Selecione uma carteira'),
-  category_id: z.string().min(1, 'Selecione uma categoria'),
+  walletId: z.string().min(1, 'Selecione uma carteira'),
+  categoryId: z.string().min(1, 'Selecione uma categoria'),
   amount: z
     .string()
     .min(1, 'Valor é obrigatório')
@@ -41,9 +41,9 @@ const transactionSchema = z.object({
   description: z.string().optional(),
   type: z.enum(['Receita', 'Despesa']),
   status: z.enum(['Pendente', 'Pago', 'Cancelado']).optional(),
-  is_paid: z.boolean().optional(),
-  installment_number: z.string().optional(),
-  total_installments: z.string().optional(),
+  isPaid: z.boolean().optional(),
+  installmentNumber: z.string().optional(),
+  totalInstallments: z.string().optional(),
 })
 
 type TransactionFormData = z.infer<typeof transactionSchema>
@@ -54,6 +54,7 @@ interface CreateTransactionModalProps {
   wallets: Wallet[]
   categories: Category[]
   onSuccess: () => void
+  initialData?: Transaction | null
 }
 
 export function CreateTransactionModal({
@@ -62,6 +63,7 @@ export function CreateTransactionModal({
   wallets,
   categories,
   onSuccess,
+  initialData,
 }: CreateTransactionModalProps) {
   const [submitting, setSubmitting] = useState(false)
   const form = useForm<TransactionFormData>({
@@ -69,46 +71,86 @@ export function CreateTransactionModal({
     defaultValues: {
       type: 'Despesa',
       status: 'Pendente',
-      is_paid: false,
+      isPaid: false,
       date: new Date().toISOString().split('T')[0],
+      description: '',
+      amount: '',
+      walletId: '',
+      categoryId: '',
     },
   })
+
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        form.reset({
+          walletId: initialData.walletId,
+          categoryId: initialData.categoryId,
+          amount: initialData.amount.toString(),
+          date: new Date(initialData.date).toISOString().split('T')[0],
+          description: initialData.description || '',
+          type: initialData.type,
+          status: initialData.status,
+          isPaid: initialData.isPaid,
+          installmentNumber: initialData.installmentNumber?.toString(),
+          totalInstallments: initialData.totalInstallments?.toString(),
+        })
+      } else {
+        form.reset({
+          type: 'Despesa',
+          status: 'Pendente',
+          isPaid: false,
+          date: new Date().toISOString().split('T')[0],
+          description: '',
+          amount: '',
+          walletId: '',
+          categoryId: '',
+        })
+      }
+    }
+  }, [open, initialData, form])
 
   const selectedType = form.watch('type')
   const filteredCategories = categories.filter(
     (cat) => cat.type === selectedType
   )
   const hasInstallments =
-    form.watch('installment_number') && form.watch('total_installments')
+    form.watch('installmentNumber') && form.watch('totalInstallments')
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
       setSubmitting(true)
       const payload: CreateTransactionRequest = {
-        wallet_id: data.wallet_id,
-        category_id: data.category_id,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
         amount: data.amount,
         date: new Date(data.date).toISOString(),
         description: data.description,
         type: data.type,
         status: data.status || 'Pendente',
-        is_paid: data.is_paid || false,
+        isPaid: data.isPaid || false,
         currency: 'BRL',
-        installment_number: data.installment_number
-          ? parseInt(data.installment_number)
+        installmentNumber: data.installmentNumber
+          ? parseInt(data.installmentNumber)
           : undefined,
-        total_installments: data.total_installments
-          ? parseInt(data.total_installments)
+        totalInstallments: data.totalInstallments
+          ? parseInt(data.totalInstallments)
           : undefined,
       }
 
-      await financeApi.transactions.create(payload)
-      toast.success('Transação criada com sucesso!')
+      if (initialData) {
+        await financeApi.transactions.update(initialData.id, payload)
+        toast.success('Transação atualizada com sucesso!')
+      } else {
+        await financeApi.transactions.create(payload)
+        toast.success('Transação criada com sucesso!')
+      }
+
       form.reset()
       onSuccess()
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar transação'
+        error instanceof Error ? error.message : 'Erro ao salvar transação'
       )
     } finally {
       setSubmitting(false)
@@ -119,9 +161,13 @@ export function CreateTransactionModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Criar Nova Transação</DialogTitle>
+          <DialogTitle>
+            {initialData ? 'Editar Transação' : 'Criar Nova Transação'}
+          </DialogTitle>
           <DialogDescription>
-            Registre uma nova receita ou despesa.
+            {initialData
+              ? 'Edite os detalhes da transação.'
+              : 'Registre uma nova receita ou despesa.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -186,10 +232,10 @@ export function CreateTransactionModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="wallet_id">Carteira</Label>
+            <Label htmlFor="walletId">Carteira</Label>
             <Select
-              value={form.watch('wallet_id')}
-              onValueChange={(value) => form.setValue('wallet_id', value)}
+              value={form.watch('walletId')}
+              onValueChange={(value) => form.setValue('walletId', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a carteira" />
@@ -202,18 +248,18 @@ export function CreateTransactionModal({
                 ))}
               </SelectContent>
             </Select>
-            {form.formState.errors.wallet_id && (
+            {form.formState.errors.walletId && (
               <p className="text-sm text-destructive">
-                {form.formState.errors.wallet_id.message}
+                {form.formState.errors.walletId.message}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category_id">Categoria</Label>
+            <Label htmlFor="categoryId">Categoria</Label>
             <Select
-              value={form.watch('category_id')}
-              onValueChange={(value) => form.setValue('category_id', value)}
+              value={form.watch('categoryId')}
+              onValueChange={(value) => form.setValue('categoryId', value)}
               disabled={filteredCategories.length === 0}
             >
               <SelectTrigger>
@@ -230,25 +276,31 @@ export function CreateTransactionModal({
                 ))}
               </SelectContent>
             </Select>
-            {form.formState.errors.category_id && (
+            {form.formState.errors.categoryId && (
               <p className="text-sm text-destructive">
-                {form.formState.errors.category_id.message}
+                {form.formState.errors.categoryId.message}
+              </p>
+            )}
+            {selectedType === 'Despesa' && filteredCategories.length === 0 && (
+              <p className="text-sm text-amber-600 mt-1">
+                Nenhuma categoria de despesa encontrada. Crie uma na aba
+                Categorias.
               </p>
             )}
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="has_installments">Parcelar</Label>
+            <Label htmlFor="hasInstallments">Parcelar</Label>
             <Switch
-              id="has_installments"
+              id="hasInstallments"
               checked={!!hasInstallments}
               onCheckedChange={(checked) => {
                 if (!checked) {
-                  form.setValue('installment_number', undefined)
-                  form.setValue('total_installments', undefined)
+                  form.setValue('installmentNumber', undefined)
+                  form.setValue('totalInstallments', undefined)
                 } else {
-                  form.setValue('installment_number', '1')
-                  form.setValue('total_installments', '1')
+                  form.setValue('installmentNumber', '1')
+                  form.setValue('totalInstallments', '1')
                 }
               }}
             />
@@ -257,35 +309,35 @@ export function CreateTransactionModal({
           {hasInstallments && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="installment_number">Parcela Atual</Label>
+                <Label htmlFor="installmentNumber">Parcela Atual</Label>
                 <Input
-                  id="installment_number"
+                  id="installmentNumber"
                   type="number"
                   min="1"
                   placeholder="1"
-                  {...form.register('installment_number')}
+                  {...form.register('installmentNumber')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="total_installments">Total de Parcelas</Label>
+                <Label htmlFor="totalInstallments">Total de Parcelas</Label>
                 <Input
-                  id="total_installments"
+                  id="totalInstallments"
                   type="number"
                   min="1"
                   placeholder="12"
-                  {...form.register('total_installments')}
+                  {...form.register('totalInstallments')}
                 />
               </div>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="is_paid">Já foi pago?</Label>
+            <Label htmlFor="isPaid">Já foi pago?</Label>
             <Switch
-              id="is_paid"
-              checked={form.watch('is_paid') || false}
-              onCheckedChange={(checked) => form.setValue('is_paid', checked)}
+              id="isPaid"
+              checked={form.watch('isPaid') || false}
+              onCheckedChange={(checked) => form.setValue('isPaid', checked)}
             />
           </div>
 
@@ -299,7 +351,11 @@ export function CreateTransactionModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Salvando...' : 'Criar Transação'}
+              {submitting
+                ? 'Salvando...'
+                : initialData
+                  ? 'Salvar'
+                  : 'Criar Transação'}
             </Button>
           </div>
         </form>

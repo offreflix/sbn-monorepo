@@ -14,7 +14,6 @@ import {
 } from '@repo/ui'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
-import { Switch } from '../ui/switch'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,8 +25,8 @@ const walletSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   type: z.string().min(1, 'Tipo é obrigatório'),
   currency: z.string().optional(),
-  invoice_closing_day: z.string().optional(),
-  invoice_due_day: z.string().optional(),
+  invoiceClosingDay: z.string().optional(),
+  invoiceDueDay: z.string().optional(),
   limit: z.string().optional(),
 })
 
@@ -64,11 +63,11 @@ export function CreateWalletModal({
         name: data.name,
         type: data.type,
         currency: data.currency || 'BRL',
-        invoice_closing_day: data.invoice_closing_day
-          ? parseInt(data.invoice_closing_day)
+        invoiceClosingDay: data.invoiceClosingDay
+          ? parseInt(data.invoiceClosingDay)
           : undefined,
-        invoice_due_day: data.invoice_due_day
-          ? parseInt(data.invoice_due_day)
+        invoiceDueDay: data.invoiceDueDay
+          ? parseInt(data.invoiceDueDay)
           : undefined,
         limit: data.limit || undefined,
       }
@@ -160,7 +159,7 @@ export function CreateWalletModal({
                     min="1"
                     max="31"
                     placeholder="15"
-                    {...form.register('invoice_closing_day')}
+                    {...form.register('invoiceClosingDay')}
                   />
                 </div>
 
@@ -172,7 +171,7 @@ export function CreateWalletModal({
                     min="1"
                     max="31"
                     placeholder="22"
-                    {...form.register('invoice_due_day')}
+                    {...form.register('invoiceDueDay')}
                   />
                 </div>
               </div>

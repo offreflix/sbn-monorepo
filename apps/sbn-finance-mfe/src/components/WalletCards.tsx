@@ -12,11 +12,12 @@ interface WalletCardsProps {
 export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  const formatCurrency = (value: string) => {
+  const formatCurrency = (value: string | number) => {
+    const num = typeof value === 'string' ? parseFloat(value) : value
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(parseFloat(value))
+    }).format(num)
   }
 
   const getWalletIcon = (type: string) => {
@@ -83,7 +84,7 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
                     </p>
                   </div>
                 </div>
-                {wallet.is_active && (
+                {wallet.isActive && (
                   <Badge variant="secondary" className="text-xs">
                     Ativa
                   </Badge>
@@ -96,7 +97,7 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
                   <p
                     className={`text-2xl font-bold ${balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
                   >
-                    {formatCurrency(wallet.balance)}
+                    {formatCurrency(balance)}
                   </p>
                 </div>
 
@@ -117,11 +118,11 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
                           {formatCurrency(parseFloat(wallet.limit) + balance)}
                         </span>
                       </div>
-                      {wallet.invoice_closing_day && wallet.invoice_due_day && (
+                      {wallet.invoiceClosingDay && wallet.invoiceDueDay && (
                         <div className="flex justify-between text-sm mt-1">
                           <span className="text-muted-foreground">Fatura</span>
                           <span className="font-medium text-foreground">
-                            Dia {wallet.invoice_due_day}
+                            Dia {wallet.invoiceDueDay}
                           </span>
                         </div>
                       )}

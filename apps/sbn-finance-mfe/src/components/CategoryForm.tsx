@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { financeApi } from '../api/finance'
-import type { CreateCategoryRequest, CategoryType } from '../types/finance'
+import type { CreateCategoryRequest } from '../types/finance'
 import {
   Button,
   Card,
@@ -32,7 +32,7 @@ const categorySchema = z.object({
   type: z.enum(['Receita', 'Despesa']),
   icon: z.string().optional(),
   color: z.string().optional(),
-  is_default: z.boolean().optional(),
+  isDefault: z.boolean().optional(),
 })
 
 type CategoryFormData = z.infer<typeof categorySchema>
@@ -63,7 +63,7 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
     resolver: zodResolver(categorySchema),
     defaultValues: {
       type: 'Despesa',
-      is_default: false,
+      isDefault: false,
     },
   })
 
@@ -75,7 +75,7 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
         type: data.type,
         icon: data.icon || undefined,
         color: data.color || undefined,
-        is_default: data.is_default || false,
+        isDefault: data.isDefault || false,
       }
 
       await financeApi.categories.create(payload)
@@ -119,10 +119,7 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo" />
@@ -199,7 +196,7 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
             />
 
             <FormField
-              name="is_default"
+              name="isDefault"
               form={form}
               render={({ field }) => (
                 <FormItem className="flex items-center gap-2">
