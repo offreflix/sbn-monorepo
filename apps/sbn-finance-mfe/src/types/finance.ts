@@ -7,38 +7,38 @@ export type RecurrenceFrequency = 'MONTHLY' | 'WEEKLY'
 
 export interface Wallet {
   id: string
-  user_id: string
+  userId: string
   name: string
   type: string
   balance: string // Decimal como string
   currency: string
-  is_active: boolean
-  invoice_closing_day?: number | null
-  invoice_due_day?: number | null
+  isActive: boolean
+  invoiceClosingDay?: number | null
+  invoiceDueDay?: number | null
   limit?: string | null
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string | null
 }
 
 export interface Category {
   id: string
-  user_id?: string | null
+  userId?: string | null
   name: string
   type: CategoryType
   icon?: string | null
   color?: string | null
-  is_default: boolean
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string | null
 }
 
 export interface Transaction {
   id: string
-  user_id: string
-  wallet_id: string
-  category_id: string
+  userId: string
+  walletId: string
+  categoryId: string
   amount: string // Decimal como string
   currency: string
   date: string
@@ -46,14 +46,14 @@ export interface Transaction {
   status: TransactionStatus
   type: TransactionType
   tags: string[]
-  is_paid: boolean
-  installment_number?: number | null
-  total_installments?: number | null
-  purchase_group_id?: string | null
-  recurrence_id?: string | null
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
+  isPaid: boolean
+  installmentNumber?: number | null
+  totalInstallments?: number | null
+  purchaseGroupId?: string | null
+  recurrenceId?: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string | null
   // Relações opcionais (quando incluídas pela API)
   wallet?: Wallet
   category?: Category
@@ -61,21 +61,21 @@ export interface Transaction {
 
 export interface Recurrence {
   id: string
-  user_id: string
-  wallet_id: string
-  category_id: string
+  userId: string
+  walletId: string
+  categoryId: string
   amount: string
   currency: string
   description?: string | null
   type: TransactionType
   frequency: RecurrenceFrequency
-  start_date: string
-  end_date?: string | null
-  last_generated?: string | null
+  startDate: string
+  endDate?: string | null
+  lastGenerated?: string | null
   active: boolean
-  created_at: string
-  updated_at: string
-  deleted_at?: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt?: string | null
 }
 
 export interface Projection {
@@ -96,14 +96,14 @@ export interface CreateWalletRequest {
   name: string
   type: string
   currency?: string
-  invoice_closing_day?: number
-  invoice_due_day?: number
+  invoiceClosingDay?: number
+  invoiceDueDay?: number
   limit?: string
 }
 
 export interface CreateTransactionRequest {
-  wallet_id: string
-  category_id: string
+  walletId: string
+  categoryId: string
   amount: string
   currency?: string
   date: string
@@ -111,9 +111,9 @@ export interface CreateTransactionRequest {
   status?: TransactionStatus
   type: TransactionType
   tags?: string[]
-  is_paid?: boolean
-  installment_number?: number
-  total_installments?: number
+  isPaid?: boolean
+  installmentNumber?: number
+  totalInstallments?: number
 }
 
 export interface CreateCategoryRequest {
@@ -121,18 +121,17 @@ export interface CreateCategoryRequest {
   type: CategoryType
   icon?: string
   color?: string
-  is_default?: boolean
+  isDefault?: boolean
 }
 
 export interface CreateRecurrenceRequest {
-  wallet_id: string
-  category_id: string
+  walletId: string
+  categoryId: string
   amount: string
   currency?: string
   description?: string
   type: TransactionType
   frequency: RecurrenceFrequency
-  start_date: string
-  end_date?: string
+  startDate: string
+  endDate?: string
 }
-

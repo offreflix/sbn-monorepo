@@ -35,7 +35,8 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: 'host',
           remotes: {
-            remote1: 'remote1@http://localhost:9001/mf-manifest.json',
+            sbn_finance_mfe:
+              'sbn_finance_mfe@http://localhost:9001/mf-manifest.json',
           },
           shared: {
             react: {

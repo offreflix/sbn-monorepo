@@ -10,7 +10,7 @@ declare module '*.svg?react' {
   export default ReactComponent
 }
 
-declare module 'remote1/App' {
+declare module 'sbn_finance_mfe/App' {
   const RemoteApp: React.ComponentType
   export default RemoteApp
 }

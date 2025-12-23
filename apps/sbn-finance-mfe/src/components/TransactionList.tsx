@@ -28,8 +28,8 @@ export function TransactionList({
     }).format(parseFloat(value))
   }
 
-  const getStatusBadge = (status: string, is_paid: boolean) => {
-    if (status === 'Pago' && is_paid) {
+  const getStatusBadge = (status: string, isPaid: boolean) => {
+    if (status === 'Pago' && isPaid) {
       return (
         <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">
           Pago
@@ -71,9 +71,9 @@ export function TransactionList({
           ) : (
             transactions.map((transaction) => {
               const category = categories.find(
-                (c) => c.id === transaction.category_id
+                (c) => c.id === transaction.categoryId
               )
-              const wallet = wallets.find((w) => w.id === transaction.wallet_id)
+              const wallet = wallets.find((w) => w.id === transaction.walletId)
               return (
                 <div
                   key={transaction.id}
@@ -99,11 +99,11 @@ export function TransactionList({
                         <h4 className="font-semibold text-foreground">
                           {transaction.description || 'Sem descrição'}
                         </h4>
-                        {transaction.installment_number &&
-                          transaction.total_installments && (
+                        {transaction.installmentNumber &&
+                          transaction.totalInstallments && (
                             <span className="text-xs text-muted-foreground">
-                              {transaction.installment_number}/
-                              {transaction.total_installments}x
+                              {transaction.installmentNumber}/
+                              {transaction.totalInstallments}x
                             </span>
                           )}
                       </div>
@@ -143,7 +143,7 @@ export function TransactionList({
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {getStatusBadge(transaction.status, transaction.is_paid)}
+                    {getStatusBadge(transaction.status, transaction.isPaid)}
                     <p
                       className={`text-lg font-bold ${
                         transaction.type === 'Receita'

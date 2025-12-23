@@ -16,7 +16,7 @@ export default defineConfig({
   tools: {
     rspack: {
       output: {
-        uniqueName: 'remote1',
+        uniqueName: 'sbn_finance_mfe',
       },
       watchOptions: {
         ignored: [
@@ -33,7 +33,7 @@ export default defineConfig({
       },
       plugins: [
         new ModuleFederationPlugin({
-          name: 'remote1',
+          name: 'sbn_finance_mfe',
           exposes: {
             './App': './src/App.tsx',
           },

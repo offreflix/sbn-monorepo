@@ -23,8 +23,8 @@ import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 
 const transactionSchema = z.object({
-  wallet_id: z.string().min(1, 'Selecione uma carteira'),
-  category_id: z.string().min(1, 'Selecione uma categoria'),
+  walletId: z.string().min(1, 'Selecione uma carteira'),
+  categoryId: z.string().min(1, 'Selecione uma categoria'),
   amount: z
     .string()
     .min(1, 'Valor é obrigatório')
@@ -36,7 +36,7 @@ const transactionSchema = z.object({
   description: z.string().optional(),
   type: z.enum(['Receita', 'Despesa']),
   status: z.enum(['Pendente', 'Pago', 'Cancelado']).optional(),
-  is_paid: z.boolean().optional(),
+  isPaid: z.boolean().optional(),
 })
 
 type TransactionFormData = z.infer<typeof transactionSchema>
@@ -60,7 +60,7 @@ export function TransactionForm({
     defaultValues: {
       type: 'Despesa',
       status: 'Pendente',
-      is_paid: false,
+      isPaid: false,
       date: new Date().toISOString().split('T')[0],
     },
   })
@@ -74,14 +74,14 @@ export function TransactionForm({
     try {
       setSubmitting(true)
       const payload: CreateTransactionRequest = {
-        wallet_id: data.wallet_id,
-        category_id: data.category_id,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
         amount: data.amount,
         date: new Date(data.date).toISOString(),
         description: data.description,
         type: data.type,
         status: data.status || 'Pendente',
-        is_paid: data.is_paid || false,
+        isPaid: data.isPaid || false,
         currency: 'BRL',
       }
 
@@ -129,7 +129,7 @@ export function TransactionForm({
             />
 
             <FormField
-              name="wallet_id"
+              name="walletId"
               form={form}
               render={({ field }) => (
                 <FormItem>
@@ -148,14 +148,14 @@ export function TransactionForm({
                     </select>
                   </FormControl>
                   <FormMessage>
-                    {form.formState.errors.wallet_id?.message}
+                    {form.formState.errors.walletId?.message}
                   </FormMessage>
                 </FormItem>
               )}
             />
 
             <FormField
-              name="category_id"
+              name="categoryId"
               form={form}
               render={({ field }) => (
                 <FormItem>
@@ -175,7 +175,7 @@ export function TransactionForm({
                     </select>
                   </FormControl>
                   <FormMessage>
-                    {form.formState.errors.category_id?.message}
+                    {form.formState.errors.categoryId?.message}
                   </FormMessage>
                 </FormItem>
               )}
@@ -238,7 +238,7 @@ export function TransactionForm({
             />
 
             <FormField
-              name="is_paid"
+              name="isPaid"
               form={form}
               render={({ field }) => (
                 <FormItem className="flex items-center gap-2">
