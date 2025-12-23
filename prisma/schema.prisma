@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -7,39 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password_hash String
-  name          String
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  deleted_at    DateTime?
-
-  wallets      Wallet[]
-  categories   Category[]
-  transactions Transaction[]
-  recurrences  Recurrence[]
-
-  @@map("users")
-}
-
 model Wallet {
-  id                  String    @id @default(uuid())
-  user_id             String
-  name                String
-  type                String // Enum handled as string or PG Enum, using string for simplicity initially
-  balance             Decimal   @default(0.0000) @db.Decimal(19, 4)
-  currency            String    @default("BRL")
-  is_active           Boolean   @default(true)
-  invoice_closing_day Int?
-  invoice_due_day     Int?
-  limit               Decimal?  @db.Decimal(19, 4)
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
-  deleted_at          DateTime?
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  name              String
+  type              String // Enum handled as string or PG Enum, using string for simplicity initially
+  balance           Decimal   @default(0.0000) @db.Decimal(19, 4)
+  currency          String    @default("BRL")
+  isActive          Boolean   @default(true) @map("is_active")
+  invoiceClosingDay Int?      @map("invoice_closing_day")
+  invoiceDueDay     Int?      @map("invoice_due_day")
+  limit             Decimal?  @db.Decimal(19, 4)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
 
-  user         User          @relation(fields: [user_id], references: [id])
+  // user relation removed
   transactions Transaction[]
   recurrences  Recurrence[]
 
@@ -47,18 +31,18 @@ model Wallet {
 }
 
 model Category {
-  id         String    @id @default(uuid())
-  user_id    String?
-  name       String
-  type       String // Enum: Receita, Despesa
-  icon       String?
-  color      String?
-  is_default Boolean   @default(false)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
+  id        String    @id @default(uuid())
+  userId    String?   @map("user_id")
+  name      String
+  type      String // Enum: Receita, Despesa
+  icon      String?
+  color     String?
+  isDefault Boolean   @default(false) @map("is_default")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  user         User?         @relation(fields: [user_id], references: [id])
+  // user relation removed
   transactions Transaction[]
   recurrences  Recurrence[]
 
@@ -67,9 +51,9 @@ model Category {
 
 model Transaction {
   id                 String    @id @default(uuid())
-  user_id            String
-  wallet_id          String
-  category_id        String
+  userId             String    @map("user_id")
+  walletId           String    @map("wallet_id")
+  categoryId         String    @map("category_id")
   amount             Decimal   @db.Decimal(19, 4)
   currency           String    @default("BRL")
   date               DateTime
@@ -77,44 +61,44 @@ model Transaction {
   status             String // Enum: Pendente, Pago, Cancelado
   type               String // Enum: Receita, Despesa
   tags               String[]
-  is_paid            Boolean   @default(false)
-  installment_number Int?
-  total_installments Int?
-  purchase_group_id  String?
-  recurrence_id      String?
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
-  deleted_at         DateTime?
+  isPaid             Boolean   @default(false) @map("is_paid")
+  installmentNumber  Int?      @map("installment_number")
+  totalInstallments  Int?      @map("total_installments")
+  purchaseGroupId    String?   @map("purchase_group_id")
+  recurrenceId       String?   @map("recurrence_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  user       User        @relation(fields: [user_id], references: [id])
-  wallet     Wallet      @relation(fields: [wallet_id], references: [id])
-  category   Category    @relation(fields: [category_id], references: [id])
-  recurrence Recurrence? @relation(fields: [recurrence_id], references: [id])
+  // user relation removed
+  wallet     Wallet      @relation(fields: [walletId], references: [id])
+  category   Category    @relation(fields: [categoryId], references: [id])
+  recurrence Recurrence? @relation(fields: [recurrenceId], references: [id])
 
   @@map("transactions")
 }
 
 model Recurrence {
-  id             String    @id @default(uuid())
-  user_id        String
-  wallet_id      String
-  category_id    String
-  amount         Decimal   @db.Decimal(19, 4)
-  currency       String    @default("BRL")
-  description    String?
-  type           String // Enum: Receita, Despesa
-  frequency      String // Enum: MONTHLY, WEEKLY
-  start_date     DateTime
-  end_date       DateTime?
-  last_generated DateTime?
-  active         Boolean   @default(true)
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  deleted_at     DateTime?
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  walletId      String    @map("wallet_id")
+  categoryId    String    @map("category_id")
+  amount        Decimal   @db.Decimal(19, 4)
+  currency      String    @default("BRL")
+  description   String?
+  type          String // Enum: Receita, Despesa
+  frequency     String // Enum: MONTHLY, WEEKLY
+  startDate     DateTime  @map("start_date")
+  endDate       DateTime? @map("end_date")
+  lastGenerated DateTime? @map("last_generated")
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
-  user         User          @relation(fields: [user_id], references: [id])
-  wallet       Wallet        @relation(fields: [wallet_id], references: [id])
-  category     Category      @relation(fields: [category_id], references: [id])
+  // user relation removed
+  wallet       Wallet        @relation(fields: [walletId], references: [id])
+  category     Category      @relation(fields: [categoryId], references: [id])
   transactions Transaction[]
 
   @@map("recurrences")

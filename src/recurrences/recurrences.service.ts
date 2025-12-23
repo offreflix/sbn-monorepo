@@ -18,14 +18,14 @@ export class RecurrencesService {
   }) {
     return this.prisma.recurrence.create({
       data: {
-        user_id: data.userId,
-        wallet_id: data.walletId,
-        category_id: data.categoryId,
+        userId: data.userId,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
         amount: data.amount,
         type: data.type,
         frequency: data.frequency,
-        start_date: new Date(data.startDate),
-        end_date: data.endDate ? new Date(data.endDate) : null,
+        startDate: new Date(data.startDate),
+        endDate: data.endDate ? new Date(data.endDate) : null,
         description: data.description,
       },
     });
@@ -33,7 +33,7 @@ export class RecurrencesService {
 
   async findAll(userId: string) {
     return this.prisma.recurrence.findMany({
-      where: { user_id: userId },
+      where: { userId: userId },
       include: {
         wallet: true,
         category: true,

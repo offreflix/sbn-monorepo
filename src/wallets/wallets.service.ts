@@ -14,7 +14,7 @@ export class WalletsService {
   }) {
     return this.prisma.wallet.create({
       data: {
-        user_id: data.userId,
+        userId: data.userId,
         name: data.name,
         type: data.type,
         balance: data.balance || 0,
@@ -25,13 +25,13 @@ export class WalletsService {
 
   async findAll(userId: string) {
     return this.prisma.wallet.findMany({
-      where: { user_id: userId },
+      where: { userId: userId },
     });
   }
 
   async findOne(id: string, userId: string) {
     const wallet = await this.prisma.wallet.findFirst({
-      where: { id, user_id: userId },
+      where: { id, userId: userId },
     });
     if (!wallet) {
       throw new NotFoundException('Wallet not found');

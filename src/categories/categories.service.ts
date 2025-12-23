@@ -14,7 +14,7 @@ export class CategoriesService {
   }) {
     return this.prisma.category.create({
       data: {
-        user_id: data.userId,
+        userId: data.userId,
         name: data.name,
         type: data.type,
         icon: data.icon,
@@ -25,7 +25,7 @@ export class CategoriesService {
 
   async findAll(userId: string) {
     return this.prisma.category.findMany({
-      where: { user_id: userId },
+      where: { userId: userId },
     });
   }
 }

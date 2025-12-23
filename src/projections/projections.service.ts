@@ -13,14 +13,14 @@ export class ProjectionsService {
 
     // 1. Get Initial Balance (Liquid Assets)
     const wallets = await this.prisma.wallet.findMany({
-      where: { user_id: userId, type: { not: 'CREDIT_CARD' } }, // Exclude debts from 'Available Cash'
+      where: { userId: userId, type: { not: 'CREDIT_CARD' } }, // Exclude debts from 'Available Cash'
     });
     let currentBalance = wallets.reduce((sum, w) => sum + Number(w.balance), 0);
 
     // 2. Fetch Pending/Future Transactions
     const transactions = await this.prisma.transaction.findMany({
       where: {
-        user_id: userId,
+        userId: userId,
         date: { gte: startDate, lte: endDate },
       },
       include: { wallet: true },
@@ -28,7 +28,7 @@ export class ProjectionsService {
 
     // 3. Fetch Recurrences and Simulate
     const recurrences = await this.prisma.recurrence.findMany({
-      where: { user_id: userId, active: true },
+      where: { userId: userId, active: true },
     });
     const simulatedTransactions = this.simulateRecurrences(
       recurrences,
@@ -51,7 +51,7 @@ export class ProjectionsService {
 
     // Optimize: Map Credit Card transactions to Due Date
     const processedEvents = allEvents.map((event) => {
-      if (event.isCreditCard && event.wallet?.invoice_due_day) {
+      if (event.isCreditCard && event.wallet?.invoiceDueDay) {
         // Logic to move date to next Due Day
         // Simple MVP: Ensure it's projected on the Due Day of the *next* month if after closing, etc.
         // For now, let's just leave it at transaction date or assume the user sets the date to the pay day.
@@ -59,8 +59,8 @@ export class ProjectionsService {
         // So we really should map to Due Day.
         const dueDate = this.calculateDueDate(
           event.date,
-          event.wallet.invoice_due_day,
-          event.wallet.invoice_closing_day,
+          event.wallet.invoiceDueDay,
+          event.wallet.invoiceClosingDay,
         );
         return { ...event, date: dueDate };
       }
@@ -96,20 +96,20 @@ export class ProjectionsService {
   ) {
     const events = [];
     for (const rule of recurrences) {
-      let current = new Date(rule.start_date);
+      let current = new Date(rule.startDate);
       // specific logic to align 'current' > start if needed
       while (current < start) {
         current = this.nextDate(current, rule.frequency);
       }
 
       while (current <= end) {
-        if (!rule.end_date || current <= rule.end_date) {
+        if (!rule.endDate || current <= rule.endDate) {
           events.push({
             date: new Date(current),
             amount: Number(rule.amount),
             type: rule.type,
             description: `${rule.description} (Recorrente)`,
-            isCreditCard: false, // Assume recurrences are usually bills/incomes directly on account, or if CC, handled by wallet logic?
+            isCreditCard: false,
             wallet: null, // TODO: Fetch wallet if needed for CC logic
           });
         }

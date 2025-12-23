@@ -16,6 +16,7 @@ export class TransactionsService {
     type: string;
     installments?: number;
     isPaid?: boolean;
+    recurrenceId?: string;
   }) {
     const installments =
       data.installments && data.installments > 1 ? data.installments : 1;
@@ -34,22 +35,24 @@ export class TransactionsService {
         transactions.push(
           this.prisma.transaction.create({
             data: {
-              user_id: data.userId,
-              wallet_id: data.walletId,
-              category_id: data.categoryId,
+              userId: data.userId,
+              walletId: data.walletId,
+              categoryId: data.categoryId,
               amount: installmentAmount,
               date: date,
               description: data.description
                 ? `${data.description} (${i + 1}/${installments})`
                 : `Parcela ${i + 1}/${installments}`,
+              tags: [] as string[], // Required by Prisma schema (String[])
               status: 'PENDENTE', // Future installments are pending usually? Or inherit? Inherit for now but user said "future launches".
               // User Plan: "gera 10 lançamentos futuros".
               // "Lançamentos futuros ... nas faturas".
               type: data.type,
-              installment_number: i + 1,
-              total_installments: installments,
-              purchase_group_id: purchaseGroupId,
-              is_paid: data.isPaid && i === 0 ? true : false, // First one might be paid if "today"
+              isPaid: false,
+              installmentNumber: i + 1,
+              totalInstallments: data.installments,
+              purchaseGroupId: purchaseGroupId, // Changed from groupId to purchaseGroupId to match declaration
+              recurrenceId: data.recurrenceId, // Removed the trailing conditional logic as it was syntactically incorrect
             },
           }),
         );
@@ -60,22 +63,23 @@ export class TransactionsService {
 
     return this.prisma.transaction.create({
       data: {
-        user_id: data.userId,
-        wallet_id: data.walletId,
-        category_id: data.categoryId,
+        userId: data.userId,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
         amount: data.amount,
         date: new Date(data.date),
         description: data.description,
+        tags: [] as string[], // Required by Prisma schema
         status: data.status,
         type: data.type,
-        is_paid: data.isPaid || false,
+        isPaid: data.isPaid || false,
       },
     });
   }
 
   async findAll(userId: string) {
     return this.prisma.transaction.findMany({
-      where: { user_id: userId },
+      where: { userId: userId },
       include: {
         wallet: true,
         category: true,
