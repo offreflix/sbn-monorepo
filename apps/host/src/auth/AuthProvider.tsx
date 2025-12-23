@@ -87,9 +87,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   const applyAuthResponse = (resp: any) => {
-    // Backend retorna access_token (snake_case), precisamos mapear
-    const accessToken = resp.accessToken || resp.access_token
-    const refreshToken = resp.refreshToken || resp.refresh_token || null
+    // Backend retorna camelCase
+    const accessToken = resp.accessToken
+    const refreshToken = resp.refreshToken || null
 
     if (!accessToken) {
       console.error('[Auth] No access token in response:', resp)
@@ -134,10 +134,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       refreshPromise.current = authApi
         .refresh(stored)
         .then((tokens: any) => {
-          // Backend pode retornar em snake_case, mapeamos para camelCase
-          const accessToken = tokens.accessToken || tokens.access_token
-          const refreshToken =
-            tokens.refreshToken || tokens.refresh_token || stored
+          // Backend retorna camelCase
+          const accessToken = tokens.accessToken
+          const refreshToken = tokens.refreshToken || stored
 
           const normalizedTokens: AuthTokens = {
             accessToken,
@@ -219,7 +218,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       refreshTokens,
       authFetch,
     }),
-    [session.user, session.tokens, loading],
+    [session.user, session.tokens, loading]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

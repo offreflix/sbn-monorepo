@@ -14,7 +14,9 @@ async function handle<T>(res: Response): Promise<T> {
 
   if (!res.ok) {
     const message = data?.message || data?.error || res.statusText
-    throw new Error(typeof message === 'string' ? message : 'Erro ao comunicar com o servidor')
+    throw new Error(
+      typeof message === 'string' ? message : 'Erro ao comunicar com o servidor'
+    )
   }
 
   return data as T
@@ -33,13 +35,18 @@ async function request<T>(path: string, init: RequestInit) {
 
 export const authApi = {
   login: (payload: LoginRequest) =>
-    request<AuthResponse>('/login', { method: 'POST', body: JSON.stringify(payload) }),
+    request<AuthResponse>('/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   register: (payload: RegisterRequest) =>
-    request<AuthResponse>('/register', { method: 'POST', body: JSON.stringify(payload) }),
+    request<AuthResponse>('/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   refresh: (refreshToken: string) =>
     request<RefreshResponse>('/refresh', {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }),
 }
-
