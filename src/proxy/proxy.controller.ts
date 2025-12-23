@@ -47,7 +47,7 @@ export class ProxyController {
       'FINANCE_SERVICE_URL',
       'http://localhost:3002',
     );
-    const url = `${financeUrl}${req.originalUrl.replace('/api', '')}`;
+    const url = `${financeUrl}${req.originalUrl.replace('/api/finance', '')}`;
     // Inject User ID into headers
     const { user } = req;
     const { host, 'content-length': contentLength, ...headers } = req.headers;
