@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('finance');
+  // app.setGlobalPrefix('finance'); // Removed to match orchestrator proxy logic (strips /api/finance)
   await app.listen(process.env.PORT ?? 3002);
 }
 bootstrap();

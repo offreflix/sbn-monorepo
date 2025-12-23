@@ -38,4 +38,28 @@ export class WalletsService {
     }
     return wallet;
   }
+
+  async update(id: string, userId: string, data: any) {
+    await this.findOne(id, userId); // Verify ownership
+
+    const updateData: any = { ...data };
+    delete updateData.userId;
+    delete updateData.id;
+
+    return this.prisma.wallet.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async remove(id: string, userId: string) {
+    await this.findOne(id, userId); // Verify ownership
+
+    // Logical delete or soft delete?
+    // Using deletedAt as per schema (paranoid)
+    return this.prisma.wallet.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
 }

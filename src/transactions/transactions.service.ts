@@ -86,4 +86,50 @@ export class TransactionsService {
       },
     });
   }
+
+  async findOne(id: string, userId: string) {
+    // Only return if belongs to user
+    return this.prisma.transaction.findFirst({
+      where: { id, userId },
+      include: {
+        wallet: true,
+        category: true,
+      },
+    });
+  }
+
+  async update(id: string, userId: string, data: any) {
+    // Ensure the transaction belongs to the user
+    const transaction = await this.findOne(id, userId);
+    if (!transaction) {
+      throw new Error('Transaction not found or denied access');
+    }
+
+    const updateData: any = { ...data };
+    if (data.date) {
+      updateData.date = new Date(data.date);
+    }
+    // Prisma will ignore undefined fields in updateData automatically?
+    // Better to be explicit or trust spread.
+
+    // Remove immutable fields or sensitive ones if necessary
+    delete updateData.userId;
+    delete updateData.id;
+
+    return this.prisma.transaction.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async remove(id: string, userId: string) {
+    const transaction = await this.findOne(id, userId);
+    if (!transaction) {
+      throw new Error('Transaction not found or denied access');
+    }
+
+    return this.prisma.transaction.delete({
+      where: { id },
+    });
+  }
 }

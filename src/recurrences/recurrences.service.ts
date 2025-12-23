@@ -33,11 +33,54 @@ export class RecurrencesService {
 
   async findAll(userId: string) {
     return this.prisma.recurrence.findMany({
-      where: { userId: userId },
+      where: { userId: userId, deletedAt: null },
       include: {
         wallet: true,
         category: true,
       },
+    });
+  }
+
+  async findOne(id: string, userId: string) {
+    const recurrence = await this.prisma.recurrence.findFirst({
+      where: { id, userId },
+      include: {
+        wallet: true,
+        category: true,
+      },
+    });
+    if (!recurrence) {
+      throw new Error('Recurrence not found');
+    }
+    return recurrence;
+  }
+
+  async update(id: string, userId: string, data: any) {
+    await this.findOne(id, userId);
+
+    const updateData: any = { ...data };
+    if (data.startDate) {
+      updateData.startDate = new Date(data.startDate);
+    }
+    if (data.endDate) {
+      updateData.endDate = new Date(data.endDate);
+    }
+
+    delete updateData.userId;
+    delete updateData.id;
+
+    return this.prisma.recurrence.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async remove(id: string, userId: string) {
+    await this.findOne(id, userId);
+
+    return this.prisma.recurrence.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 }
