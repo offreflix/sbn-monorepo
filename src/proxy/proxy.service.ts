@@ -1,14 +1,24 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  HttpException,
+} from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 import { firstValueFrom } from 'rxjs';
+import { HeadersDictionary, JsonValue } from '../common/types';
 
 @Injectable()
 export class ProxyService {
   constructor(private readonly httpService: HttpService) {}
 
-  async forwardRequest(url: string, method: string, data?: any, headers?: any) {
-    const config: AxiosRequestConfig = {
+  async forwardRequest<TResponse = unknown>(
+    url: string,
+    method: string,
+    data?: JsonValue,
+    headers?: HeadersDictionary,
+  ): Promise<TResponse> {
+    const config: AxiosRequestConfig<JsonValue> = {
       method,
       url,
       data,
@@ -16,13 +26,32 @@ export class ProxyService {
     };
 
     try {
-      const response = await firstValueFrom(this.httpService.request(config));
+      const response = await firstValueFrom(
+        this.httpService.request<TResponse>(config),
+      );
       return response.data;
-    } catch (error) {
-      if (error.response) {
-        throw new InternalServerErrorException(error.response.data);
+    } catch (error: unknown) {
+      if (this.hasResponse(error)) {
+        throw new HttpException(error.response.data, error.response.status);
       }
-      throw new InternalServerErrorException(error.message);
+      const message =
+        error instanceof Error ? error.message : 'Unknown proxy error';
+      throw new InternalServerErrorException(message);
     }
+  }
+
+  private hasResponse(
+    error: unknown,
+  ): error is { response: { data: unknown; status: number } } {
+    if (typeof error !== 'object' || error === null || !('response' in error)) {
+      return false;
+    }
+
+    const { response } = error as { response?: unknown };
+    if (typeof response !== 'object' || response === null) {
+      return false;
+    }
+
+    return 'data' in response && 'status' in response;
   }
 }
