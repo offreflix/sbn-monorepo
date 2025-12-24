@@ -18,8 +18,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
-import { Input } from '../ui/input'
+  Input,
+} from '@repo/ui'
 import { useAuth } from '../auth/AuthProvider'
 import { z } from 'zod'
 

@@ -15,15 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/ui'
-import { Input } from '../ui/input'
 import {
+  Input,
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
-} from '../ui/form'
+} from '@repo/ui'
 import { toast } from 'sonner'
 import { useState } from 'react'
 

@@ -6,7 +6,7 @@ import { WalletCards } from './components/WalletCards'
 import { TransactionList } from './components/TransactionList'
 import { CategoryGrid } from './components/CategoryGrid'
 import { BalanceOverview } from './components/BalanceOverview'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
 import { CreditCard, TrendingUp, Calendar } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 

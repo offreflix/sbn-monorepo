@@ -23,7 +23,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../ui/alert-dialog'
+} from '@repo/ui'
 
 interface TransactionListProps {
   transactions: Transaction[]

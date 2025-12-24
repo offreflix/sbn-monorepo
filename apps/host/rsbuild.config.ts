@@ -50,6 +50,9 @@ export default defineConfig({
               eager: true,
             },
           },
+          dts: {
+            enabled: false,
+          },
         }),
       ],
     },

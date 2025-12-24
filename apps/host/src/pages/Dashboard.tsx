@@ -13,7 +13,7 @@ export const DashboardPage = () => {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <Header subtitle="Dashboard" />
 
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10">

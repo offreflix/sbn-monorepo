@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
+import { ThemeProvider } from './theme/ThemeProvider'
 import { DashboardPage } from './pages/Dashboard'
 import { FinanceRemotePage } from './pages/FinanceRemote'
 import { LoginPage } from './pages/Login'
@@ -28,6 +29,7 @@ const Protected = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -55,6 +57,7 @@ function App() {
       </BrowserRouter>
       <Toaster richColors closeButton />
     </AuthProvider>
+    </ThemeProvider>
   )
 }
 

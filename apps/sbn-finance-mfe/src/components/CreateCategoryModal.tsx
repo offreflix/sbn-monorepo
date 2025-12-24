@@ -12,8 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/ui'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
+import { Input, Label } from '@repo/ui'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
