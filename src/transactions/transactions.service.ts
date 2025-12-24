@@ -61,7 +61,7 @@ export class TransactionsService {
       return this.prisma.$transaction(transactions);
     }
 
-    return this.prisma.transaction.create({
+    const transaction = await this.prisma.transaction.create({
       data: {
         userId: data.userId,
         walletId: data.walletId,
@@ -69,12 +69,29 @@ export class TransactionsService {
         amount: data.amount,
         date: new Date(data.date),
         description: data.description,
-        tags: [] as string[], // Required by Prisma schema
+        tags: [] as string[],
         status: data.status,
         type: data.type,
         isPaid: data.isPaid || false,
       },
     });
+
+    if (transaction.isPaid) {
+      const increment =
+        transaction.type === 'Receita'
+          ? transaction.amount
+          : -Number(transaction.amount);
+      await this.prisma.wallet.update({
+        where: { id: transaction.walletId },
+        data: {
+          balance: {
+            increment: increment,
+          },
+        },
+      });
+    }
+
+    return transaction;
   }
 
   async findAll(userId: string) {
@@ -116,16 +133,57 @@ export class TransactionsService {
     delete updateData.userId;
     delete updateData.id;
 
-    return this.prisma.transaction.update({
+    // Revert previous balance effect
+    if (transaction.isPaid) {
+      const revertIncrement =
+        transaction.type === 'Receita'
+          ? -Number(transaction.amount)
+          : Number(transaction.amount);
+      await this.prisma.wallet.update({
+        where: { id: transaction.walletId },
+        data: { balance: { increment: revertIncrement } },
+      });
+    }
+
+    const updatedTransaction = await this.prisma.transaction.update({
       where: { id },
       data: updateData,
     });
+
+    // Apply new balance effect
+    if (updatedTransaction.isPaid) {
+      const applyIncrement =
+        updatedTransaction.type === 'Receita'
+          ? Number(updatedTransaction.amount)
+          : -Number(updatedTransaction.amount);
+      await this.prisma.wallet.update({
+        where: { id: updatedTransaction.walletId },
+        data: { balance: { increment: applyIncrement } },
+      });
+    }
+
+    return updatedTransaction;
   }
 
   async remove(id: string, userId: string) {
     const transaction = await this.findOne(id, userId);
     if (!transaction) {
       throw new Error('Transaction not found or denied access');
+    }
+
+    if (transaction.isPaid) {
+      const increment =
+        transaction.type === 'Receita'
+          ? -Number(transaction.amount)
+          : Number(transaction.amount);
+      await this.prisma.wallet.update({
+        where: { id: transaction.walletId },
+        data: {
+          balance: {
+            increment: increment,
+          },
+        },
+      });
     }
 
     return this.prisma.transaction.delete({
