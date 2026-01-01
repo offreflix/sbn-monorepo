@@ -91,10 +91,13 @@ async function request<T>(path: string, init: RequestInit) {
           throw new Error('Sessão expirada. Faça login novamente.')
         }
       } else {
+        clearSession()
+        window.location.href = '/login'
         throw new Error('Sessão expirada. Faça login novamente.')
       }
     } catch (error) {
       if (error instanceof Error && error.message.includes('Sessão expirada')) {
+        window.location.href = '/login'
         throw error
       }
       throw new Error('Erro ao renovar sessão')
