@@ -62,9 +62,24 @@ export class AuthService {
     }
 
     const payload = { email: user.email, sub: user.id };
-    // Optionally rotate refresh token here
+
+    // Rotate refresh token
+    const newRefreshToken = uuidv4();
+
+    // Delete old token
+    await this.redis.del(`refreshToken:${refreshToken}`);
+
+    // Store new token
+    await this.redis.set(
+      `refreshToken:${newRefreshToken}`,
+      user.id,
+      'EX',
+      60 * 60 * 24 * 7,
+    );
+
     return {
       accessToken: this.jwtService.sign(payload),
+      refreshToken: newRefreshToken,
     };
   }
 
