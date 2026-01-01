@@ -8,6 +8,7 @@ import type {
   CreateTransactionRequest,
   CreateCategoryRequest,
   CreateRecurrenceRequest,
+  DashboardSummary,
 } from '../types/finance'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000'
@@ -160,6 +161,16 @@ export const financeApi = {
   transactions: {
     list: () =>
       request<Transaction[]>('/api/finance/transactions', { method: 'GET' }),
+    summary: (month?: number, year?: number) => {
+      const params = new URLSearchParams()
+      if (month) params.append('month', month.toString())
+      if (year) params.append('year', year.toString())
+      const queryString = params.toString() ? `?${params.toString()}` : ''
+      return request<DashboardSummary>(
+        `/api/finance/transactions/summary${queryString}`,
+        { method: 'GET' }
+      )
+    },
     create: (payload: CreateTransactionRequest) =>
       request<Transaction>('/api/finance/transactions', {
         method: 'POST',

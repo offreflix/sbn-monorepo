@@ -79,13 +79,9 @@ export function CreateTransactionModal({
   })
 
   useEffect(() => {
-    console.log('=== useEffect do formulário ===')
-    console.log('open:', open)
-    console.log('initialData:', initialData)
-
     if (open) {
       if (initialData) {
-        const resetData = {
+        form.reset({
           walletId: initialData.walletId,
           categoryId: initialData.categoryId,
           amount: initialData.amount.toString(),
@@ -96,17 +92,9 @@ export function CreateTransactionModal({
           isPaid: initialData.isPaid,
           installmentNumber: initialData.installmentNumber?.toString(),
           totalInstallments: initialData.totalInstallments?.toString(),
-        }
-        console.log('Resetando formulário com dados de edição:', resetData)
-        form.reset(resetData)
-
-        // Aguarda um pouco para garantir que o reset foi aplicado
-        setTimeout(() => {
-          console.log('Valores após reset:', form.getValues())
-          console.log('Erros após reset:', form.formState.errors)
-        }, 100)
+        })
       } else {
-        const resetData: TransactionFormData = {
+        form.reset({
           type: 'Despesa',
           status: 'Pendente',
           isPaid: false,
@@ -115,16 +103,10 @@ export function CreateTransactionModal({
           amount: '',
           walletId: '',
           categoryId: '',
-        }
-        console.log('Resetando formulário para criação:', resetData)
-        form.reset(resetData)
+        })
       }
-    } else {
-      // Limpa o formulário quando o modal fecha
-      console.log('Fechando modal, limpando formulário')
-      form.reset()
     }
-  }, [open, initialData])
+  }, [open, initialData, form])
 
   const selectedType = form.watch('type')
   const filteredCategories = categories.filter(
@@ -134,12 +116,6 @@ export function CreateTransactionModal({
     form.watch('installmentNumber') && form.watch('totalInstallments')
 
   const onSubmit = async (data: TransactionFormData) => {
-    console.log('=== onSubmit chamado ===')
-    console.log('Dados do formulário:', data)
-    console.log('initialData:', initialData)
-    console.log('Erros do formulário:', form.formState.errors)
-    console.log('Valores atuais do form:', form.getValues())
-
     try {
       setSubmitting(true)
       const payload: CreateTransactionRequest = {
@@ -160,26 +136,17 @@ export function CreateTransactionModal({
           : undefined,
       }
 
-      console.log('Payload a ser enviado:', payload)
-
       if (initialData) {
-        console.log('Atualizando transação com ID:', initialData.id)
         await financeApi.transactions.update(initialData.id, payload)
-        console.log('Transação atualizada com sucesso!')
         toast.success('Transação atualizada com sucesso!')
-        onOpenChange(false)
-        form.reset()
-        onSuccess()
       } else {
-        console.log('Criando nova transação')
         await financeApi.transactions.create(payload)
-        console.log('Transação criada com sucesso!')
         toast.success('Transação criada com sucesso!')
-        form.reset()
-        onSuccess()
       }
+
+      form.reset()
+      onSuccess()
     } catch (error) {
-      console.error('Erro ao salvar transação:', error)
       toast.error(
         error instanceof Error ? error.message : 'Erro ao salvar transação',
       )
@@ -202,29 +169,7 @@ export function CreateTransactionModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={form.handleSubmit(onSubmit, (errors) => {
-            console.log('=== ERROS DE VALIDAÇÃO ===')
-            console.log('Erros completos:', errors)
-            console.log('Valores atuais do form:', form.getValues())
-            console.log('Estado do formulário:', {
-              isValid: form.formState.isValid,
-              isDirty: form.formState.isDirty,
-              errors: form.formState.errors,
-            })
-
-            // Mostra erros específicos
-            Object.keys(errors).forEach((key) => {
-              console.log(
-                `Erro no campo ${key}:`,
-                errors[key as keyof typeof errors],
-              )
-            })
-
-            toast.error('Por favor, preencha todos os campos obrigatórios')
-          })}
-          className="space-y-4 mt-4"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label>Tipo de Transação</Label>
             <div className="grid grid-cols-2 gap-2">
@@ -288,9 +233,7 @@ export function CreateTransactionModal({
             <Label htmlFor="walletId">Carteira</Label>
             <Select
               value={form.watch('walletId')}
-              onValueChange={(value) => {
-                form.setValue('walletId', value, { shouldValidate: true })
-              }}
+              onValueChange={(value) => form.setValue('walletId', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a carteira" />
@@ -314,9 +257,7 @@ export function CreateTransactionModal({
             <Label htmlFor="categoryId">Categoria</Label>
             <Select
               value={form.watch('categoryId')}
-              onValueChange={(value) => {
-                form.setValue('categoryId', value, { shouldValidate: true })
-              }}
+              onValueChange={(value) => form.setValue('categoryId', value)}
               disabled={filteredCategories.length === 0}
             >
               <SelectTrigger>

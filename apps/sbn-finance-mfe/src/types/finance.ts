@@ -135,3 +135,9 @@ export interface CreateRecurrenceRequest {
   startDate: string
   endDate?: string
 }
+
+export interface DashboardSummary {
+  totalBalance: number
+  totalIncome: number
+  totalExpenses: number
+}

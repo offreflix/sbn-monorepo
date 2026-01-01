@@ -6,8 +6,19 @@ import { WalletCards } from './components/WalletCards'
 import { TransactionList } from './components/TransactionList'
 import { CategoryGrid } from './components/CategoryGrid'
 import { BalanceOverview } from './components/BalanceOverview'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
-import { CreditCard, TrendingUp, Calendar } from 'lucide-react'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@repo/ui'
+import { CreditCard, TrendingUp, Calendar, RefreshCcw } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
 const App = () => {
@@ -15,41 +26,49 @@ const App = () => {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [summary, setSummary] = useState({
+    totalBalance: 0,
+    totalIncome: 0,
+    totalExpenses: 0,
+  })
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  // Date filter state
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const loadData = async () => {
     try {
       setLoading(true)
-      const [txs, wls, cats] = await Promise.all([
+      const [txs, wls, cats, sum] = await Promise.all([
         financeApi.transactions.list(),
         financeApi.wallets.list(),
         financeApi.categories.list(),
+        financeApi.transactions.summary(selectedMonth, selectedYear),
       ])
       setTransactions(txs)
       setWallets(wls)
       setCategories(cats)
+      setSummary(sum)
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Erro ao carregar dados'
-      )
+      console.error('Erro ao carregar dados:', error)
+      toast.error('Erro ao carregar dados. Tente novamente.')
     } finally {
       setLoading(false)
     }
   }
 
-  const totalBalance = wallets.reduce(
-    (sum, wallet) => sum + parseFloat(wallet.balance),
-    0
-  )
-  const totalIncome = transactions
-    .filter((t) => t.type === 'Receita' && t.isPaid)
-    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-  const totalExpenses = transactions
-    .filter((t) => t.type === 'Despesa' && t.isPaid)
-    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+  useEffect(() => {
+    loadData()
+  }, [selectedMonth, selectedYear]) // Reload when filter changes
+
+  // Remove client-side calculation since we use server summary
+  // const totalBalance... (removed)
+  // const totalIncome... (removed)
+  // const totalExpenses... (removed)
+
+  const handleTransactionSuccess = () => {
+    loadData()
+  }
 
   if (loading) {
     return (
@@ -66,10 +85,59 @@ const App = () => {
         <main className="container mx-auto px-4 py-6 space-y-6">
           {/* Balance Overview */}
           <BalanceOverview
-            totalBalance={totalBalance}
-            totalIncome={totalIncome}
-            totalExpenses={totalExpenses}
+            totalBalance={summary.totalBalance}
+            totalIncome={summary.totalIncome}
+            totalExpenses={summary.totalExpenses}
           />
+
+          {/* Filtering Controls */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                Dashboard Financeiro
+              </h1>
+              <div className="flex gap-2 ml-4">
+                <Select
+                  value={selectedMonth.toString()}
+                  onValueChange={(value) => setSelectedMonth(Number(value))}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Selecione o mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                      <SelectItem key={m} value={m.toString()}>
+                        {new Date(0, m - 1).toLocaleString('pt-BR', {
+                          month: 'long',
+                        })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={selectedYear.toString()}
+                  onValueChange={(value) => setSelectedYear(Number(value))}
+                >
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => 2023 + i).map((y) => (
+                      <SelectItem key={y} value={y.toString()}>
+                        {y}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => loadData()}>
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
           {/* Wallets Section */}
           <section>
@@ -105,11 +173,14 @@ const App = () => {
                 transactions={transactions}
                 wallets={wallets}
                 categories={categories}
-                onRefresh={loadData}
+                onRefresh={handleTransactionSuccess}
               />
             </TabsContent>
             <TabsContent value="categories" className="mt-6">
-              <CategoryGrid categories={categories} onRefresh={loadData} />
+              <CategoryGrid
+                categories={categories}
+                onRefresh={handleTransactionSuccess}
+              />
             </TabsContent>
           </Tabs>
         </main>
