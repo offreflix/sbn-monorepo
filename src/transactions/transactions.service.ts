@@ -12,7 +12,7 @@ export class TransactionsService {
     amount: number;
     date: string;
     description?: string;
-    status: string;
+    status?: string;
     type: string;
     installments?: number;
     isPaid?: boolean;
@@ -70,7 +70,7 @@ export class TransactionsService {
         date: new Date(data.date),
         description: data.description,
         tags: [] as string[],
-        status: data.status,
+        status: data.status || 'PENDENTE',
         type: data.type,
         isPaid: data.isPaid || false,
       },
@@ -189,5 +189,45 @@ export class TransactionsService {
     return this.prisma.transaction.delete({
       where: { id },
     });
+  }
+
+  async getSummary(userId: string, month: number, year: number) {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Get Total Balance from Wallets
+    const wallets = await this.prisma.wallet.findMany({
+      where: { userId },
+    });
+    const totalBalance = wallets.reduce(
+      (acc, wallet) => acc + Number(wallet.balance),
+      0,
+    );
+
+    // Get Income and Expenses for the period
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+
+    const totalIncome = transactions
+      .filter((t) => t.type === 'Receita')
+      .reduce((acc, t) => acc + Number(t.amount), 0);
+
+    const totalExpenses = transactions
+      .filter((t) => t.type === 'Despesa')
+      .reduce((acc, t) => acc + Number(t.amount), 0);
+
+    return {
+      totalBalance,
+      totalIncome,
+      totalExpenses,
+    };
   }
 }

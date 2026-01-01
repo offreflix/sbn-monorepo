@@ -7,15 +7,21 @@ import {
   Headers,
   Patch,
   Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { WalletsService } from './wallets.service';
+import { CreateWalletDto } from './dto/create-wallet.dto';
+import { UpdateWalletDto } from './dto/update-wallet.dto';
 
 @Controller('wallets')
 export class WalletsController {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Post()
-  create(@Body() body: any, @Headers('x-user-id') userId: string) {
+  create(@Body() body: CreateWalletDto, @Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.walletsService.create({ ...body, userId });
   }
 
@@ -32,7 +38,7 @@ export class WalletsController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: UpdateWalletDto,
     @Headers('x-user-id') userId: string,
   ) {
     return this.walletsService.update(id, userId, body);
