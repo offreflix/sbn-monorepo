@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -24,6 +24,14 @@ export class TransactionsService {
     const installmentAmount =
       installments > 1 ? data.amount / installments : data.amount;
 
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { id: data.walletId, userId: data.userId },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found');
+    }
+
     if (installments > 1) {
       const transactions = [];
       const baseDate = new Date(data.date);
@@ -31,6 +39,11 @@ export class TransactionsService {
       for (let i = 0; i < installments; i++) {
         const date = new Date(baseDate);
         date.setMonth(date.getMonth() + i);
+
+        // Future installments are 'Pendente' unless specifically handled logic requires otherwise
+        // For simplicity, first installment follows isPaid, others are Pendente.
+        const isInstallmentPaid = i === 0 && data.isPaid;
+        const status = isInstallmentPaid ? 'Pago' : 'Pendente';
 
         transactions.push(
           this.prisma.transaction.create({
@@ -43,23 +56,42 @@ export class TransactionsService {
               description: data.description
                 ? `${data.description} (${i + 1}/${installments})`
                 : `Parcela ${i + 1}/${installments}`,
-              tags: [] as string[], // Required by Prisma schema (String[])
-              status: 'PENDENTE', // Future installments are pending usually? Or inherit? Inherit for now but user said "future launches".
-              // User Plan: "gera 10 lançamentos futuros".
-              // "Lançamentos futuros ... nas faturas".
+              tags: [] as string[],
+              status: status,
               type: data.type,
-              isPaid: false,
+              isPaid: isInstallmentPaid,
               installmentNumber: i + 1,
               totalInstallments: data.installments,
-              purchaseGroupId: purchaseGroupId, // Changed from groupId to purchaseGroupId to match declaration
-              recurrenceId: data.recurrenceId, // Removed the trailing conditional logic as it was syntactically incorrect
+              purchaseGroupId: purchaseGroupId,
+              recurrenceId: data.recurrenceId,
             },
           }),
         );
       }
-      // Execute all
-      return this.prisma.$transaction(transactions);
+
+      const createdTransactions = await this.prisma.$transaction(transactions);
+
+      // Update balance for the FIRST paid installment if applicable
+      if (data.isPaid) {
+        const firstTx = createdTransactions[0];
+        const increment =
+          firstTx.type === 'Receita'
+            ? Number(firstTx.amount)
+            : -Number(firstTx.amount);
+        await this.prisma.wallet.update({
+          where: { id: firstTx.walletId },
+          data: { balance: { increment: increment } },
+        });
+      }
+      return createdTransactions;
     }
+
+    let isPaid = data.isPaid || false;
+    let status = data.status || (isPaid ? 'Pago' : 'Pendente');
+
+    // Consistency check
+    if (status === 'Pago') isPaid = true;
+    if (isPaid && status !== 'Pago') status = 'Pago';
 
     const transaction = await this.prisma.transaction.create({
       data: {
@@ -70,16 +102,16 @@ export class TransactionsService {
         date: new Date(data.date),
         description: data.description,
         tags: [] as string[],
-        status: data.status || 'PENDENTE',
+        status: status,
         type: data.type,
-        isPaid: data.isPaid || false,
+        isPaid: isPaid,
       },
     });
 
     if (transaction.isPaid) {
       const increment =
         transaction.type === 'Receita'
-          ? transaction.amount
+          ? Number(transaction.amount) // Ensure conversion if needed, though type is number already
           : -Number(transaction.amount);
       await this.prisma.wallet.update({
         where: { id: transaction.walletId },
@@ -126,14 +158,29 @@ export class TransactionsService {
     if (data.date) {
       updateData.date = new Date(data.date);
     }
-    // Prisma will ignore undefined fields in updateData automatically?
-    // Better to be explicit or trust spread.
+
+    // Logic to sync isPaid and status
+    if (data.isPaid !== undefined) {
+      updateData.isPaid = data.isPaid;
+      // Auto-update status based on isPaid
+      if (updateData.isPaid) {
+        updateData.status = 'Pago';
+      } else {
+        if (!data.status || data.status === 'Pago') {
+          updateData.status = 'Pendente';
+        }
+      }
+    } else if (data.status === 'Pago') {
+      updateData.isPaid = true;
+    } else if (data.status === 'Pendente') {
+      updateData.isPaid = false;
+    }
 
     // Remove immutable fields or sensitive ones if necessary
     delete updateData.userId;
     delete updateData.id;
 
-    // Revert previous balance effect
+    // Revert previous balance effect if it was paid
     if (transaction.isPaid) {
       const revertIncrement =
         transaction.type === 'Receita'
@@ -150,7 +197,7 @@ export class TransactionsService {
       data: updateData,
     });
 
-    // Apply new balance effect
+    // Apply new balance effect if paid
     if (updatedTransaction.isPaid) {
       const applyIncrement =
         updatedTransaction.type === 'Receita'
