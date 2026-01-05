@@ -7,7 +7,8 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev --open",
     "preview": "rsbuild preview",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -26,7 +27,6 @@
     "lucide-react": "^0.454.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-hook-form": "^7.53.2",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.4",
     "zod": "^3.24.1"

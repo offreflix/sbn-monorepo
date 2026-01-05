@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './index.css'
 import { financeApi } from './api/finance'
 import type { Transaction, Wallet, Category } from './types/finance'
@@ -36,7 +36,7 @@ const App = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       const [txs, wls, cats, sum] = await Promise.all([
@@ -55,11 +55,11 @@ const App = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedMonth, selectedYear])
 
   useEffect(() => {
     loadData()
-  }, [selectedMonth, selectedYear]) // Reload when filter changes
+  }, [loadData]) // Reload when filter changes
 
   // Remove client-side calculation since we use server summary
   // const totalBalance... (removed)

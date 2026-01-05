@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": ["VITE_API_BASE"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

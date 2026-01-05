@@ -83,7 +83,7 @@ export function TransactionList({
       await financeApi.transactions.delete(transactionToDelete.id)
       toast.success('Transação excluída com sucesso')
       onRefresh()
-    } catch (error) {
+    } catch {
       toast.error('Erro ao excluir transação')
     } finally {
       setTransactionToDelete(null)
