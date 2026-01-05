@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const applyAuthResponse = (resp: any) => {
     // Backend retorna camelCase
+    console.log('[AuthProvider] Auth Response:', resp)
     const accessToken = resp.accessToken
     const refreshToken = resp.refreshToken || null
 
@@ -96,11 +97,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error('Token de acesso não recebido do servidor')
     }
 
+    if (!refreshToken) {
+      console.warn('[Auth] No refresh token in response!', resp)
+    }
+
     const nextSession: SessionState = {
       user: resp.user,
       tokens: {
         accessToken,
-        refreshToken: refreshToken || '', // Temporário: backend não retorna refreshToken ainda
+        refreshToken: refreshToken || '',
       },
     }
     setSession(nextSession)
@@ -112,7 +117,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: resp.user?.email,
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,
-        rawResponse: resp,
       })
     }
   }

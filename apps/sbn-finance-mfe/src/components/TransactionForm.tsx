@@ -63,7 +63,7 @@ export function TransactionForm({
       type: 'Despesa',
       status: 'Pendente',
       isPaid: false,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toLocaleDateString('sv'), // 'sv' locale formats as YYYY-MM-DD
     },
   })
 
@@ -75,11 +75,16 @@ export function TransactionForm({
   const onSubmit = async (data: TransactionFormData) => {
     try {
       setSubmitting(true)
+
+      // Create date at 12:00 local time to prevent timezone shifts when converting to UTC
+      const [year, month, day] = data.date.split('-').map(Number)
+      const date = new Date(year, month - 1, day, 12, 0, 0)
+
       const payload: CreateTransactionRequest = {
         walletId: data.walletId,
         categoryId: data.categoryId,
         amount: data.amount,
-        date: new Date(data.date).toISOString(),
+        date: date.toISOString(),
         description: data.description,
         type: data.type,
         status: data.status || 'Pendente',

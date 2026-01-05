@@ -55,53 +55,58 @@ async function request<T>(path: string, init: RequestInit) {
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  let res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers,
   })
 
-  // Se receber 401, tenta renovar o token (refresh)
+  // Se receber 401
   if (res.status === 401) {
-    try {
-      const refreshToken = getRefreshToken()
-      if (refreshToken) {
-        // Tenta renovar o token
-        const refreshRes = await fetch(`${API_BASE}/api/auth/refresh`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
+    // 1. Verificar se o token já foi atualizado por outra aba/processo (Race Condition)
+    const currentToken = getAccessToken()
+    if (token && currentToken && token !== currentToken) {
+      // Token mudou, tenta novamente com o novo token
+      const newHeaders: Record<string, string> = {
+        ...headers,
+        Authorization: `Bearer ${currentToken}`,
+      }
+      return handle<T>(
+        await fetch(`${API_BASE}${path}`, {
+          ...init,
+          headers: newHeaders,
         })
+      )
+    }
 
-        if (refreshRes.ok) {
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-            await refreshRes.json()
-          // Atualiza os tokens no localStorage
-          updateTokens(newAccessToken, newRefreshToken)
-          // Repete a requisição original com o novo token
-          const newHeaders: Record<string, string> = {
-            ...headers,
-            Authorization: `Bearer ${newAccessToken}`,
-          }
-          res = await fetch(`${API_BASE}${path}`, {
-            ...init,
-            headers: newHeaders,
-          })
-        } else {
-          // Refresh falhou, limpa a sessão
-          clearSession()
-          throw new Error('Sessão expirada. Faça login novamente.')
-        }
-      } else {
+    try {
+      if (!refreshPromise) {
+        refreshPromise = handlerRefresh().finally(() => {
+          refreshPromise = null
+        })
+      }
+
+      const tokens = await refreshPromise
+      const newHeaders: Record<string, string> = {
+        ...headers,
+        Authorization: `Bearer ${tokens.accessToken}`,
+      }
+      return handle<T>(
+        await fetch(`${API_BASE}${path}`, {
+          ...init,
+          headers: newHeaders,
+        })
+      )
+    } catch (error) {
+      // Only force logout if refresh failed fatally or wasn't recoverable
+      if (error instanceof Error && error.message.includes('Refresh failed')) {
+        clearSession()
+      }
+      // If unexpected error, also redirect but careful not to loop
+      if (!getAccessToken()) {
         clearSession()
         window.location.href = '/login'
-        throw new Error('Sessão expirada. Faça login novamente.')
       }
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Sessão expirada')) {
-        window.location.href = '/login'
-        throw error
-      }
-      throw new Error('Erro ao renovar sessão')
+      throw error
     }
   }
 
@@ -138,6 +143,36 @@ function updateTokens(newAccessToken: string, newRefreshToken: string) {
   } catch {
     // Ignora erros de parse
   }
+}
+
+// Promise singleton to deduplicate refresh requests
+let refreshPromise: Promise<{
+  accessToken: string
+  refreshToken: string
+}> | null = null
+
+async function handlerRefresh(): Promise<{
+  accessToken: string
+  refreshToken: string
+}> {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) {
+    throw new Error('No refresh token available')
+  }
+
+  const response = await fetch(`${API_BASE}/api/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Refresh failed')
+  }
+
+  const data = await response.json()
+  updateTokens(data.accessToken, data.refreshToken)
+  return data
 }
 
 function clearSession() {
