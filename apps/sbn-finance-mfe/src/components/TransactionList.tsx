@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, Badge, Button } from '@repo/ui'
 import {
   ArrowUpRight,
@@ -7,8 +7,12 @@ import {
   Plus,
   Pencil,
   Trash2,
+  CheckCircle2,
+  XCircle,
+  MoreVertical,
+  CalendarDays,
 } from 'lucide-react'
-import { format } from 'date-fns'
+import { format, isToday, isYesterday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CreateTransactionModal } from './CreateTransactionModal'
 import type { Transaction, Wallet, Category } from '../types/finance'
@@ -51,30 +55,29 @@ export function TransactionList({
     }).format(parseFloat(value))
   }
 
-  const getStatusBadge = (status: string, isPaid: boolean) => {
-    if (status === 'Pago' && isPaid) {
-      return (
-        <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">
-          Pago
-        </Badge>
-      )
-    }
-    if (status === 'Pendente') {
-      return (
-        <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20">
-          Pendente
-        </Badge>
-      )
-    }
-    if (status === 'Cancelado') {
-      return <Badge variant="destructive">Cancelado</Badge>
-    }
-    return <Badge variant="secondary">{status}</Badge>
-  }
+  // Group transactions by date
+  const groupedTransactions = useMemo(() => {
+    const groups: Record<string, Transaction[]> = {}
 
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction)
-    setIsCreateModalOpen(true)
+    // Sort by date desc first
+    const sorted = [...transactions].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+
+    sorted.forEach((t) => {
+      const dateKey = format(new Date(t.date), 'yyyy-MM-dd')
+      if (!groups[dateKey]) groups[dateKey] = []
+      groups[dateKey].push(t)
+    })
+
+    return groups
+  }, [transactions])
+
+  const getDateLabel = (dateStr: string) => {
+    const date = new Date(dateStr)
+    if (isToday(date)) return 'Hoje'
+    if (isYesterday(date)) return 'Ontem'
+    return format(date, "dd 'de' MMMM", { locale: ptBR })
   }
 
   const handleDelete = async () => {
@@ -90,143 +93,137 @@ export function TransactionList({
     }
   }
 
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsCreateModalOpen(true)
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end sticky top-0 backdrop-blur z-10 py-2">
         <Button
           onClick={() => {
             setEditingTransaction(null)
             setIsCreateModalOpen(true)
           }}
           size="sm"
-          className="gap-2"
+          className="gap-2 rounded-full"
         >
           <Plus className="h-4 w-4" />
           Nova Transação
         </Button>
       </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          {transactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhuma transação encontrada
-            </p>
-          ) : (
-            transactions.map((transaction) => {
-              const category = categories.find(
-                (c) => c.id === transaction.categoryId
-              )
-              const wallet = wallets.find((w) => w.id === transaction.walletId)
-              return (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
+      <div className="space-y-6">
+        {Object.keys(groupedTransactions).length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <div className="bg-muted/50 p-4 rounded-full mb-4">
+              <CalendarDays className="h-8 w-8 opacity-50" />
+            </div>
+            <p>Nenhuma transação encontrada</p>
+          </div>
+        ) : (
+          Object.entries(groupedTransactions).map(([date, txs]) => (
+            <div
+              key={date}
+              className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+            >
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 ml-1">
+                {getDateLabel(date)}
+              </h3>
+              <div className="space-y-2">
+                {txs.map((transaction) => {
+                  const category = categories.find(
+                    (c) => c.id === transaction.categoryId
+                  )
+                  const wallet = wallets.find(
+                    (w) => w.id === transaction.walletId
+                  )
+                  const isIncome = transaction.type === 'Receita'
+
+                  return (
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                        transaction.type === 'Receita'
-                          ? 'bg-emerald-500/10 text-emerald-600'
-                          : 'bg-red-500/10 text-red-600'
-                      }`}
+                      key={transaction.id}
+                      className="group relative flex items-center justify-between p-3 rounded-xl hover:bg-muted/40 transition-colors border border-transparent hover:border-border/50"
                     >
-                      {transaction.type === 'Receita' ? (
-                        <ArrowUpRight className="h-5 w-5" />
-                      ) : (
-                        <ArrowDownRight className="h-5 w-5" />
-                      )}
-                    </div>
+                      <div className="flex items-center gap-4">
+                        {/* Icon Box */}
+                        <div
+                          className="h-10 w-10 rounded-xl flex items-center justify-center text-lg shadow-sm"
+                          style={{
+                            backgroundColor: category?.color
+                              ? `${category.color}20`
+                              : '#f3f4f6',
+                            color: category?.color || '#6b7280',
+                          }}
+                        >
+                          {category?.icon ||
+                            (isIncome ? (
+                              <ArrowUpRight className="h-5 w-5" />
+                            ) : (
+                              <ArrowDownRight className="h-5 w-5" />
+                            ))}
+                        </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-foreground">
-                          {transaction.description || 'Sem descrição'}
-                        </h4>
-                        {transaction.installmentNumber &&
-                          transaction.totalInstallments && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] h-5 px-1.5 font-normal text-muted-foreground"
-                            >
-                              {transaction.installmentNumber}/
-                              {transaction.totalInstallments}
-                            </Badge>
-                          )}
+                        <div>
+                          <p className="font-medium text-sm text-foreground">
+                            {transaction.description ||
+                              category?.name ||
+                              'Sem descrição'}
+                          </p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            {wallet?.name}
+                            {transaction.installmentNumber &&
+                              ` • ${transaction.installmentNumber}/${transaction.totalInstallments}`}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        {category && (
-                          <>
-                            <div
-                              className="h-2 w-2 rounded-full"
-                              style={{
-                                backgroundColor: category.color || '#3b82f6',
-                              }}
-                            />
-                            <span className="text-sm text-muted-foreground">
-                              {category.name}
-                            </span>
-                          </>
-                        )}
-                        {wallet && (
-                          <>
-                            <span className="text-sm text-muted-foreground">
-                              •
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {wallet.name}
-                            </span>
-                          </>
-                        )}
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {format(new Date(transaction.date), 'dd MMM', {
-                            locale: ptBR,
-                          })}
-                        </span>
+
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p
+                            className={`font-semibold tabular-nums text-sm ${isIncome ? 'text-emerald-600' : 'text-foreground'}`}
+                          >
+                            {isIncome ? '+' : '-'}{' '}
+                            {formatCurrency(transaction.amount)}
+                          </p>
+                          <div className="flex justify-end mt-0.5">
+                            {transaction.isPaid ? (
+                              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                            ) : (
+                              <Clock className="h-3 w-3 text-amber-500" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Direct actions instead of DropdownMenu */}
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleEdit(transaction)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => setTransactionToDelete(transaction)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {getStatusBadge(transaction.status, transaction.isPaid)}
-                    <p
-                      className={`text-lg font-bold ${
-                        transaction.type === 'Receita'
-                          ? 'text-emerald-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {transaction.type === 'Receita' ? '+' : '-'}
-                      {formatCurrency(transaction.amount)}
-                    </p>
-
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleEdit(transaction)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setTransactionToDelete(transaction)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
-      </Card>
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       <CreateTransactionModal
         open={isCreateModalOpen}

@@ -100,7 +100,7 @@ export function Header({ title = 'SBN Shell', subtitle }: HeaderProps) {
               className="gap-2"
             >
               <Home className="h-4 w-4" />
-              <span className="hidden sm:inline">Home</span>
+              <span className="sm:inline">Home</span>
             </Button>
             <Button
               variant="ghost"
@@ -109,7 +109,7 @@ export function Header({ title = 'SBN Shell', subtitle }: HeaderProps) {
               className="gap-2"
             >
               <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline">Financeiro</span>
+              <span className="sm:inline">Financeiro</span>
             </Button>
           </nav>
 
