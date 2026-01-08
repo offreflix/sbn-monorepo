@@ -110,7 +110,7 @@ export function CreateTransactionModal({
 
   const selectedType = form.watch('type')
   const filteredCategories = categories.filter(
-    (cat) => cat.type === selectedType,
+    (cat) => cat.type === selectedType
   )
   const hasInstallments =
     form.watch('installmentNumber') && form.watch('totalInstallments')
@@ -134,6 +134,10 @@ export function CreateTransactionModal({
         totalInstallments: data.totalInstallments
           ? parseInt(data.totalInstallments)
           : undefined,
+        installments:
+          data.installmentNumber === '1' && data.totalInstallments
+            ? parseInt(data.totalInstallments)
+            : undefined,
       }
 
       if (initialData) {
@@ -148,7 +152,7 @@ export function CreateTransactionModal({
       onSuccess()
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao salvar transação',
+        error instanceof Error ? error.message : 'Erro ao salvar transação'
       )
     } finally {
       setSubmitting(false)

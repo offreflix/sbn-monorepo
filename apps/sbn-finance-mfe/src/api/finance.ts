@@ -194,8 +194,15 @@ export const financeApi = {
 
   // Transactions
   transactions: {
-    list: () =>
-      request<Transaction[]>('/api/finance/transactions', { method: 'GET' }),
+    list: (month?: number, year?: number) => {
+      const params = new URLSearchParams()
+      if (month) params.append('month', month.toString())
+      if (year) params.append('year', year.toString())
+      const queryString = params.toString() ? `?${params.toString()}` : ''
+      return request<Transaction[]>(`/api/finance/transactions${queryString}`, {
+        method: 'GET',
+      })
+    },
     summary: (month?: number, year?: number) => {
       const params = new URLSearchParams()
       if (month) params.append('month', month.toString())

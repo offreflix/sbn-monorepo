@@ -145,10 +145,13 @@ export function TransactionList({
                         </h4>
                         {transaction.installmentNumber &&
                           transaction.totalInstallments && (
-                            <span className="text-xs text-muted-foreground">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] h-5 px-1.5 font-normal text-muted-foreground"
+                            >
                               {transaction.installmentNumber}/
-                              {transaction.totalInstallments}x
-                            </span>
+                              {transaction.totalInstallments}
+                            </Badge>
                           )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">

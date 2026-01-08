@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import './index.css'
 import { financeApi } from './api/finance'
 import type { Transaction, Wallet, Category } from './types/finance'
@@ -6,6 +7,7 @@ import { WalletCards } from './components/WalletCards'
 import { TransactionList } from './components/TransactionList'
 import { CategoryGrid } from './components/CategoryGrid'
 import { BalanceOverview } from './components/BalanceOverview'
+import { IncomeExpenseChart } from './components/IncomeExpenseChart'
 import {
   Tabs,
   TabsContent,
@@ -33,14 +35,18 @@ const App = () => {
   })
 
   // Date filter state
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  // Date filter state
+  const [searchParams, setSearchParams] = useSearchParams()
+  const selectedMonth =
+    Number(searchParams.get('month')) || new Date().getMonth() + 1
+  const selectedYear =
+    Number(searchParams.get('year')) || new Date().getFullYear()
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true)
       const [txs, wls, cats, sum] = await Promise.all([
-        financeApi.transactions.list(),
+        financeApi.transactions.list(selectedMonth, selectedYear),
         financeApi.wallets.list(),
         financeApi.categories.list(),
         financeApi.transactions.summary(selectedMonth, selectedYear),
@@ -99,7 +105,12 @@ const App = () => {
               <div className="flex gap-2 ml-4">
                 <Select
                   value={selectedMonth.toString()}
-                  onValueChange={(value) => setSelectedMonth(Number(value))}
+                  onValueChange={(value) =>
+                    setSearchParams({
+                      month: value,
+                      year: selectedYear.toString(),
+                    })
+                  }
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Selecione o mês" />
@@ -117,7 +128,12 @@ const App = () => {
 
                 <Select
                   value={selectedYear.toString()}
-                  onValueChange={(value) => setSelectedYear(Number(value))}
+                  onValueChange={(value) =>
+                    setSearchParams({
+                      month: selectedMonth.toString(),
+                      year: value,
+                    })
+                  }
                 >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue placeholder="Ano" />
@@ -138,6 +154,12 @@ const App = () => {
               </Button>
             </div>
           </div>
+          {/* Charts Section */}
+          <IncomeExpenseChart
+            transactions={transactions}
+            year={selectedYear}
+            month={selectedMonth}
+          />
 
           {/* Wallets Section */}
           <section>

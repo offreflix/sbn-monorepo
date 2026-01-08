@@ -39,6 +39,13 @@ const transactionSchema = z.object({
   type: z.enum(['Receita', 'Despesa']),
   status: z.enum(['Pendente', 'Pago', 'Cancelado']).optional(),
   isPaid: z.boolean().optional(),
+  installments: z
+    .string()
+    .default('1')
+    .refine((val) => {
+      const n = parseInt(val)
+      return !isNaN(n) && n >= 1
+    }, 'Mínimo 1 parcela'),
 })
 
 type TransactionFormData = z.infer<typeof transactionSchema>
@@ -63,6 +70,7 @@ export function TransactionForm({
       type: 'Despesa',
       status: 'Pendente',
       isPaid: false,
+      installments: '1',
       date: new Date().toLocaleDateString('sv'), // 'sv' locale formats as YYYY-MM-DD
     },
   })
@@ -89,6 +97,7 @@ export function TransactionForm({
         type: data.type,
         status: data.status || 'Pendente',
         isPaid: data.isPaid || false,
+        installments: parseInt(data.installments),
         currency: 'BRL',
       }
 
@@ -204,6 +213,22 @@ export function TransactionForm({
                   </FormControl>
                   <FormMessage>
                     {form.formState.errors.amount?.message}
+                  </FormMessage>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="installments"
+              form={form}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Parcelas</FormLabel>
+                  <FormControl>
+                    <Input type="number" min="1" placeholder="1" {...field} />
+                  </FormControl>
+                  <FormMessage>
+                    {form.formState.errors.installments?.message}
                   </FormMessage>
                 </FormItem>
               )}

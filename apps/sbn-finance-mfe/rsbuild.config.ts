@@ -48,10 +48,13 @@ export default defineConfig({
               singleton: true,
               eager: true,
             },
+            'react-router-dom': {
+              version: dependencies['react-router-dom'],
+              singleton: true,
+              eager: true,
+            },
           },
-          dts: {
-            enabled: false,
-          },
+          dts: false,
         }),
       ],
     },

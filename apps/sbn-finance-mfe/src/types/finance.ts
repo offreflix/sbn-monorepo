@@ -114,6 +114,7 @@ export interface CreateTransactionRequest {
   isPaid?: boolean
   installmentNumber?: number
   totalInstallments?: number
+  installments?: number
 }
 
 export interface CreateCategoryRequest {
