@@ -49,8 +49,16 @@ export class TransactionsController {
   }
 
   @Get()
-  findAll(@Headers('x-user-id') userId: string) {
-    return this.transactionsService.findAll(userId);
+  findAll(
+    @Headers('x-user-id') userId: string,
+    @Query('month') month?: number,
+    @Query('year') year?: number,
+  ) {
+    return this.transactionsService.findAll(
+      userId,
+      month ? Number(month) : undefined,
+      year ? Number(year) : undefined,
+    );
   }
 
   @Get(':id')

@@ -15,6 +15,8 @@ export class TransactionsService {
     status?: string;
     type: string;
     installments?: number;
+    installmentNumber?: number;
+    totalInstallments?: number;
     isPaid?: boolean;
     recurrenceId?: string;
   }) {
@@ -105,6 +107,9 @@ export class TransactionsService {
         status: status,
         type: data.type,
         isPaid: isPaid,
+        installmentNumber: data.installmentNumber,
+        totalInstallments: data.totalInstallments,
+        recurrenceId: data.recurrenceId,
       },
     });
 
@@ -126,12 +131,28 @@ export class TransactionsService {
     return transaction;
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: string, month?: number, year?: number) {
+    const where: any = { userId };
+
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      endDate.setHours(23, 59, 59, 999);
+
+      where.date = {
+        gte: startDate,
+        lte: endDate,
+      };
+    }
+
     return this.prisma.transaction.findMany({
-      where: { userId: userId },
+      where,
       include: {
         wallet: true,
         category: true,
+      },
+      orderBy: {
+        date: 'desc',
       },
     });
   }
