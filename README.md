@@ -1,135 +1,407 @@
-# Turborepo starter
+# SBN Micro Frontend Repository
 
-This Turborepo starter is maintained by the Turborepo core team.
+Monorepo gerenciado pelo Turborepo contendo aplicações frontend baseadas em arquitetura de Micro Frontends usando Module Federation.
 
-## Using this example
+## 📋 Visão Geral
 
-Run the following command:
+Este repositório implementa uma arquitetura de **Micro Frontends** utilizando **Module Federation** para permitir o desenvolvimento e deploy independente de diferentes partes da aplicação. O projeto é construído com **React**, **TypeScript**, **Rsbuild** e **Turborepo** para gerenciamento do monorepo.
 
-```sh
-npx create-turbo@latest
-```
+### Arquitetura
 
-## What's inside?
+- **Host App (`host`)**: Aplicação principal que atua como container e orquestra os micro frontends remotos
+- **Remote Apps**: Micro frontends independentes que são carregados dinamicamente pelo host
+  - `sbn-finance-mfe`: Módulo de gestão financeira
 
-This Turborepo includes the following packages/apps:
+## 🛠️ Stack Tecnológico
 
-### Apps and Packages
+### Core
+- **React 19.2.3**: Biblioteca UI
+- **TypeScript 5.9.3**: Tipagem estática
+- **Turborepo 2.6.3**: Gerenciamento de monorepo e cache de builds
+- **pnpm 9.0.0**: Gerenciador de pacotes
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Build & Bundling
+- **Rsbuild 1.6.14**: Build tool baseado em Rspack
+- **Module Federation Enhanced 0.21.6**: Implementação de Module Federation
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### UI & Estilização
+- **Tailwind CSS 4.0.0**: Framework CSS utility-first
+- **Radix UI**: Componentes acessíveis e não estilizados
+- **Shadcn UI** (via `@repo/ui`): Biblioteca de componentes
+- **Lucide React**: Ícones
+- **Sonner**: Notificações toast
 
-### Utilities
+### Formulários & Validação
+- **React Hook Form 7.53.2**: Gerenciamento de formulários
+- **Zod 3.23.8**: Validação de schemas
+- **@hookform/resolvers**: Integração React Hook Form + Zod
 
-This Turborepo has some additional tools already setup for you:
+### Roteamento & Estado
+- **React Router DOM 7.1.2**: Roteamento client-side
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### Gráficos
+- **Recharts 3.6.0**: Biblioteca de gráficos (usado em `sbn-finance-mfe`)
+- **date-fns 4.1.0**: Manipulação de datas
 
-### Build
+### Testes
+- **Vitest 2.1.4**: Framework de testes
+- **Testing Library**: Utilitários para testes de componentes React
 
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
+## 📁 Estrutura do Projeto
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+sbn-mfe-repo/
+├── apps/
+│   ├── host/                    # Aplicação host (container principal)
+│   │   ├── src/
+│   │   │   ├── api/            # API client de autenticação
+│   │   │   ├── auth/           # Provider de autenticação
+│   │   │   ├── components/     # Componentes compartilhados do host
+│   │   │   ├── pages/         # Páginas da aplicação
+│   │   │   ├── theme/         # Provider de tema
+│   │   │   └── types/         # Tipos TypeScript
+│   │   ├── rsbuild.config.ts  # Configuração do Rsbuild + Module Federation
+│   │   └── package.json
+│   │
+│   └── sbn-finance-mfe/        # Micro frontend de finanças
+│       ├── src/
+│       │   ├── api/           # API client de finanças
+│       │   ├── components/    # Componentes do módulo financeiro
+│       │   ├── types/         # Tipos TypeScript
+│       │   └── App.tsx        # Componente principal exposto via Module Federation
+│       ├── rsbuild.config.ts  # Configuração do Rsbuild + Module Federation
+│       └── package.json
+│
+└── packages/
+    ├── ui/                     # Biblioteca de componentes UI compartilhados
+    │   ├── src/
+    │   │   ├── lib/           # Utilitários (utils, cn)
+    │   │   └── *.tsx          # Componentes (button, card, dialog, etc.)
+    │   └── package.json
+    │
+    ├── eslint-config/          # Configurações compartilhadas do ESLint
+    │   ├── base.js
+    │   ├── next.js
+    │   └── react-internal.js
+    │
+    └── typescript-config/      # Configurações compartilhadas do TypeScript
+        ├── base.json
+        ├── nextjs.json
+        └── react-library.json
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🚀 Pré-requisitos
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+- **Node.js**: >= 18
+- **pnpm**: 9.0.0 (gerenciado via `packageManager` no `package.json`)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+## 📦 Instalação
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+1. Clone o repositório:
+```bash
+git clone <repository-url>
+cd sbn-mfe-repo
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+2. Instale as dependências:
+```bash
+pnpm install
 ```
 
-## Useful Links
+## ⚙️ Configuração
 
-Learn more about the power of Turborepo:
+### Variáveis de Ambiente
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+O projeto utiliza variáveis de ambiente para configuração da API base. Crie arquivos `.env` nos diretórios dos apps conforme necessário:
+
+**apps/host/.env** e **apps/sbn-finance-mfe/.env**:
+```env
+VITE_API_BASE=http://localhost:3000
+```
+
+> **Nota**: A variável `VITE_API_BASE` é compartilhada globalmente via `turbo.json` e deve ser configurada para apontar para o backend da aplicação.
+
+## 🎯 Scripts Disponíveis
+
+### Scripts da Raiz
+
+Execute na raiz do monorepo:
+
+```bash
+# Desenvolvimento (inicia todos os apps em modo dev)
+pnpm dev
+
+# Build de todos os apps e packages
+pnpm build
+
+# Lint em todos os projetos
+pnpm lint
+
+# Verificação de tipos TypeScript
+pnpm check-types
+
+# Formatação de código (Prettier)
+pnpm format
+```
+
+### Scripts por App/Package
+
+Execute em um app ou package específico:
+
+```bash
+# Desenvolvimento de um app específico
+cd apps/host
+pnpm dev
+
+# Build de um app específico
+pnpm build
+
+# Preview do build de produção
+pnpm preview
+
+# Testes (quando disponível)
+pnpm test
+```
+
+### Filtros do Turborepo
+
+Você também pode usar filtros para executar comandos em apps específicos:
+
+```bash
+# Desenvolvimento apenas do host
+pnpm dev --filter=host
+
+# Build apenas do sbn-finance-mfe
+pnpm build --filter=sbn-finance-mfe
+
+# Lint apenas do package ui
+pnpm lint --filter=@repo/ui
+```
+
+## 💻 Desenvolvimento
+
+### Iniciando o Ambiente de Desenvolvimento
+
+1. **Inicie todos os apps simultaneamente** (recomendado):
+```bash
+pnpm dev
+```
+
+Isso iniciará:
+- `host` em `http://localhost:9000`
+- `sbn-finance-mfe` em `http://localhost:9001`
+
+2. **Ou inicie apps individualmente**:
+
+Terminal 1 (Host):
+```bash
+cd apps/host
+pnpm dev
+```
+
+Terminal 2 (Finance MFE):
+```bash
+cd apps/sbn-finance-mfe
+pnpm dev
+```
+
+### Como Funciona o Module Federation
+
+1. **Host App** (`apps/host`):
+   - Roda na porta `9000`
+   - Configurado como **host** no Module Federation
+   - Carrega o remote `sbn_finance_mfe` de `http://localhost:9001`
+   - Gerencia autenticação e roteamento principal
+
+2. **Finance MFE** (`apps/sbn-finance-mfe`):
+   - Roda na porta `9001`
+   - Configurado como **remote** no Module Federation
+   - Expõe o componente `./App` para ser consumido pelo host
+   - Implementa toda a lógica de gestão financeira
+
+### Estrutura de Autenticação
+
+O **host** gerencia a autenticação e armazena os tokens no `localStorage` sob a chave `sbn-auth-session`. O **sbn-finance-mfe** lê esses tokens para fazer requisições autenticadas à API.
+
+## 🏗️ Build
+
+### Build de Produção
+
+```bash
+# Build de todos os apps e packages
+pnpm build
+```
+
+Os builds serão gerados em:
+- `apps/host/dist/`
+- `apps/sbn-finance-mfe/dist/`
+
+### Preview Local do Build
+
+```bash
+# No diretório do app
+cd apps/host
+pnpm preview
+```
+
+## 🧪 Testes
+
+### Executar Testes
+
+```bash
+# Todos os testes
+pnpm test
+
+# Testes de um app específico
+cd apps/host
+pnpm test
+```
+
+O projeto utiliza **Vitest** como framework de testes e **Testing Library** para testes de componentes React.
+
+## 📦 Apps e Packages
+
+### Apps
+
+#### `host`
+Aplicação principal que atua como container dos micro frontends.
+
+**Funcionalidades:**
+- Autenticação (Login/Registro)
+- Gerenciamento de sessão e tokens
+- Roteamento principal
+- Carregamento dinâmico de micro frontends remotos
+- Dashboard principal
+- Integração com módulo financeiro
+
+**Porta**: `9000`
+
+#### `sbn-finance-mfe`
+Micro frontend de gestão financeira.
+
+**Funcionalidades:**
+- Gestão de carteiras (wallets)
+- Gestão de transações (receitas e despesas)
+- Gestão de categorias
+- Visualização de gráficos (receitas vs despesas)
+- Filtros por mês/ano
+- Resumo financeiro (saldo total, receitas, despesas)
+
+**Porta**: `9001`
+
+**Componentes principais:**
+- `BalanceOverview`: Visão geral do saldo
+- `WalletCards`: Cards de carteiras
+- `TransactionList`: Lista de transações
+- `CategoryGrid`: Grid de categorias
+- `IncomeExpenseChart`: Gráfico de receitas vs despesas
+
+### Packages
+
+#### `@repo/ui`
+Biblioteca de componentes UI compartilhados baseada em Radix UI e Shadcn UI.
+
+**Componentes disponíveis:**
+- `Button`, `Card`, `Dialog`, `AlertDialog`
+- `Input`, `Textarea`, `Label`, `Select`
+- `Tabs`, `Switch`, `Badge`, `Code`, `Form`
+
+#### `@repo/eslint-config`
+Configurações compartilhadas do ESLint.
+
+**Configurações:**
+- `base`: Configuração base
+- `next-js`: Para projetos Next.js
+- `react-internal`: Para projetos React internos
+
+#### `@repo/typescript-config`
+Configurações compartilhadas do TypeScript.
+
+**Configurações:**
+- `base.json`: Configuração base
+- `nextjs.json`: Para projetos Next.js
+- `react-library.json`: Para bibliotecas React
+
+## 🔧 Configuração do Module Federation
+
+### Host Configuration (`apps/host/rsbuild.config.ts`)
+
+```typescript
+new ModuleFederationPlugin({
+  name: 'host',
+  remotes: {
+    sbn_finance_mfe: 'sbn_finance_mfe@http://localhost:9001/mf-manifest.json',
+  },
+  shared: {
+    react: { singleton: true, eager: true },
+    'react-dom': { singleton: true, eager: true },
+    'react-router-dom': { singleton: true, eager: true },
+  },
+})
+```
+
+### Remote Configuration (`apps/sbn-finance-mfe/rsbuild.config.ts`)
+
+```typescript
+new ModuleFederationPlugin({
+  name: 'sbn_finance_mfe',
+  exposes: {
+    './App': './src/App.tsx',
+  },
+  shared: {
+    react: { singleton: true, eager: true },
+    'react-dom': { singleton: true, eager: true },
+    'react-router-dom': { singleton: true },
+  },
+})
+```
+
+## 🐳 Docker
+
+Cada app possui um `Dockerfile` para containerização:
+
+```bash
+# Build da imagem
+docker build -t sbn-host ./apps/host
+docker build -t sbn-finance-mfe ./apps/sbn-finance-mfe
+
+# Executar container
+docker run -p 9000:9000 sbn-host
+docker run -p 9001:9001 sbn-finance-mfe
+```
+
+## 📝 Convenções de Código
+
+- **TypeScript**: Todo o código é tipado
+- **ESLint**: Linting configurado em todos os projetos
+- **Prettier**: Formatação automática de código
+- **Conventional Commits**: Padrão de commits recomendado
+
+## 🔗 Links Úteis
+
+### Documentação
+- [Turborepo](https://turborepo.com/docs)
+- [Rsbuild](https://rsbuild.rs)
+- [Module Federation](https://module-federation.io)
+- [React](https://react.dev)
+- [TypeScript](https://www.typescriptlang.org)
+
+### Ferramentas
+- [Turborepo Remote Cache](https://turborepo.com/docs/core-concepts/remote-caching)
+- [Vercel Remote Cache](https://vercel.com/docs/monorepos/remote-caching)
+
+## 🤝 Contribuindo
+
+1. Crie uma branch a partir de `main`
+2. Faça suas alterações
+3. Execute os testes e lint: `pnpm test && pnpm lint`
+4. Faça commit seguindo o padrão Conventional Commits
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto é privado.
+
+---
+
+**Desenvolvido com ❤️ usando Turborepo, React e Module Federation**
