@@ -337,3 +337,22 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+
+// Re-export commonly used recharts components
+export {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'

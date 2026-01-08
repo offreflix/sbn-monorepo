@@ -7,6 +7,7 @@ import { WalletCards } from './components/WalletCards'
 import { TransactionList } from './components/TransactionList'
 import { CategoryGrid } from './components/CategoryGrid'
 import { BalanceOverview } from './components/BalanceOverview'
+import { IncomeExpenseChart } from './components/IncomeExpenseChart'
 import {
   Tabs,
   TabsContent,
@@ -18,7 +19,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  IncomeExpenseChart,
 } from '@repo/ui'
 import { CreditCard, TrendingUp, Calendar, RefreshCcw } from 'lucide-react'
 import { toast, Toaster } from 'sonner'

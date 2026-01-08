@@ -1,33 +1,29 @@
-'use strict'
-
 import { useMemo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from './card'
-import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from './chart'
-
-export interface TransactionItem {
-  type: 'Receita' | 'Despesa'
-  amount: string | number
-}
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from '@repo/ui'
+import type { ChartConfig } from '@repo/ui'
+import type { Transaction } from '../types/finance'
 
 interface IncomeExpenseChartProps {
-  transactions: TransactionItem[]
+  transactions: Transaction[]
   year: number
   month: number
 }
 
-const chartConfig = {
+const chartConfig: ChartConfig = {
   receitas: {
     label: 'Receitas',
     color: 'hsl(var(--chart-1, 142 70% 45%))',
@@ -36,7 +32,7 @@ const chartConfig = {
     label: 'Despesas',
     color: 'hsl(var(--chart-2, 0 84% 60%))',
   },
-} satisfies ChartConfig
+}
 
 export function IncomeExpenseChart({
   transactions,
@@ -71,7 +67,7 @@ export function IncomeExpenseChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full [&>div]:aspect-auto!">
           <BarChart
             data={data}
             accessibilityLayer
