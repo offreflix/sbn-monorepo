@@ -49,8 +49,8 @@ export function IncomeExpenseChart({
       .reduce((acc, t) => acc + parseFloat(String(t.amount)), 0)
 
     return [
-      { name: 'receitas', value: income, fill: 'var(--color-receitas)' },
-      { name: 'despesas', value: expense, fill: 'var(--color-despesas)' },
+      { type: 'receitas', value: income, fill: 'var(--color-receitas)' },
+      { type: 'despesas', value: expense, fill: 'var(--color-despesas)' },
     ]
   }, [transactions])
 
@@ -67,7 +67,10 @@ export function IncomeExpenseChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full [&>div]:aspect-auto!">
+        <ChartContainer
+          config={chartConfig}
+          className="h-[300px] w-full [&>div]:aspect-auto!"
+        >
           <BarChart
             data={data}
             accessibilityLayer
@@ -80,7 +83,7 @@ export function IncomeExpenseChart({
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="name"
+              dataKey="type"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
@@ -103,7 +106,18 @@ export function IncomeExpenseChart({
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  nameKey="type"
+                  formatter={(value) =>
+                    new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(Number(value))
+                  }
+                />
+              }
             />
             <Bar dataKey="value" radius={8} barSize={60} />
           </BarChart>
