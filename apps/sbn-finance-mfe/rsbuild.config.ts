@@ -51,7 +51,6 @@ export default defineConfig({
             'react-router-dom': {
               version: dependencies['react-router-dom'],
               singleton: true,
-              eager: true,
             },
           },
           dts: false,

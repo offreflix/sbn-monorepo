@@ -1,19 +1,23 @@
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
+import { useMemo } from 'react'
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-  type ChartConfig,
 } from '@repo/ui'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts'
 import type { Transaction } from '../types/finance'
-import { useMemo } from 'react'
 
 interface IncomeExpenseChartProps {
   transactions: Transaction[]
@@ -21,109 +25,91 @@ interface IncomeExpenseChartProps {
   month: number
 }
 
-const chartConfig = {
-  informational: {
-    label: 'Financeiro',
-  },
-  Receita: {
-    label: 'Receita',
-    color: '#10b981', // Emerald 500
-  },
-  Despesa: {
-    label: 'Despesa',
-    color: '#ef4444', // Red 500
-  },
-} satisfies ChartConfig
-
 export function IncomeExpenseChart({
   transactions,
   year,
   month,
 }: IncomeExpenseChartProps) {
   const data = useMemo(() => {
-    const daysInMonth = new Date(year, month, 0).getDate()
-    // Create base data for all days
-    const map = new Map<
-      number,
-      { day: number; Receita: number; Despesa: number }
-    >()
+    const income = transactions
+      .filter((t) => t.type === 'Receita')
+      .reduce((acc, t) => acc + parseFloat(t.amount), 0)
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      map.set(i, { day: i, Receita: 0, Despesa: 0 })
-    }
+    const expense = transactions
+      .filter((t) => t.type === 'Despesa')
+      .reduce((acc, t) => acc + parseFloat(t.amount), 0)
 
-    // Accumulate transactions
-    transactions.forEach((t) => {
-      const tDate = new Date(t.date)
-      // Check exact month/year match
-      if (tDate.getMonth() + 1 === month && tDate.getFullYear() === year) {
-        const day = tDate.getDate()
-        const entry = map.get(day)
-        if (entry) {
-          if (t.type === 'Receita') {
-            entry.Receita += Number(t.amount)
-          } else {
-            entry.Despesa += Number(t.amount)
-          }
-        }
-      }
-    })
+    return [
+      { name: 'Receitas', value: income, color: '#10b981' }, // emerald-500
+      { name: 'Despesas', value: expense, color: '#ef4444' }, // red-500
+    ]
+  }, [transactions])
 
-    return Array.from(map.values())
-  }, [transactions, year, month])
+  const monthName = new Date(year, month - 1).toLocaleString('pt-BR', {
+    month: 'long',
+  })
 
   return (
-    <Card className="col-span-4">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Fluxo Financeiro</CardTitle>
+        <CardTitle>Visão Geral</CardTitle>
         <CardDescription>
-          Receitas e Despesas diárias para {month}/{year}
+          Comparativo de receitas e despesas em {monthName} de {year}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[300px] w-full"
-          style={{ minHeight: '300px', width: '100%' }}
-        >
-          <AreaChart
-            data={data}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="day"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              interval="preserveStartEnd"
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
-            <Area
-              dataKey="Despesa"
-              type="natural"
-              fill="var(--color-Despesa)"
-              fillOpacity={0.4}
-              stroke="var(--color-Despesa)"
-              stackId="a"
-            />
-            <Area
-              dataKey="Receita"
-              type="natural"
-              fill="var(--color-Receita)"
-              fillOpacity={0.4}
-              stroke="var(--color-Receita)"
-              stackId="b"
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </AreaChart>
-        </ChartContainer>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'currentColor', fontSize: 12 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'currentColor', fontSize: 12 }}
+                tickFormatter={(value) =>
+                  new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                    notation: 'compact',
+                  }).format(value)
+                }
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                }}
+                formatter={(value: number) =>
+                  new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(value)
+                }
+              />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={60}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )
