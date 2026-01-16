@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Query, Headers, BadRequestException } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -7,10 +7,13 @@ export class DashboardController {
 
   @Get('summary')
   async getSummary(
-    @Headers('user-id') userId: string,
+    @Headers('x-user-id') userId: string,
     @Query('month') month: string,
     @Query('year') year: string,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.dashboardService.getSummary(
       userId,
       parseInt(month),
@@ -20,10 +23,13 @@ export class DashboardController {
 
   @Get('categories')
   async getCategories(
-    @Headers('user-id') userId: string,
+    @Headers('x-user-id') userId: string,
     @Query('month') month: string,
     @Query('year') year: string,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.dashboardService.getCategories(
       userId,
       parseInt(month),

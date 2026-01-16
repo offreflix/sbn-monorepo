@@ -24,6 +24,9 @@ export class TransactionsController {
     @Query('month') month?: number,
     @Query('year') year?: number,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     const now = new Date();
     const currentMonth = month || now.getMonth() + 1;
     const currentYear = year || now.getFullYear();
@@ -54,6 +57,9 @@ export class TransactionsController {
     @Query('month') month?: number,
     @Query('year') year?: number,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.transactionsService.findAll(
       userId,
       month ? Number(month) : undefined,
@@ -63,6 +69,9 @@ export class TransactionsController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.transactionsService.findOne(id, userId);
   }
 
@@ -72,11 +81,17 @@ export class TransactionsController {
     @Body() body: UpdateTransactionDto,
     @Headers('x-user-id') userId: string,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.transactionsService.update(id, userId, body);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.transactionsService.remove(id, userId);
   }
 }

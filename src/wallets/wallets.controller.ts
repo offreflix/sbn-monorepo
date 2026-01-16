@@ -27,11 +27,17 @@ export class WalletsController {
 
   @Get()
   findAll(@Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.walletsService.findAll(userId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.walletsService.findOne(id, userId);
   }
 
@@ -41,11 +47,17 @@ export class WalletsController {
     @Body() body: UpdateWalletDto,
     @Headers('x-user-id') userId: string,
   ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.walletsService.update(id, userId, body);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Headers('x-user-id') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
     return this.walletsService.remove(id, userId);
   }
 }
