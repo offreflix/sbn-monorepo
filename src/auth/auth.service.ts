@@ -37,7 +37,6 @@ export class AuthService {
   async login(user: UserWithoutPassword) {
     const payload = { email: user.email, sub: user.id };
     const refreshToken = uuidv4();
-    // Validate that redis is working or handle error? Standard invocation.
     // Store refresh token with 7 days expiration
     await this.redis.set(
       `refreshToken:${refreshToken}`,
@@ -48,7 +47,7 @@ export class AuthService {
 
     return {
       accessToken: this.jwtService.sign(payload),
-      refreshToken: refreshToken,
+      refreshToken: refreshToken, // Will be sent as cookie, but still returned for internal use
       user: {
         id: user.id,
         email: user.email,
@@ -121,6 +120,15 @@ export class AuthService {
         name: data.name,
       },
     });
+    const { password_hash, ...result } = user;
+    return result;
+  }
+
+  async getCurrentUser(userId: string): Promise<UserWithoutPassword> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
     const { password_hash, ...result } = user;
     return result;
   }

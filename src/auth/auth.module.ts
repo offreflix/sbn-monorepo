@@ -5,10 +5,14 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
   imports: [
     PrismaModule,
+    PassportModule,
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'secretKey'),
@@ -19,6 +23,8 @@ import { JwtModule } from '@nestjs/jwt';
   ],
   providers: [
     AuthService,
+    JwtStrategy,
+    JwtAuthGuard,
     {
       provide: 'REDIS_CLIENT',
       useFactory: (configService: ConfigService) => {
@@ -31,5 +37,6 @@ import { JwtModule } from '@nestjs/jwt';
     },
   ],
   controllers: [AuthController],
+  exports: [JwtAuthGuard],
 })
 export class AuthModule {}
