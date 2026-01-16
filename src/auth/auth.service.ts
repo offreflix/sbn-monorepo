@@ -9,6 +9,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
+import { User } from '@prisma/client';
+import { RegisterDto } from './dto/auth.dto';
+
+export type UserWithoutPassword = Omit<User, 'password_hash'>;
 
 @Injectable()
 export class AuthService {
@@ -18,7 +22,10 @@ export class AuthService {
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(
+    email: string,
+    pass: string,
+  ): Promise<UserWithoutPassword | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && (await bcrypt.compare(pass, user.password_hash))) {
       const { password_hash, ...result } = user;
@@ -27,7 +34,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: UserWithoutPassword) {
     const payload = { email: user.email, sub: user.id };
     const refreshToken = uuidv4();
     // Validate that redis is working or handle error? Standard invocation.
@@ -97,7 +104,7 @@ export class AuthService {
     }
   }
 
-  async register(data: { email: string; password: string; name: string }) {
+  async register(data: RegisterDto): Promise<UserWithoutPassword> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
