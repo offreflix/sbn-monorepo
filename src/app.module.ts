@@ -7,9 +7,18 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { RecurrencesModule } from './recurrences/recurrences.module';
 import { ProjectionsModule } from './projections/projections.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
-  imports: [PrismaModule, WalletsModule, TransactionsModule, CategoriesModule, RecurrencesModule, ProjectionsModule],
+  imports: [
+    PrismaModule,
+    WalletsModule,
+    TransactionsModule,
+    CategoriesModule,
+    RecurrencesModule,
+    ProjectionsModule,
+    DashboardModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

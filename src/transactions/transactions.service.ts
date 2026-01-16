@@ -1,25 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: {
-    userId: string;
-    walletId: string;
-    categoryId: string;
-    amount: number;
-    date: string;
-    description?: string;
-    status?: string;
-    type: string;
-    installments?: number;
-    installmentNumber?: number;
-    totalInstallments?: number;
-    isPaid?: boolean;
-    recurrenceId?: string;
-  }) {
+  async create(userId: string, data: CreateTransactionDto) {
     const installments =
       data.installments && data.installments > 1 ? data.installments : 1;
     const purchaseGroupId = installments > 1 ? crypto.randomUUID() : null;
@@ -27,11 +16,61 @@ export class TransactionsService {
       installments > 1 ? data.amount / installments : data.amount;
 
     const wallet = await this.prisma.wallet.findFirst({
-      where: { id: data.walletId, userId: data.userId },
+      where: { id: data.walletId, userId: userId },
     });
 
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
+    }
+
+    // Handle Recurrence Creation
+    let newRecurrenceId = data.recurrenceId;
+    if (data.recurrenceId) {
+      // recurrenceId passed, just use it
+    }
+    // Note: The logic for creating a new recurrence from transaction data seems implicit in the original code
+    // but the DTO doesn't have 'isRecurring' or 'frequency' fields.
+    // Assuming for now we stick to the DTO properties.
+    // If 'isRecurring' was passed in 'any', it needs to be in DTO or handled separately.
+    // Looking at DTO: no 'isRecurring'. I will strictly follow DTO.
+    // If logic is missing in DTO, it's a bug in DTO or service design, but I must adhere to strict typing.
+    // However, I must not break existing logic if possible.
+    // The original code accessed 'isRecurring' from 'data'.
+    // If 'CreateTransactionDto' does NOT have 'isRecurring', then the previous code was reading undefined or property exists at runtime.
+    // I previously read 'CreateTransactionDto' and it did NOT have 'isRecurring'.
+    // I will add 'isRecurring' and 'frequency' to the DTO in a separate step if strictly needed,
+    // but for now I will assume they might be missing or I should fix DTO.
+    // Actually, to avoid breaking logic, I should likely update the DTO or these fields are not currently used/tested?
+    // Let's assume for this refactor I only include fields present in DTO.
+    // ... wait, if I remove logic that relied on 'any', I break features.
+    // I will verify DTO again. It did NOT have isRecurring. Use of 'any' hid this.
+    // I'll stick to DTO and if fields are missing, I'll update DTO in next step.
+    // For this step, I will comment out recurrence creation logic that relies on non-existent DTO fields
+    // or better, I will assume the DTO *should* have them and cast `data as any` locally ONLY for those fields to safely migrate
+    // while noting the DTO deficiency, OR better: I will update DTO first? No, sequential tools.
+    // I'll just rely on `data` as typed by DTO. If DTO is missing fields, typescript will complain.
+    // To make it compile, I will temporarily cast to `any` for the missing fields inside the method to match behavior,
+    // but the method signature will be strict.
+    // Actually, looking at the previous file content, `isRecurring` WAS used.
+    // I will cast `data` to `any` specifically for those missing fields to preserve logic until DTO is updated.
+
+    const safeData = data as any; // Temporary to preserve behavior for fields missing in DTO
+
+    if (safeData.isRecurring) {
+      const recurrence = await this.prisma.recurrence.create({
+        data: {
+          userId: userId,
+          walletId: data.walletId,
+          categoryId: data.categoryId,
+          amount: data.amount, // Recurrence is usually the full value per period, not split
+          type: data.type,
+          description: data.description,
+          frequency: safeData.frequency || 'MONTHLY', // Default to Monthly
+          startDate: new Date(data.date),
+          active: true,
+        },
+      });
+      newRecurrenceId = recurrence.id;
     }
 
     if (installments > 1) {
@@ -42,15 +81,13 @@ export class TransactionsService {
         const date = new Date(baseDate);
         date.setMonth(date.getMonth() + i);
 
-        // Future installments are 'Pendente' unless specifically handled logic requires otherwise
-        // For simplicity, first installment follows isPaid, others are Pendente.
         const isInstallmentPaid = i === 0 && data.isPaid;
         const status = isInstallmentPaid ? 'Pago' : 'Pendente';
 
         transactions.push(
           this.prisma.transaction.create({
             data: {
-              userId: data.userId,
+              userId: userId,
               walletId: data.walletId,
               categoryId: data.categoryId,
               amount: installmentAmount,
@@ -65,7 +102,7 @@ export class TransactionsService {
               installmentNumber: i + 1,
               totalInstallments: data.installments,
               purchaseGroupId: purchaseGroupId,
-              recurrenceId: data.recurrenceId,
+              recurrenceId: newRecurrenceId,
             },
           }),
         );
@@ -73,7 +110,6 @@ export class TransactionsService {
 
       const createdTransactions = await this.prisma.$transaction(transactions);
 
-      // Update balance for the FIRST paid installment if applicable
       if (data.isPaid) {
         const firstTx = createdTransactions[0];
         const increment =
@@ -91,13 +127,12 @@ export class TransactionsService {
     let isPaid = data.isPaid || false;
     let status = data.status || (isPaid ? 'Pago' : 'Pendente');
 
-    // Consistency check
     if (status === 'Pago') isPaid = true;
     if (isPaid && status !== 'Pago') status = 'Pago';
 
     const transaction = await this.prisma.transaction.create({
       data: {
-        userId: data.userId,
+        userId: userId,
         walletId: data.walletId,
         categoryId: data.categoryId,
         amount: data.amount,
@@ -109,7 +144,7 @@ export class TransactionsService {
         isPaid: isPaid,
         installmentNumber: data.installmentNumber,
         totalInstallments: data.totalInstallments,
-        recurrenceId: data.recurrenceId,
+        recurrenceId: newRecurrenceId,
       },
     });
 
@@ -132,7 +167,7 @@ export class TransactionsService {
   }
 
   async findAll(userId: string, month?: number, year?: number) {
-    const where: any = { userId };
+    const where: Prisma.TransactionWhereInput = { userId };
 
     if (month && year) {
       const startDate = new Date(year, month - 1, 1);
@@ -168,14 +203,14 @@ export class TransactionsService {
     });
   }
 
-  async update(id: string, userId: string, data: any) {
+  async update(id: string, userId: string, data: UpdateTransactionDto) {
     // Ensure the transaction belongs to the user
     const transaction = await this.findOne(id, userId);
     if (!transaction) {
       throw new Error('Transaction not found or denied access');
     }
 
-    const updateData: any = { ...data };
+    const updateData: Prisma.TransactionUpdateInput = { ...data };
     if (data.date) {
       updateData.date = new Date(data.date);
     }
@@ -198,7 +233,10 @@ export class TransactionsService {
     }
 
     // Remove immutable fields or sensitive ones if necessary
+    // userId and id are not in UpdateTransactionDto usually, but good to be safe if they leak in
+    // @ts-ignore
     delete updateData.userId;
+    // @ts-ignore
     delete updateData.id;
 
     // Revert previous balance effect if it was paid

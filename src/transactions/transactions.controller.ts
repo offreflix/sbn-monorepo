@@ -45,7 +45,7 @@ export class TransactionsController {
       // For now, explicit check or rely on logic.
       throw new BadRequestException('x-user-id header is required');
     }
-    return this.transactionsService.create({ ...body, userId });
+    return this.transactionsService.create(userId, body);
   }
 
   @Get()
