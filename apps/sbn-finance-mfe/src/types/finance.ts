@@ -115,6 +115,8 @@ export interface CreateTransactionRequest {
   installmentNumber?: number
   totalInstallments?: number
   installments?: number
+  isRecurring?: boolean
+  frequency?: RecurrenceFrequency
 }
 
 export interface CreateCategoryRequest {
@@ -138,7 +140,26 @@ export interface CreateRecurrenceRequest {
 }
 
 export interface DashboardSummary {
-  totalBalance: number
-  totalIncome: number
-  totalExpenses: number
+  cards: {
+    balance: number
+    currentInvoice: number
+    nextInvoice: number
+    totalInvoices: number
+  }
+  overview: {
+    income: number
+    expense: number
+    balance: number
+  }
+}
+
+export interface DashboardCategory {
+  name: string
+  value: number
+  percentage: number
+}
+
+export interface DashboardCategories {
+  income: DashboardCategory[]
+  expense: DashboardCategory[]
 }

@@ -27,6 +27,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@repo/ui'
 
 interface TransactionListProps {
@@ -48,6 +54,12 @@ export function TransactionList({
   const [transactionToDelete, setTransactionToDelete] =
     useState<Transaction | null>(null)
 
+  // Filters
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [walletFilter, setWalletFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+
   const formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -55,12 +67,25 @@ export function TransactionList({
     }).format(parseFloat(value))
   }
 
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => {
+      const matchesSearch =
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false
+      const matchesCategory =
+        categoryFilter === 'all' || t.categoryId === categoryFilter
+      const matchesWallet =
+        walletFilter === 'all' || t.walletId === walletFilter
+      const matchesType = typeFilter === 'all' || t.type === typeFilter
+      return matchesSearch && matchesCategory && matchesWallet && matchesType
+    })
+  }, [transactions, searchTerm, categoryFilter, walletFilter, typeFilter])
+
   // Group transactions by date
   const groupedTransactions = useMemo(() => {
     const groups: Record<string, Transaction[]> = {}
 
     // Sort by date desc first
-    const sorted = [...transactions].sort(
+    const sorted = [...filteredTransactions].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     )
 
@@ -71,7 +96,7 @@ export function TransactionList({
     })
 
     return groups
-  }, [transactions])
+  }, [filteredTransactions])
 
   const getDateLabel = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -100,18 +125,69 @@ export function TransactionList({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end sticky top-0 backdrop-blur z-10 py-2">
-        <Button
-          onClick={() => {
-            setEditingTransaction(null)
-            setIsCreateModalOpen(true)
-          }}
-          size="sm"
-          className="gap-2 rounded-full"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Transação
-        </Button>
+      {/* Actions & Filters */}
+      <div className="space-y-4 bg-card p-4 rounded-xl border">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+          <div className="relative w-full md:w-64">
+            <Input
+              placeholder="Buscar transações..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button
+            onClick={() => {
+              setEditingTransaction(null)
+              setIsCreateModalOpen(true)
+            }}
+            size="sm"
+            className="gap-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white w-full md:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Transação
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todas as categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todos os tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              <SelectItem value="Receita">Receitas</SelectItem>
+              <SelectItem value="Despesa">Despesas</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={walletFilter} onValueChange={setWalletFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todas as contas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as contas</SelectItem>
+              {wallets.map((wallet) => (
+                <SelectItem key={wallet.id} value={wallet.id}>
+                  {wallet.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-6">

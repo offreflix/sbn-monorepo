@@ -9,6 +9,7 @@ import type {
   CreateCategoryRequest,
   CreateRecurrenceRequest,
   DashboardSummary,
+  DashboardCategories,
 } from '../types/finance'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000'
@@ -258,6 +259,29 @@ export const financeApi = {
       return request<Projection>(`/api/finance/projections${params}`, {
         method: 'GET',
       })
+    },
+  },
+
+  dashboard: {
+    summary: (month?: number, year?: number) => {
+      const params = new URLSearchParams()
+      if (month) params.append('month', month.toString())
+      if (year) params.append('year', year.toString())
+      const queryString = params.toString() ? `?${params.toString()}` : ''
+      return request<DashboardSummary>(
+        `/api/finance/dashboard/summary${queryString}`,
+        { method: 'GET' }
+      )
+    },
+    categories: (month?: number, year?: number) => {
+      const params = new URLSearchParams()
+      if (month) params.append('month', month.toString())
+      if (year) params.append('year', year.toString())
+      const queryString = params.toString() ? `?${params.toString()}` : ''
+      return request<DashboardCategories>(
+        `/api/finance/dashboard/categories${queryString}`,
+        { method: 'GET' }
+      )
     },
   },
 }

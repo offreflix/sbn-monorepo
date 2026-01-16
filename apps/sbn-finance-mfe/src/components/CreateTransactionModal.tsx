@@ -42,6 +42,8 @@ const transactionSchema = z.object({
   isPaid: z.boolean().optional(),
   installmentNumber: z.string().optional(),
   totalInstallments: z.string().optional(),
+  isRecurring: z.boolean().default(false),
+  frequency: z.enum(['MONTHLY', 'WEEKLY']).default('MONTHLY'),
 })
 
 type TransactionFormData = z.infer<typeof transactionSchema>
@@ -75,6 +77,8 @@ export function CreateTransactionModal({
       amount: '',
       walletId: '',
       categoryId: '',
+      isRecurring: false,
+      frequency: 'MONTHLY',
     },
   })
 
@@ -92,6 +96,7 @@ export function CreateTransactionModal({
           isPaid: initialData.isPaid,
           installmentNumber: initialData.installmentNumber?.toString(),
           totalInstallments: initialData.totalInstallments?.toString(),
+          isRecurring: !!initialData.recurrenceId, // Simple inference
         })
       } else {
         form.reset({
@@ -103,6 +108,8 @@ export function CreateTransactionModal({
           amount: '',
           walletId: '',
           categoryId: '',
+          isRecurring: false,
+          frequency: 'MONTHLY',
         })
       }
     }
@@ -114,6 +121,7 @@ export function CreateTransactionModal({
   )
   const hasInstallments =
     form.watch('installmentNumber') && form.watch('totalInstallments')
+  const isRecurring = form.watch('isRecurring')
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
@@ -138,6 +146,8 @@ export function CreateTransactionModal({
           data.installmentNumber === '1' && data.totalInstallments
             ? parseInt(data.totalInstallments)
             : undefined,
+        isRecurring: data.isRecurring,
+        frequency: data.frequency,
       }
 
       if (initialData) {
@@ -161,186 +171,199 @@ export function CreateTransactionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? 'Editar Transação' : 'Criar Nova Transação'}
+          <DialogTitle className="text-xl font-semibold">
+            {initialData
+              ? 'Editar Transação'
+              : 'Criar nova despesa, ou cadastrar em lote'}
           </DialogTitle>
           <DialogDescription>
             {initialData
               ? 'Edite os detalhes da transação.'
-              : 'Registre uma nova receita ou despesa.'}
+              : 'Preencha os dados da nova transação.'}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label>Tipo de Transação</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant={selectedType === 'Receita' ? 'default' : 'outline'}
-                onClick={() => form.setValue('type', 'Receita')}
-                className="w-full"
-              >
-                Receita
-              </Button>
-              <Button
-                type="button"
-                variant={selectedType === 'Despesa' ? 'default' : 'outline'}
-                onClick={() => form.setValue('type', 'Despesa')}
-                className="w-full"
-              >
-                Despesa
-              </Button>
-            </div>
-          </div>
-
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
             <Input
               id="description"
               {...form.register('description')}
-              placeholder="Ex: Almoço no restaurante"
+              placeholder="Compra no varejão"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Valor (R$)</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                {...form.register('amount')}
-              />
+              <Label htmlFor="categoryId">Categoria</Label>
+              <Select
+                value={form.watch('categoryId')}
+                onValueChange={(value) => form.setValue('categoryId', value)}
+                disabled={filteredCategories.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{category.icon || '💰'}</span>
+                        <span>{category.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.categoryId && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.categoryId.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="walletId">Conta bancária</Label>
+              <Select
+                value={form.watch('walletId')}
+                onValueChange={(value) => form.setValue('walletId', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a conta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {wallets.map((wallet) => (
+                    <SelectItem key={wallet.id} value={wallet.id}>
+                      {wallet.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.walletId && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.walletId.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Valor</Label>
+              <div className="relative">
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="pl-8" // Add padding for currency symbol if needed?
+                  {...form.register('amount')}
+                />
+              </div>
               {form.formState.errors.amount && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-red-500">
                   {form.formState.errors.amount.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Input id="date" type="date" {...form.register('date')} />
-              {form.formState.errors.date && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.date.message}
-                </p>
-              )}
+              <Label>Tipo de transação</Label>
+              <Select
+                value={selectedType}
+                onValueChange={(value: 'Receita' | 'Despesa') =>
+                  form.setValue('type', value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Receita">Receita</SelectItem>
+                  <SelectItem value="Despesa">
+                    Despesa (Crédito/Débito)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
+          {/* Installments Logic */}
           <div className="space-y-2">
-            <Label htmlFor="walletId">Carteira</Label>
-            <Select
-              value={form.watch('walletId')}
-              onValueChange={(value) => form.setValue('walletId', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a carteira" />
-              </SelectTrigger>
-              <SelectContent>
-                {wallets.map((wallet) => (
-                  <SelectItem key={wallet.id} value={wallet.id}>
-                    {wallet.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.walletId && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.walletId.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categoryId">Categoria</Label>
-            <Select
-              value={form.watch('categoryId')}
-              onValueChange={(value) => form.setValue('categoryId', value)}
-              disabled={filteredCategories.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{category.icon || '💰'}</span>
-                      <span>{category.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.categoryId && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.categoryId.message}
-              </p>
-            )}
-            {selectedType === 'Despesa' && filteredCategories.length === 0 && (
-              <p className="text-sm text-amber-600 mt-1">
-                Nenhuma categoria de despesa encontrada. Crie uma na aba
-                Categorias.
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="hasInstallments">Parcelar</Label>
-            <Switch
-              id="hasInstallments"
-              checked={!!hasInstallments}
-              onCheckedChange={(checked) => {
-                if (!checked) {
-                  form.setValue('installmentNumber', undefined)
-                  form.setValue('totalInstallments', undefined)
-                } else {
-                  form.setValue('installmentNumber', '1')
-                  form.setValue('totalInstallments', '1')
-                }
-              }}
-            />
-          </div>
-
-          {hasInstallments && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="installmentNumber">Parcela Atual</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="hasInstallments">Parcelar?</Label>
+              <Switch
+                id="hasInstallments"
+                checked={!!hasInstallments}
+                onCheckedChange={(checked) => {
+                  if (!checked) {
+                    form.setValue('installmentNumber', undefined)
+                    form.setValue('totalInstallments', undefined)
+                  } else {
+                    form.setValue('installmentNumber', '1')
+                    form.setValue('totalInstallments', '1')
+                  }
+                }}
+              />
+            </div>
+            {hasInstallments && (
+              <div className="grid grid-cols-2 gap-4 mt-2">
                 <Input
-                  id="installmentNumber"
+                  placeholder="Qtd Parcelas (ex: 12)"
                   type="number"
-                  min="1"
-                  placeholder="1"
-                  {...form.register('installmentNumber')}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="totalInstallments">Total de Parcelas</Label>
-                <Input
-                  id="totalInstallments"
-                  type="number"
-                  min="1"
-                  placeholder="12"
                   {...form.register('totalInstallments')}
                 />
+                <div className="flex items-center text-sm text-muted-foreground">
+                  {form.watch('amount') && form.watch('totalInstallments')
+                    ? `${form.watch('totalInstallments')}x de R$ ${(parseFloat(form.watch('amount')) / parseInt(form.watch('totalInstallments') || '1')).toFixed(2)}`
+                    : null}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isPaid">Já foi pago?</Label>
-            <Switch
-              id="isPaid"
-              checked={form.watch('isPaid') || false}
-              onCheckedChange={(checked) => form.setValue('isPaid', checked)}
-            />
+          <div className="p-4 border rounded-lg bg-muted/50 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="isRecurring" className="text-base">
+                  É recorrente?
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Selecione caso sua despesa for recorrente
+                </p>
+              </div>
+              <Switch
+                id="isRecurring"
+                checked={isRecurring}
+                onCheckedChange={(checked) =>
+                  form.setValue('isRecurring', checked)
+                }
+              />
+            </div>
+            {isRecurring && (
+              <div className="pt-2">
+                <Label className="mb-2 block">Frequência</Label>
+                <Select
+                  value={form.watch('frequency')}
+                  onValueChange={(val: any) => form.setValue('frequency', val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MONTHLY">Mensal</SelectItem>
+                    <SelectItem value="WEEKLY">Semanal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="date">Data da transação</Label>
+            <Input id="date" type="date" {...form.register('date')} />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
@@ -352,12 +375,12 @@ export function CreateTransactionModal({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting
-                ? 'Salvando...'
-                : initialData
-                  ? 'Salvar'
-                  : 'Criar Transação'}
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {submitting ? 'Salvando...' : initialData ? 'Salvar' : 'Criar'}
             </Button>
           </div>
         </form>
