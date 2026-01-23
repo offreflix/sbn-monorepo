@@ -103,3 +103,24 @@ model Recurrence {
 
   @@map("recurrences")
 }
+
+model WishlistItem {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  name        String
+  description String?
+  price       Decimal?  @db.Decimal(19, 4)
+  currency    String    @default("BRL")
+  url         String?   // Link para o produto
+  imageUrl    String?   @map("image_url")
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status      String    @default("WISHED") // WISHED, PURCHASED, REMOVED
+  tags        String[]
+  notes       String?
+  purchasedAt DateTime? @map("purchased_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("wishlist_items")
+}

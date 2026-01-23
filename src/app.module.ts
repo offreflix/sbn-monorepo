@@ -8,6 +8,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { RecurrencesModule } from './recurrences/recurrences.module';
 import { ProjectionsModule } from './projections/projections.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     RecurrencesModule,
     ProjectionsModule,
     DashboardModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],
