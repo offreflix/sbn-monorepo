@@ -9,6 +9,7 @@ import {
   X,
   Home,
   DollarSign,
+  Heart,
   LogOut,
   Sun,
   Moon,
@@ -110,6 +111,15 @@ export function Header({ title = 'SBN Shell', subtitle }: HeaderProps) {
             >
               <DollarSign className="h-4 w-4" />
               <span className="sm:inline">Financeiro</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/wishlist')}
+              className="gap-2"
+            >
+              <Heart className="h-4 w-4" />
+              <span className="sm:inline">Lista de Desejos</span>
             </Button>
           </nav>
 
@@ -266,6 +276,18 @@ export function Header({ title = 'SBN Shell', subtitle }: HeaderProps) {
               >
                 <DollarSign className="h-4 w-4" />
                 Financeiro
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigate('/wishlist')
+                  setMobileMenuOpen(false)
+                }}
+                className="justify-start gap-2"
+              >
+                <Heart className="h-4 w-4" />
+                Lista de Desejos
               </Button>
             </nav>
 

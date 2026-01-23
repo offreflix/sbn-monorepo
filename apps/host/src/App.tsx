@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
 import { DashboardPage } from './pages/Dashboard'
 import { FinanceRemotePage } from './pages/FinanceRemote'
+import { WishlistPage } from './pages/Wishlist'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 
@@ -48,6 +49,14 @@ function App() {
             element={
               <Protected>
                 <FinanceRemotePage />
+              </Protected>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <Protected>
+                <WishlistPage />
               </Protected>
             }
           />
