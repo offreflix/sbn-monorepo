@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Wallet, Recurrence, Transaction } from '@prisma/client';
+import { Wallet, Recurrence, Transaction } from '@prisma/client-finance';
 
 @Injectable()
 export class ProjectionsService {

@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from '@prisma/client';
+import { User } from '@prisma/client-auth';
 import { RegisterDto } from './dto/auth.dto';
 
 export type UserWithoutPassword = Omit<User, 'password_hash'>;
