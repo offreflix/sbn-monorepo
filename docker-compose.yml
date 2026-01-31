@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Databases
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sbn_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sbn-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - sbn-network
+
+  # Backend Services
+  sbn-auth:
+    build:
+      context: ../sbn-auth
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+      JWT_SECRET: your_jwt_secret_key
+    depends_on:
+      - postgres
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  sbn-finance:
+    build:
+      context: ../sbn-finance
+      dockerfile: Dockerfile
+    ports:
+      - '3002:3002'
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+    depends_on:
+      - postgres
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  sbn-orchestrator:
+    build:
+      context: ../sbn-orchestrator
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      AUTH_SERVICE_URL: http://sbn-auth:3001
+      FINANCE_SERVICE_URL: http://sbn-finance:3002
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - sbn-auth
+      - sbn-finance
+      - redis
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  # Frontend Services
+  sbn-shell-mfe:
+    build:
+      context: ../sbn-mfe-repo
+      dockerfile: apps/host/Dockerfile
+    ports:
+      - '3005:80'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
+  sbn-finance-mfe:
+    build:
+      context: ../sbn-mfe-repo
+      dockerfile: apps/sbn-finance-mfe/Dockerfile
+    ports:
+      - '3006:80'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+networks:
+  sbn-network:
+    driver: bridge
