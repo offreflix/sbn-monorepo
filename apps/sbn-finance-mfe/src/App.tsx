@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import './index.css'
 import { financeApi } from './api/finance'
 import type {
@@ -42,11 +41,8 @@ const App = () => {
       expense: [],
     })
 
-  const [searchParams, setSearchParams] = useSearchParams()
-  const selectedMonth =
-    Number(searchParams.get('month')) || new Date().getMonth() + 1
-  const selectedYear =
-    Number(searchParams.get('year')) || new Date().getFullYear()
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const loadData = useCallback(async () => {
     try {
@@ -119,12 +115,7 @@ const App = () => {
             <div className="flex items-center gap-2">
               <Select
                 value={selectedMonth.toString()}
-                onValueChange={(value) =>
-                  setSearchParams({
-                    month: value,
-                    year: selectedYear.toString(),
-                  })
-                }
+                onValueChange={(value) => setSelectedMonth(Number(value))}
               >
                 <SelectTrigger className="w-[120px] h-8 text-xs">
                   <SelectValue placeholder="Mês" />
@@ -146,12 +137,7 @@ const App = () => {
 
               <Select
                 value={selectedYear.toString()}
-                onValueChange={(value) =>
-                  setSearchParams({
-                    month: selectedMonth.toString(),
-                    year: value,
-                  })
-                }
+                onValueChange={(value) => setSelectedYear(Number(value))}
               >
                 <SelectTrigger className="w-[80px] h-8 text-xs">
                   <SelectValue placeholder="Ano" />
