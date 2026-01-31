@@ -27,7 +27,7 @@ services:
   # Backend Services
   sbn-auth:
     build:
-      context: ../sbn-auth
+      context: ./apps/auth
       dockerfile: Dockerfile
     ports:
       - '3001:3001'
@@ -44,7 +44,7 @@ services:
 
   sbn-finance:
     build:
-      context: ../sbn-finance
+      context: ./apps/finance
       dockerfile: Dockerfile
     ports:
       - '3002:3002'
@@ -60,7 +60,7 @@ services:
 
   sbn-orchestrator:
     build:
-      context: ../sbn-orchestrator
+      context: ./apps/orchestrator
       dockerfile: Dockerfile
     ports:
       - '3000:3000'
@@ -80,14 +80,14 @@ services:
       - all
 
   # Frontend Services
-  sbn-shell-mfe:
+  sbn-host:
     build:
-      context: ../sbn-mfe-repo
+      context: .
       dockerfile: apps/host/Dockerfile
     ports:
-      - '3005:80'
+      - '9000:80'
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      VITE_API_BASE: http://localhost:3000
     networks:
       - sbn-network
     profiles:
@@ -96,12 +96,12 @@ services:
 
   sbn-finance-mfe:
     build:
-      context: ../sbn-mfe-repo
+      context: .
       dockerfile: apps/sbn-finance-mfe/Dockerfile
     ports:
-      - '3006:80'
+      - '9001:80'
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      VITE_API_BASE: http://localhost:3000
     networks:
       - sbn-network
     profiles:
