@@ -1,12 +1,24 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["VITE_API_BASE"],
+  "globalEnv": [
+    "VITE_API_BASE",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "AUTH_SERVICE_URL",
+    "FINANCE_SERVICE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -14,9 +26,18 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
-    "dev": {
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"]
+    },
+    "prisma:generate": {
       "cache": false,
-      "persistent": true
+      "outputs": ["node_modules/.prisma/**"]
+    },
+    "prisma:migrate": {
+      "cache": false
     }
   }
 }
