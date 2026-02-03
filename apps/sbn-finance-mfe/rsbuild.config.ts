@@ -20,6 +20,8 @@ export default defineConfig({
   dev: {
     assetPrefix: 'http://localhost:9001',
     hmr: true,
+    liveReload: true,
+    writeToDisk: true,
   },
   tools: {
     rspack: {
@@ -33,11 +35,10 @@ export default defineConfig({
           '**/dist/**',
           '**/.turbo/**',
           '**/.rsbuild/**',
-          '**/mf-manifest.json',
           '**/*.log',
         ],
-        aggregateTimeout: 300,
-        poll: false,
+        aggregateTimeout: 100,
+        poll: 1000,
       },
       plugins: [
         new ModuleFederationPlugin({

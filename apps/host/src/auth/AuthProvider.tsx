@@ -121,7 +121,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Try to invalidate refresh token on backend
+    const refreshToken = session.tokens?.refreshToken
+    if (refreshToken) {
+      try {
+        await authApi.logout(refreshToken)
+      } catch (error) {
+        console.warn('[Auth] Failed to invalidate refresh token:', error)
+      }
+    }
+
     const nextSession: SessionState = { user: null, tokens: null }
     setSession(nextSession)
     persistSession(nextSession)

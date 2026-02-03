@@ -102,16 +102,11 @@ async function request<T>(path: string, init: RequestInit) {
         })
       )
     } catch (error) {
-      // Only force logout if refresh failed fatally or wasn't recoverable
-      if (error instanceof Error && error.message.includes('Refresh failed')) {
-        clearSession()
-      }
-      // If unexpected error, also redirect but careful not to loop
-      if (!getAccessToken()) {
-        clearSession()
-        window.location.href = '/login'
-      }
-      throw error
+      // Refresh failed - clear session and redirect to login
+      console.error('[Finance API] Token refresh failed:', error)
+      clearSession()
+      window.location.href = '/login'
+      throw new Error('Sessão expirada. Redirecionando para login...')
     }
   }
 

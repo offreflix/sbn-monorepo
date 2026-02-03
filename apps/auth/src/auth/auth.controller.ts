@@ -8,9 +8,8 @@ import {
   UnauthorizedException,
   UseGuards,
   Req,
-  Res,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import {
   LoginDto,
@@ -20,7 +19,6 @@ import {
 } from './dto/auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { AuthenticatedUser } from './auth.types';
-import { Cookies } from './cookies.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: AuthenticatedUser;
@@ -32,10 +30,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
@@ -45,19 +40,10 @@ export class AuthController {
     }
     const result = await this.authService.login(user);
 
-    // Set refreshToken as HttpOnly cookie
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: isProduction, // Only send over HTTPS in production
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days in milliseconds
-      path: '/',
-    });
-
-    // Return only accessToken and user (not refreshToken)
+    // Return all tokens in body (needed for cross-origin with proxy)
     return {
       accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
       user: result.user,
     };
   }
@@ -69,49 +55,26 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(
-    @Cookies('refreshToken') refreshToken: string,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    if (!refreshToken) {
+  async refresh(@Body() body: RefreshTokenDto) {
+    if (!body.refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
     }
 
-    const result = await this.authService.refresh(refreshToken);
+    const result = await this.authService.refresh(body.refreshToken);
 
-    // Set new refreshToken as HttpOnly cookie (rotation)
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
-      path: '/',
-    });
-
-    // Return only accessToken
+    // Return all tokens in body (needed for cross-origin with proxy)
     return {
       accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Cookies('refreshToken') refreshToken: string,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    if (refreshToken) {
-      await this.authService.logout(refreshToken);
+  async logout(@Body() body: { refreshToken?: string }) {
+    if (body.refreshToken) {
+      await this.authService.logout(body.refreshToken);
     }
-
-    // Clear refreshToken cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-    });
 
     return { success: true };
   }

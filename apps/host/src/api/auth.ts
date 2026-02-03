@@ -49,4 +49,9 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }),
+  logout: (refreshToken?: string) =>
+    request<{ success: boolean }>('/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    }),
 }
