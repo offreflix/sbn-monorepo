@@ -1,19 +1,21 @@
 generator client {
-  provider      = "prisma-client-js"
-  output        = "../../../node_modules/@prisma/client-finance"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/client-finance"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["finance"]
 }
 
 model Wallet {
   id                String    @id @default(uuid())
   userId            String    @map("user_id")
   name              String
-  type              String // Enum handled as string or PG Enum, using string for simplicity initially
+  type              String
   balance           Decimal   @default(0.0000) @db.Decimal(19, 4)
   currency          String    @default("BRL")
   isActive          Boolean   @default(true) @map("is_active")
@@ -24,18 +26,18 @@ model Wallet {
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
 
-  // user relation removed
   transactions Transaction[]
   recurrences  Recurrence[]
 
   @@map("wallets")
+  @@schema("finance")
 }
 
 model Category {
   id        String    @id @default(uuid())
   userId    String?   @map("user_id")
   name      String
-  type      String // Enum: Receita, Despesa
+  type      String
   icon      String?
   color     String?
   isDefault Boolean   @default(false) @map("is_default")
@@ -43,11 +45,11 @@ model Category {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  // user relation removed
   transactions Transaction[]
   recurrences  Recurrence[]
 
   @@map("categories")
+  @@schema("finance")
 }
 
 model Transaction {
@@ -59,8 +61,8 @@ model Transaction {
   currency           String    @default("BRL")
   date               DateTime
   description        String?
-  status             String // Enum: Pendente, Pago, Cancelado
-  type               String // Enum: Receita, Despesa
+  status             String
+  type               String
   tags               String[]
   isPaid             Boolean   @default(false) @map("is_paid")
   installmentNumber  Int?      @map("installment_number")
@@ -71,12 +73,12 @@ model Transaction {
   updatedAt          DateTime  @updatedAt @map("updated_at")
   deletedAt          DateTime? @map("deleted_at")
 
-  // user relation removed
   wallet     Wallet      @relation(fields: [walletId], references: [id])
   category   Category    @relation(fields: [categoryId], references: [id])
   recurrence Recurrence? @relation(fields: [recurrenceId], references: [id])
 
   @@map("transactions")
+  @@schema("finance")
 }
 
 model Recurrence {
@@ -87,8 +89,8 @@ model Recurrence {
   amount        Decimal   @db.Decimal(19, 4)
   currency      String    @default("BRL")
   description   String?
-  type          String // Enum: Receita, Despesa
-  frequency     String // Enum: MONTHLY, WEEKLY
+  type          String
+  frequency     String
   startDate     DateTime  @map("start_date")
   endDate       DateTime? @map("end_date")
   lastGenerated DateTime? @map("last_generated")
@@ -97,12 +99,12 @@ model Recurrence {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at")
 
-  // user relation removed
   wallet       Wallet        @relation(fields: [walletId], references: [id])
   category     Category      @relation(fields: [categoryId], references: [id])
   transactions Transaction[]
 
   @@map("recurrences")
+  @@schema("finance")
 }
 
 model WishlistItem {
@@ -112,10 +114,10 @@ model WishlistItem {
   description String?
   price       Decimal?  @db.Decimal(19, 4)
   currency    String    @default("BRL")
-  url         String?   // Link para o produto
+  url         String?
   imageUrl    String?   @map("image_url")
-  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
-  status      String    @default("WISHED") // WISHED, PURCHASED, REMOVED
+  priority    String    @default("MEDIUM")
+  status      String    @default("WISHED")
   tags        String[]
   notes       String?
   purchasedAt DateTime? @map("purchased_at")
@@ -124,4 +126,5 @@ model WishlistItem {
   deletedAt   DateTime? @map("deleted_at")
 
   @@map("wishlist_items")
+  @@schema("finance")
 }

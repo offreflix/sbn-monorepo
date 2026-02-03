@@ -1,12 +1,14 @@
 generator client {
-  provider      = "prisma-client-js"
-  output        = "../../../node_modules/@prisma/client-auth"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/client-auth"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["auth"]
 }
 
 model User {
@@ -19,4 +21,5 @@ model User {
   deleted_at    DateTime?
 
   @@map("users")
+  @@schema("auth")
 }
