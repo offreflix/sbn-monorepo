@@ -14,16 +14,24 @@ export class DashboardService {
     const endDate = new Date(currentYear, currentMonth, 0);
     endDate.setHours(23, 59, 59, 999);
 
-    // 1. Wallets Balance (Cash)
-    const wallets = await this.prisma.wallet.findMany({
-      where: { userId, type: { not: 'CREDIT_CARD' } },
+    // 1. Wallets Balance (Cash) - excludes credit cards
+    // Types can be: "Conta Corrente", "Poupança", "Cartão de Crédito", "Investimento", "Dinheiro", "Outro"
+    const allWallets = await this.prisma.wallet.findMany({
+      where: { userId, deletedAt: null },
     });
+
+    // Credit card types (case-insensitive check)
+    const isCreditCard = (type: string) =>
+      type.toLowerCase().includes('crédito') ||
+      type.toLowerCase().includes('credito') ||
+      type.toLowerCase() === 'credit_card' ||
+      type.toLowerCase() === 'credit card';
+
+    const wallets = allWallets.filter((w) => !isCreditCard(w.type));
     const totalBalance = wallets.reduce((acc, w) => acc + Number(w.balance), 0);
 
     // 2. Credit Card Invoices
-    const creditCards = await this.prisma.wallet.findMany({
-      where: { userId, type: 'CREDIT_CARD' },
-    });
+    const creditCards = allWallets.filter((w) => isCreditCard(w.type));
 
     let currentInvoice = 0;
     let nextInvoice = 0;

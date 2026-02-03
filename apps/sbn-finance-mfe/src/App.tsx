@@ -10,6 +10,7 @@ import type {
 } from './types/finance'
 import { TransactionList } from './components/TransactionList'
 import { Dashboard } from './components/Dashboard'
+import { CategoryGrid } from './components/CategoryGrid'
 import {
   Select,
   SelectContent,
@@ -18,10 +19,10 @@ import {
   SelectValue,
   Button,
 } from '@repo/ui'
-import { LayoutDashboard, RefreshCcw, Receipt } from 'lucide-react'
+import { LayoutDashboard, RefreshCcw, Receipt, Tags } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
-type View = 'dashboard' | 'transactions' | 'recurrences'
+type View = 'dashboard' | 'transactions' | 'categories'
 
 const App = () => {
   const [view, setView] = useState<View>('dashboard')
@@ -109,6 +110,15 @@ const App = () => {
                   <Receipt className="h-4 w-4" />
                   Transações
                 </Button>
+                <Button
+                  variant={view === 'categories' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setView('categories')}
+                  className="gap-2"
+                >
+                  <Tags className="h-4 w-4" />
+                  Categorias
+                </Button>
               </div>
             </div>
 
@@ -174,6 +184,8 @@ const App = () => {
                 summary={dashboardSummary}
                 categories={dashboardCategories}
                 wallets={wallets}
+                allCategories={categories}
+                transactions={transactions}
                 loading={loading}
                 onRefresh={handleTransactionSuccess}
               />
@@ -186,6 +198,21 @@ const App = () => {
                 categories={categories}
                 onRefresh={handleTransactionSuccess}
               />
+            )}
+
+            {view === 'categories' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight">Categorias</h2>
+                  <p className="text-muted-foreground">
+                    Gerencie suas categorias de receitas e despesas
+                  </p>
+                </div>
+                <CategoryGrid
+                  categories={categories}
+                  onRefresh={handleTransactionSuccess}
+                />
+              </div>
             )}
           </div>
         </main>

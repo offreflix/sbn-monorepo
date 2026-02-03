@@ -36,10 +36,14 @@ async function handle<T>(res: Response): Promise<T> {
   const data = isJson ? await res.json() : null
 
   if (!res.ok) {
-    const message = data?.message || data?.error || res.statusText
-    throw new Error(
-      typeof message === 'string' ? message : 'Erro ao comunicar com o servidor'
-    )
+    const rawMessage = data?.message || data?.error || res.statusText
+    // Handle array of messages (NestJS validation errors)
+    const message = Array.isArray(rawMessage)
+      ? rawMessage.join(', ')
+      : typeof rawMessage === 'string'
+        ? rawMessage
+        : 'Erro ao comunicar com o servidor'
+    throw new Error(message)
   }
 
   return data as T

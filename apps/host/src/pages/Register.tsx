@@ -59,8 +59,8 @@ export const RegisterPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#e2e8f0,_#f8fafc)] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md glass-card">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>

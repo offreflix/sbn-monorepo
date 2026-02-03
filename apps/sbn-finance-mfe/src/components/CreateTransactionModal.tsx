@@ -129,11 +129,11 @@ export function CreateTransactionModal({
       const payload: CreateTransactionRequest = {
         walletId: data.walletId,
         categoryId: data.categoryId,
-        amount: data.amount,
+        amount: parseFloat(data.amount).toString(), // Ensure valid number format
         date: new Date(data.date).toISOString(),
         description: data.description,
         type: data.type,
-        status: data.status || 'Pendente',
+        status: data.isPaid ? 'Pago' : (data.status || 'Pendente'),
         isPaid: data.isPaid || false,
         currency: 'BRL',
         installmentNumber: data.installmentNumber
@@ -366,6 +366,28 @@ export function CreateTransactionModal({
             <Input id="date" type="date" {...form.register('date')} />
           </div>
 
+          {/* Payment Status */}
+          <div className="p-4 border rounded-lg bg-muted/50">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="isPaid" className="text-base">
+                  Já foi paga?
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Marque se a transação já foi efetivada na conta
+                </p>
+              </div>
+              <Switch
+                id="isPaid"
+                checked={form.watch('isPaid') || false}
+                onCheckedChange={(checked) => {
+                  form.setValue('isPaid', checked)
+                  form.setValue('status', checked ? 'Pago' : 'Pendente')
+                }}
+              />
+            </div>
+          </div>
+
           <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
@@ -375,11 +397,7 @@ export function CreateTransactionModal({
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
-            >
+            <Button type="submit" disabled={submitting}>
               {submitting ? 'Salvando...' : initialData ? 'Salvar' : 'Criar'}
             </Button>
           </div>

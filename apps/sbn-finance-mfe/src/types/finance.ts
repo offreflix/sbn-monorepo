@@ -98,7 +98,7 @@ export interface CreateWalletRequest {
   currency?: string
   invoiceClosingDay?: number
   invoiceDueDay?: number
-  limit?: string
+  limit?: number
 }
 
 export interface CreateTransactionRequest {

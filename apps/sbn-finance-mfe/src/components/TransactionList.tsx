@@ -126,7 +126,7 @@ export function TransactionList({
   return (
     <div className="space-y-4">
       {/* Actions & Filters */}
-      <div className="space-y-4 bg-card p-4 rounded-xl border">
+      <div className="space-y-4 glass-dark p-4 rounded-xl">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
           <div className="relative w-full md:w-64">
             <Input
@@ -141,7 +141,7 @@ export function TransactionList({
               setIsCreateModalOpen(true)
             }}
             size="sm"
-            className="gap-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white w-full md:w-auto"
+            className="gap-2"
           >
             <Plus className="h-4 w-4" />
             Nova Transação

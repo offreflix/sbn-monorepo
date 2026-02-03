@@ -68,7 +68,7 @@ export function CreateWalletModal({
         invoiceDueDay: data.invoiceDueDay
           ? parseInt(data.invoiceDueDay)
           : undefined,
-        limit: data.limit || undefined,
+        limit: data.limit ? parseFloat(data.limit) : undefined,
       }
 
       await financeApi.wallets.create(payload)

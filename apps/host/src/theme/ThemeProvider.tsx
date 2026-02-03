@@ -14,12 +14,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme') as Theme | null
-      return stored || 'system'
+      return stored || 'dark'
     }
-    return 'system'
+    return 'dark'
   })
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark')
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const updateTheme = () => {
       root.classList.remove('light', 'dark')
 
-      let resolved: 'light' | 'dark' = 'light'
+      let resolved: 'light' | 'dark' = 'dark'
 
       if (theme === 'system') {
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')

@@ -6,6 +6,14 @@ import { dependencies } from './package.json'
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [pluginReact()],
+  html: {
+    tags: [
+      { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+      { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
+      { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' } },
+    ],
+    title: 'SBN - Personal Finance',
+  },
   server: {
     port: 9000,
   },
