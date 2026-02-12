@@ -24,7 +24,7 @@ export class ProxyController {
   ) {
     const authUrl = this.configService.get<string>(
       'AUTH_SERVICE_URL',
-      'http://localhost:3001',
+      'http://localhost:56081',
     );
     const url = `${authUrl}${req.originalUrl.replace('/api', '')}`;
     console.log(`[Proxy] Forwarding auth request to: ${url}`);
@@ -45,7 +45,7 @@ export class ProxyController {
   ) {
     const financeUrl = this.configService.get<string>(
       'FINANCE_SERVICE_URL',
-      'http://localhost:3002',
+      'http://localhost:56082',
     );
     const url = `${financeUrl}${req.originalUrl.replace('/api/finance', '')}`;
     // Inject User ID into headers

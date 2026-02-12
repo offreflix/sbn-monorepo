@@ -30,7 +30,7 @@ services:
       context: ./apps/auth
       dockerfile: Dockerfile
     ports:
-      - '3001:3001'
+      - '56081:56081'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
       JWT_SECRET: your_jwt_secret_key
@@ -47,7 +47,7 @@ services:
       context: ./apps/finance
       dockerfile: Dockerfile
     ports:
-      - '3002:3002'
+      - '56082:56082'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
     depends_on:
@@ -63,10 +63,10 @@ services:
       context: ./apps/orchestrator
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '56080:56080'
     environment:
-      AUTH_SERVICE_URL: http://sbn-auth:3001
-      FINANCE_SERVICE_URL: http://sbn-finance:3002
+      AUTH_SERVICE_URL: http://sbn-auth:56081
+      FINANCE_SERVICE_URL: http://sbn-finance:56082
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
@@ -87,7 +87,7 @@ services:
     ports:
       - '9000:80'
     environment:
-      VITE_API_BASE: http://localhost:3000
+      VITE_API_BASE: http://localhost:56080
     networks:
       - sbn-network
     profiles:
@@ -101,7 +101,7 @@ services:
     ports:
       - '9001:80'
     environment:
-      VITE_API_BASE: http://localhost:3000
+      VITE_API_BASE: http://localhost:56080
     networks:
       - sbn-network
     profiles:

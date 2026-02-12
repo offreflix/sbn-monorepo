@@ -41,9 +41,9 @@ pnpm dev:frontend   # Frontend only
 
 - **Frontend (Host)**: http://localhost:9000
 - **Finance MFE**: http://localhost:9001
-- **Orchestrator**: http://localhost:3000
-- **Auth Service**: http://localhost:3001
-- **Finance Service**: http://localhost:3002
+- **Orchestrator**: http://localhost:56080
+- **Auth Service**: http://localhost:56081
+- **Finance Service**: http://localhost:56082
 
 ## Migration History
 

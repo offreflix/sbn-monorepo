@@ -12,7 +12,7 @@ import type {
   DashboardCategories,
 } from "../types/finance";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:56080";
 
 // Helper para obter access token do localStorage (compartilhado com host)
 // O host salva em 'sbn-auth-session' como JSON: { user, tokens: { accessToken, refreshToken } }
