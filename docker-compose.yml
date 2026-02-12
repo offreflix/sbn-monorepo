@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Databases
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sbn_db
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sbn-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - sbn-network
+
+  # Backend Services
+  sbn-auth:
+    build:
+      context: ./apps/auth
+      dockerfile: Dockerfile
+    ports:
+      - '56081:56081'
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+      JWT_SECRET: your_jwt_secret_key
+    depends_on:
+      - postgres
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  sbn-finance:
+    build:
+      context: ./apps/finance
+      dockerfile: Dockerfile
+    ports:
+      - '56082:56082'
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+    depends_on:
+      - postgres
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  sbn-orchestrator:
+    build:
+      context: ./apps/orchestrator
+      dockerfile: Dockerfile
+    ports:
+      - '56080:56080'
+    environment:
+      AUTH_SERVICE_URL: http://sbn-auth:56081
+      FINANCE_SERVICE_URL: http://sbn-finance:56082
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - sbn-auth
+      - sbn-finance
+      - redis
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
+  # Frontend Services
+  sbn-host:
+    build:
+      context: .
+      dockerfile: apps/host/Dockerfile
+    ports:
+      - '9000:80'
+    environment:
+      VITE_API_BASE: http://localhost:56080
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
+  sbn-finance-mfe:
+    build:
+      context: .
+      dockerfile: apps/sbn-finance-mfe/Dockerfile
+    ports:
+      - '9001:80'
+    environment:
+      VITE_API_BASE: http://localhost:56080
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+networks:
+  sbn-network:
+    driver: bridge

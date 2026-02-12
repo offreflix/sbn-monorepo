@@ -10,7 +10,7 @@ pnpm install
 
 ## Get started
 
-Start the dev server, and the app will be available at [http://localhost:3000](http://localhost:3000).
+Start the dev server, and the app will be available at [http://localhost:9000](http://localhost:9000).
 
 ```bash
 pnpm run dev

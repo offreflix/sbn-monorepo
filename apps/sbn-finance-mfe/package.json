@@ -1,0 +1,23 @@
+{
+  "name": "sbn-finance-mfe",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev": "rsbuild dev --open",
+    "preview": "rsbuild preview",
+    "test": "vitest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-select": "^2.1.2",
+    "@repo/ui": "workspace:*",
+    "date-fns": "^4.1.0",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1"
+  }
+}

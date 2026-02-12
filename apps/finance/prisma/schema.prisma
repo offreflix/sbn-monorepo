@@ -1,0 +1,130 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/@prisma/client-finance"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["finance"]
+}
+
+model Wallet {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  name              String
+  type              String
+  balance           Decimal   @default(0.0000) @db.Decimal(19, 4)
+  currency          String    @default("BRL")
+  isActive          Boolean   @default(true) @map("is_active")
+  invoiceClosingDay Int?      @map("invoice_closing_day")
+  invoiceDueDay     Int?      @map("invoice_due_day")
+  limit             Decimal?  @db.Decimal(19, 4)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+
+  transactions Transaction[]
+  recurrences  Recurrence[]
+
+  @@map("wallets")
+  @@schema("finance")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  userId    String?   @map("user_id")
+  name      String
+  type      String
+  icon      String?
+  color     String?
+  isDefault Boolean   @default(false) @map("is_default")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  transactions Transaction[]
+  recurrences  Recurrence[]
+
+  @@map("categories")
+  @@schema("finance")
+}
+
+model Transaction {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  walletId           String    @map("wallet_id")
+  categoryId         String    @map("category_id")
+  amount             Decimal   @db.Decimal(19, 4)
+  currency           String    @default("BRL")
+  date               DateTime
+  description        String?
+  status             String
+  type               String
+  tags               String[]
+  isPaid             Boolean   @default(false) @map("is_paid")
+  installmentNumber  Int?      @map("installment_number")
+  totalInstallments  Int?      @map("total_installments")
+  purchaseGroupId    String?   @map("purchase_group_id")
+  recurrenceId       String?   @map("recurrence_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
+
+  wallet     Wallet      @relation(fields: [walletId], references: [id])
+  category   Category    @relation(fields: [categoryId], references: [id])
+  recurrence Recurrence? @relation(fields: [recurrenceId], references: [id])
+
+  @@map("transactions")
+  @@schema("finance")
+}
+
+model Recurrence {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  walletId      String    @map("wallet_id")
+  categoryId    String    @map("category_id")
+  amount        Decimal   @db.Decimal(19, 4)
+  currency      String    @default("BRL")
+  description   String?
+  type          String
+  frequency     String
+  startDate     DateTime  @map("start_date")
+  endDate       DateTime? @map("end_date")
+  lastGenerated DateTime? @map("last_generated")
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  wallet       Wallet        @relation(fields: [walletId], references: [id])
+  category     Category      @relation(fields: [categoryId], references: [id])
+  transactions Transaction[]
+
+  @@map("recurrences")
+  @@schema("finance")
+}
+
+model WishlistItem {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  name        String
+  description String?
+  price       Decimal?  @db.Decimal(19, 4)
+  currency    String    @default("BRL")
+  url         String?
+  imageUrl    String?   @map("image_url")
+  priority    String    @default("MEDIUM")
+  status      String    @default("WISHED")
+  tags        String[]
+  notes       String?
+  purchasedAt DateTime? @map("purchased_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("wishlist_items")
+  @@schema("finance")
+}

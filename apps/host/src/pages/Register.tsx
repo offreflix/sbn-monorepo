@@ -1,18 +1,18 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import { z } from 'zod'
-import { useAuth } from '../auth/AuthProvider'
-import { Button } from '@repo/ui'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
+import { useAuth } from "../auth/AuthProvider";
+import { Button } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Form,
   FormControl,
@@ -20,47 +20,47 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form'
-import { Input } from '../ui/input'
+  Input,
+} from "@repo/ui";
 
 const schema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Informe um e-mail válido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-})
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Informe um e-mail válido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>;
 
 export const RegisterPage = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', email: '', password: '' },
-  })
+    defaultValues: { name: "", email: "", password: "" },
+  });
 
-  const [submitting, setSubmitting] = useState(false)
-  const { register: doRegister, user, loading } = useAuth()
-  const navigate = useNavigate()
+  const [submitting, setSubmitting] = useState(false);
+  const { register: doRegister, user, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate('/dashboard', { replace: true })
-  }, [user, loading, navigate])
+    if (!loading && user) navigate("/dashboard", { replace: true });
+  }, [user, loading, navigate]);
 
   const onSubmit = async (data: FormValues) => {
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await doRegister(data)
-      toast.success('Conta criada com sucesso')
-      navigate('/dashboard', { replace: true })
+      await doRegister(data);
+      toast.success("Conta criada com sucesso");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao registrar')
+      toast.error(err instanceof Error ? err.message : "Erro ao registrar");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#e2e8f0,_#f8fafc)] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md glass-card">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>
@@ -126,12 +126,12 @@ export const RegisterPage = () => {
             />
 
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? 'Criando conta...' : 'Criar conta'}
+              {submitting ? "Criando conta..." : "Criar conta"}
             </Button>
           </Form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Já tem conta?{' '}
+            Já tem conta?{" "}
             <Link
               to="/login"
               className="font-medium text-primary hover:underline"
@@ -142,5 +142,5 @@ export const RegisterPage = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
