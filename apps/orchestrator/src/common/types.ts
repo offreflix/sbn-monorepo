@@ -5,15 +5,4 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
-export type HeadersDictionary = Record<
-  string,
-  string | string[] | undefined
->;
-
-
-
-
-
-
-
-
+export type HeadersDictionary = Record<string, string | string[] | undefined>;

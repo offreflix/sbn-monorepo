@@ -11,17 +11,20 @@ For complete documentation, see [CLAUDE.md](./CLAUDE.md)
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js >= 18
 - pnpm >= 9.0.0
 - Docker & Docker Compose
 
 ### Installation
+
 ```bash
 pnpm install
 pnpm prisma:generate
 ```
 
 ### Development
+
 ```bash
 # Start infrastructure
 docker-compose up -d postgres redis
@@ -45,6 +48,7 @@ pnpm dev:frontend   # Frontend only
 ## Migration History
 
 This monorepo preserves full Git history from 4 repositories via git subtree merge:
+
 - sbn-auth: 7 commits → apps/auth/
 - sbn-finance: 10 commits → apps/finance/
 - sbn-orchestrator: 7 commits → apps/orchestrator/

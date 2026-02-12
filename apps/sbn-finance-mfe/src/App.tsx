@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from 'react'
-import './index.css'
-import { financeApi } from './api/finance'
+import { useState, useEffect, useCallback } from "react";
+import "./index.css";
+import { financeApi } from "./api/finance";
 import type {
   Transaction,
   Wallet,
   Category,
   DashboardSummary,
   DashboardCategories,
-} from './types/finance'
-import { TransactionList } from './components/TransactionList'
-import { Dashboard } from './components/Dashboard'
-import { CategoryGrid } from './components/CategoryGrid'
+} from "./types/finance";
+import { TransactionList } from "./components/TransactionList";
+import { Dashboard } from "./components/Dashboard";
+import { CategoryGrid } from "./components/CategoryGrid";
 import {
   Select,
   SelectContent,
@@ -18,36 +18,36 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
-} from '@repo/ui'
-import { LayoutDashboard, RefreshCcw, Receipt, Tags } from 'lucide-react'
-import { toast, Toaster } from 'sonner'
+} from "@repo/ui";
+import { LayoutDashboard, RefreshCcw, Receipt, Tags } from "lucide-react";
+import { toast, Toaster } from "sonner";
 
-type View = 'dashboard' | 'transactions' | 'categories'
+type View = "dashboard" | "transactions" | "categories";
 
 const App = () => {
-  const [view, setView] = useState<View>('dashboard')
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [wallets, setWallets] = useState<Wallet[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<View>("dashboard");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Dashboard Data
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary>({
     cards: { balance: 0, currentInvoice: 0, nextInvoice: 0, totalInvoices: 0 },
     overview: { income: 0, expense: 0, balance: 0 },
-  })
+  });
   const [dashboardCategories, setDashboardCategories] =
     useState<DashboardCategories>({
       income: [],
       expense: [],
-    })
+    });
 
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
       // Parallel Fetch
       const [txs, wls, cats, dashSum, dashCats] = await Promise.all([
@@ -56,28 +56,28 @@ const App = () => {
         financeApi.categories.list(),
         financeApi.dashboard.summary(selectedMonth, selectedYear),
         financeApi.dashboard.categories(selectedMonth, selectedYear),
-      ])
+      ]);
 
-      setTransactions(txs)
-      setWallets(wls)
-      setCategories(cats)
-      setDashboardSummary(dashSum)
-      setDashboardCategories(dashCats)
+      setTransactions(txs);
+      setWallets(wls);
+      setCategories(cats);
+      setDashboardSummary(dashSum);
+      setDashboardCategories(dashCats);
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-      toast.error('Erro ao carregar dados. Tente novamente.')
+      console.error("Erro ao carregar dados:", error);
+      toast.error("Erro ao carregar dados. Tente novamente.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [selectedMonth, selectedYear])
+  }, [selectedMonth, selectedYear]);
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    loadData();
+  }, [loadData]);
 
   const handleTransactionSuccess = () => {
-    loadData()
-  }
+    loadData();
+  };
 
   return (
     <>
@@ -93,27 +93,27 @@ const App = () => {
               {/* View Switcher - Simple Buttons */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant={view === 'dashboard' ? 'secondary' : 'ghost'}
+                  variant={view === "dashboard" ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => setView('dashboard')}
+                  onClick={() => setView("dashboard")}
                   className="gap-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
                 <Button
-                  variant={view === 'transactions' ? 'secondary' : 'ghost'}
+                  variant={view === "transactions" ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => setView('transactions')}
+                  onClick={() => setView("transactions")}
                   className="gap-2"
                 >
                   <Receipt className="h-4 w-4" />
                   Transações
                 </Button>
                 <Button
-                  variant={view === 'categories' ? 'secondary' : 'ghost'}
+                  variant={view === "categories" ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => setView('categories')}
+                  onClick={() => setView("categories")}
                   className="gap-2"
                 >
                   <Tags className="h-4 w-4" />
@@ -137,8 +137,8 @@ const App = () => {
                       value={m.toString()}
                       className="text-xs"
                     >
-                      {new Date(0, m - 1).toLocaleString('pt-BR', {
-                        month: 'long',
+                      {new Date(0, m - 1).toLocaleString("pt-BR", {
+                        month: "long",
                       })}
                     </SelectItem>
                   ))}
@@ -179,7 +179,7 @@ const App = () => {
 
         <main className="container mx-auto px-4 py-8 space-y-8">
           <div className="max-w-7xl mx-auto">
-            {view === 'dashboard' && (
+            {view === "dashboard" && (
               <Dashboard
                 summary={dashboardSummary}
                 categories={dashboardCategories}
@@ -191,7 +191,7 @@ const App = () => {
               />
             )}
 
-            {view === 'transactions' && (
+            {view === "transactions" && (
               <TransactionList
                 transactions={transactions}
                 wallets={wallets}
@@ -200,10 +200,12 @@ const App = () => {
               />
             )}
 
-            {view === 'categories' && (
+            {view === "categories" && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl font-bold tracking-tight">Categorias</h2>
+                  <h2 className="text-3xl font-bold tracking-tight">
+                    Categorias
+                  </h2>
                   <p className="text-muted-foreground">
                     Gerencie suas categorias de receitas e despesas
                   </p>
@@ -220,10 +222,10 @@ const App = () => {
 
       <div
         className="hidden md:flex lg:flex xl:flex"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

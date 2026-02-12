@@ -1,8 +1,8 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
-import type { CreateWalletRequest } from '../types/finance'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
+import type { CreateWalletRequest } from "../types/finance";
 import {
   Button,
   Card,
@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Input,
   Form,
@@ -23,43 +23,43 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@repo/ui'
-import { toast } from 'sonner'
-import { useState } from 'react'
+} from "@repo/ui";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const walletSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.string().min(1, 'Tipo é obrigatório'),
+  name: z.string().min(1, "Nome é obrigatório"),
+  type: z.string().min(1, "Tipo é obrigatório"),
   currency: z.string().optional(),
   invoiceClosingDay: z.string().optional(),
   invoiceDueDay: z.string().optional(),
   limit: z.string().optional(),
-})
+});
 
-type WalletFormData = z.infer<typeof walletSchema>
+type WalletFormData = z.infer<typeof walletSchema>;
 
 interface WalletFormProps {
-  onSuccess: () => void
-  onCancel: () => void
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<WalletFormData>({
     resolver: zodResolver(walletSchema),
     defaultValues: {
-      currency: 'BRL',
-      type: 'Conta Corrente',
+      currency: "BRL",
+      type: "Conta Corrente",
     },
-  })
+  });
 
   const onSubmit = async (data: WalletFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const payload: CreateWalletRequest = {
         name: data.name,
         type: data.type,
-        currency: data.currency || 'BRL',
+        currency: data.currency || "BRL",
         invoiceClosingDay: data.invoiceClosingDay
           ? parseInt(data.invoiceClosingDay)
           : undefined,
@@ -67,20 +67,20 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
           ? parseInt(data.invoiceDueDay)
           : undefined,
         limit: data.limit || undefined,
-      }
+      };
 
-      await financeApi.wallets.create(payload)
-      toast.success('Carteira criada com sucesso!')
-      form.reset()
-      onSuccess()
+      await financeApi.wallets.create(payload);
+      toast.success("Carteira criada com sucesso!");
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar carteira'
-      )
+        error instanceof Error ? error.message : "Erro ao criar carteira",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -149,7 +149,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                     <Input
                       placeholder="BRL"
                       {...field}
-                      value={field.value || 'BRL'}
+                      value={field.value || "BRL"}
                     />
                   </FormControl>
                   <FormMessage>
@@ -173,7 +173,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                         max="31"
                         placeholder="Ex: 10"
                         {...field}
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage>
@@ -196,7 +196,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                         max="31"
                         placeholder="Ex: 15"
                         {...field}
-                        value={field.value || ''}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage>
@@ -238,12 +238,12 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Salvando...' : 'Criar Carteira'}
+                {submitting ? "Salvando..." : "Criar Carteira"}
               </Button>
             </div>
           </div>
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

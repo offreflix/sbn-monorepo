@@ -1,15 +1,15 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { Toaster } from 'sonner'
-import { AuthProvider, useAuth } from './auth/AuthProvider'
-import { ThemeProvider } from './theme/ThemeProvider'
-import { DashboardPage } from './pages/Dashboard'
-import { FinanceRemotePage } from './pages/FinanceRemote'
-import { WishlistPage } from './pages/Wishlist'
-import { LoginPage } from './pages/Login'
-import { RegisterPage } from './pages/Register'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { ThemeProvider } from "./theme/ThemeProvider";
+import { DashboardPage } from "./pages/Dashboard";
+import { FinanceRemotePage } from "./pages/FinanceRemote";
+import { WishlistPage } from "./pages/Wishlist";
+import { LoginPage } from "./pages/Login";
+import { RegisterPage } from "./pages/Register";
 
 const Protected = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -18,56 +18,56 @@ const Protected = ({ children }: { children: React.ReactNode }) => {
           Carregando sessão...
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>
-}
+  return <>{children}</>;
+};
 
 function App() {
   return (
     <ThemeProvider>
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <Protected>
-                <DashboardPage />
-              </Protected>
-            }
-          />
-          <Route
-            path="/finance"
-            element={
-              <Protected>
-                <FinanceRemotePage />
-              </Protected>
-            }
-          />
-          <Route
-            path="/wishlist"
-            element={
-              <Protected>
-                <WishlistPage />
-              </Protected>
-            }
-          />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster richColors closeButton />
-    </AuthProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <Protected>
+                  <DashboardPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/finance"
+              element={
+                <Protected>
+                  <FinanceRemotePage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/wishlist"
+              element={
+                <Protected>
+                  <WishlistPage />
+                </Protected>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+        <Toaster richColors closeButton />
+      </AuthProvider>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

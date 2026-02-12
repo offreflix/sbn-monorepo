@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import {
   Wallet,
   TrendingUp,
@@ -6,27 +6,27 @@ import {
   CreditCard,
   DollarSign,
   Calendar,
-} from 'lucide-react'
-import { formatCurrency } from '../lib/utils'
+} from "lucide-react";
+import { formatCurrency } from "../lib/utils";
 import type {
   DashboardSummary,
   DashboardCategories,
   Wallet as WalletType,
   Category,
   Transaction,
-} from '../types/finance'
-import { WalletCards } from './WalletCards'
-import { CategoryGrid } from './CategoryGrid'
-import { TransactionList } from './TransactionList'
+} from "../types/finance";
+import { WalletCards } from "./WalletCards";
+import { CategoryGrid } from "./CategoryGrid";
+import { TransactionList } from "./TransactionList";
 
 interface DashboardProps {
-  summary: DashboardSummary
-  categories: DashboardCategories
-  wallets: WalletType[]
-  allCategories: Category[]
-  transactions: Transaction[]
-  loading: boolean
-  onRefresh: () => void
+  summary: DashboardSummary;
+  categories: DashboardCategories;
+  wallets: WalletType[];
+  allCategories: Category[];
+  transactions: Transaction[];
+  loading: boolean;
+  onRefresh: () => void;
 }
 
 export function Dashboard({
@@ -41,27 +41,27 @@ export function Dashboard({
   // Helper for Skeleton or value
   const Val = ({
     val,
-    type = 'currency',
+    type = "currency",
   }: {
-    val: number | undefined
-    type?: 'currency' | 'text'
+    val: number | undefined;
+    type?: "currency" | "text";
   }) => {
     if (loading || val === undefined)
-      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />;
     return (
-      <span className={type === 'currency' ? 'tabular-nums' : ''}>
-        {type === 'currency' ? formatCurrency(val) : val}
+      <span className={type === "currency" ? "tabular-nums" : ""}>
+        {type === "currency" ? formatCurrency(val) : val}
       </span>
-    )
-  }
+    );
+  };
 
   // Simple Progress Component
   const SimpleProgress = ({
     value,
     colorClass,
   }: {
-    value: number
-    colorClass: string
+    value: number;
+    colorClass: string;
   }) => (
     <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
       <div
@@ -69,7 +69,7 @@ export function Dashboard({
         style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
       />
     </div>
-  )
+  );
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -203,7 +203,7 @@ export function Dashboard({
                 </span>
               </div>
               <div
-                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? 'text-primary' : 'text-red-400'}`}
+                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? "text-primary" : "text-red-400"}`}
               >
                 <Val val={summary.overview.balance} />
               </div>
@@ -229,12 +229,14 @@ export function Dashboard({
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                      {cat.name}{' '}
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
                     </span>
-                    <span className="tabular-nums">{formatCurrency(cat.value)}</span>
+                    <span className="tabular-nums">
+                      {formatCurrency(cat.value)}
+                    </span>
                   </div>
                   <SimpleProgress
                     value={cat.percentage}
@@ -261,12 +263,14 @@ export function Dashboard({
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-400" />
-                      {cat.name}{' '}
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
                     </span>
-                    <span className="tabular-nums">{formatCurrency(cat.value)}</span>
+                    <span className="tabular-nums">
+                      {formatCurrency(cat.value)}
+                    </span>
                   </div>
                   <SimpleProgress
                     value={cat.percentage}
@@ -305,5 +309,5 @@ export function Dashboard({
         />
       </section>
     </div>
-  )
+  );
 }

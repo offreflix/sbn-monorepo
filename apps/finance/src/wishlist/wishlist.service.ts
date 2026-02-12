@@ -37,7 +37,10 @@ export class WishlistService {
     });
   }
 
-  async findAll(userId: string, filters?: { status?: string; priority?: string }) {
+  async findAll(
+    userId: string,
+    filters?: { status?: string; priority?: string },
+  ) {
     const where: any = {
       userId,
       deletedAt: null,

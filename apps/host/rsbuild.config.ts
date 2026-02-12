@@ -1,24 +1,40 @@
-import { defineConfig } from '@rsbuild/core'
-import { pluginReact } from '@rsbuild/plugin-react'
-import { ModuleFederationPlugin } from '@module-federation/enhanced/rspack'
-import { dependencies } from './package.json'
+import { defineConfig } from "@rsbuild/core";
+import { pluginReact } from "@rsbuild/plugin-react";
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import { dependencies } from "./package.json";
 
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [pluginReact()],
   html: {
     tags: [
-      { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
-      { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true } },
-      { tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' } },
+      {
+        tag: "link",
+        attrs: { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      },
+      {
+        tag: "link",
+        attrs: {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: true,
+        },
+      },
+      {
+        tag: "link",
+        attrs: {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        },
+      },
     ],
-    title: 'SBN - Personal Finance',
+    title: "SBN - Personal Finance",
   },
   server: {
     port: 9000,
   },
   dev: {
-    assetPrefix: 'http://localhost:9000',
+    assetPrefix: "http://localhost:9000",
     hmr: true,
     liveReload: true,
     writeToDisk: true,
@@ -26,26 +42,26 @@ export default defineConfig({
   tools: {
     rspack: {
       output: {
-        uniqueName: 'host',
+        uniqueName: "host",
       },
       watchOptions: {
         ignored: [
-          '**/node_modules/**',
-          '**/@mf-types/**',
-          '**/dist/**',
-          '**/.turbo/**',
-          '**/.rsbuild/**',
-          '**/*.log',
+          "**/node_modules/**",
+          "**/@mf-types/**",
+          "**/dist/**",
+          "**/.turbo/**",
+          "**/.rsbuild/**",
+          "**/*.log",
         ],
         aggregateTimeout: 100,
         poll: 1000,
       },
       plugins: [
         new ModuleFederationPlugin({
-          name: 'host',
+          name: "host",
           remotes: {
             sbn_finance_mfe:
-              'sbn_finance_mfe@http://localhost:9001/mf-manifest.json',
+              "sbn_finance_mfe@http://localhost:9001/mf-manifest.json",
           },
           shared: {
             react: {
@@ -53,13 +69,13 @@ export default defineConfig({
               singleton: true,
               eager: true,
             },
-            'react-dom': {
-              version: dependencies['react-dom'],
+            "react-dom": {
+              version: dependencies["react-dom"],
               singleton: true,
               eager: true,
             },
-            'react-router-dom': {
-              version: dependencies['react-router-dom'],
+            "react-router-dom": {
+              version: dependencies["react-router-dom"],
               singleton: true,
               eager: true,
             },
@@ -71,4 +87,4 @@ export default defineConfig({
       ],
     },
   },
-})
+});

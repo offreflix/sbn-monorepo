@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Header } from '../components/Header'
-import { wishlistApi, type WishlistItem } from '../api/wishlist'
+import { useState, useEffect, useCallback } from "react";
+import { Header } from "../components/Header";
+import { wishlistApi, type WishlistItem } from "../api/wishlist";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@repo/ui'
-import { Button } from '@repo/ui'
+} from "@repo/ui";
+import { Button } from "@repo/ui";
 import {
   Dialog,
   DialogContent,
@@ -16,67 +16,77 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@repo/ui'
-import { Input } from '@repo/ui'
-import { Label } from '@repo/ui'
+} from "@repo/ui";
+import { Input } from "@repo/ui";
+import { Label } from "@repo/ui";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import { Textarea } from '@repo/ui'
-import { Plus, Heart, Check, Trash2, ExternalLink, Filter } from 'lucide-react'
-import { toast } from 'sonner'
+} from "@repo/ui";
+import { Textarea } from "@repo/ui";
+import {
+  Plus,
+  Heart,
+  Check,
+  Trash2,
+  ExternalLink,
+  Filter,
+  ShoppingCart,
+} from "lucide-react";
+import { toast } from "sonner";
+import { PurchaseTransactionModal } from "../components/PurchaseTransactionModal";
 
 export const WishlistPage = () => {
-  const [items, setItems] = useState<WishlistItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [filterStatus, setFilterStatus] = useState<string>('')
-  const [filterPriority, setFilterPriority] = useState<string>('')
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [purchaseItem, setPurchaseItem] = useState<WishlistItem | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    currency: 'BRL',
-    url: '',
-    imageUrl: '',
-    priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
-    tags: '',
-    notes: '',
-  })
+    name: "",
+    description: "",
+    price: "",
+    currency: "BRL",
+    url: "",
+    imageUrl: "",
+    priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
+    tags: "",
+    notes: "",
+  });
 
   const loadItems = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const data = await wishlistApi.list(
-        filterStatus || undefined,
-        filterPriority || undefined
-      )
-      setItems(data)
+        filterStatus !== "all" ? filterStatus : undefined,
+        filterPriority !== "all" ? filterPriority : undefined,
+      );
+      setItems(data);
     } catch (error) {
-      console.error('Erro ao carregar wishlist:', error)
-      toast.error('Erro ao carregar lista de desejos')
+      console.error("Erro ao carregar wishlist:", error);
+      toast.error("Erro ao carregar lista de desejos");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [filterStatus, filterPriority])
+  }, [filterStatus, filterPriority]);
 
   useEffect(() => {
-    loadItems()
-  }, [loadItems])
+    loadItems();
+  }, [loadItems]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       const tagsArray = formData.tags
-        .split(',')
+        .split(",")
         .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
+        .filter((tag) => tag.length > 0);
 
       await wishlistApi.create({
         name: formData.name,
@@ -88,85 +98,78 @@ export const WishlistPage = () => {
         priority: formData.priority,
         tags: tagsArray.length > 0 ? tagsArray : undefined,
         notes: formData.notes || undefined,
-      })
+      });
 
-      toast.success('Item adicionado à lista de desejos!')
-      setIsDialogOpen(false)
+      toast.success("Item adicionado à lista de desejos!");
+      setIsDialogOpen(false);
       setFormData({
-        name: '',
-        description: '',
-        price: '',
-        currency: 'BRL',
-        url: '',
-        imageUrl: '',
-        priority: 'MEDIUM',
-        tags: '',
-        notes: '',
-      })
-      loadItems()
+        name: "",
+        description: "",
+        price: "",
+        currency: "BRL",
+        url: "",
+        imageUrl: "",
+        priority: "MEDIUM",
+        tags: "",
+        notes: "",
+      });
+      loadItems();
     } catch (error) {
-      console.error('Erro ao criar item:', error)
-      toast.error('Erro ao adicionar item')
+      console.error("Erro ao criar item:", error);
+      toast.error("Erro ao adicionar item");
     }
-  }
+  };
 
-  const handleMarkAsPurchased = async (id: string) => {
-    try {
-      await wishlistApi.markAsPurchased(id)
-      toast.success('Item marcado como comprado!')
-      loadItems()
-    } catch (error) {
-      console.error('Erro ao marcar como comprado:', error)
-      toast.error('Erro ao atualizar item')
-    }
-  }
+  const handlePurchase = (item: WishlistItem) => {
+    setPurchaseItem(item);
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja remover este item?')) return
+    if (!confirm("Tem certeza que deseja remover este item?")) return;
 
     try {
-      await wishlistApi.delete(id)
-      toast.success('Item removido!')
-      loadItems()
+      await wishlistApi.delete(id);
+      toast.success("Item removido!");
+      loadItems();
     } catch (error) {
-      console.error('Erro ao deletar item:', error)
-      toast.error('Erro ao remover item')
+      console.error("Erro ao deletar item:", error);
+      toast.error("Erro ao remover item");
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'text-red-500'
-      case 'MEDIUM':
-        return 'text-yellow-500'
-      case 'LOW':
-        return 'text-green-500'
+      case "HIGH":
+        return "text-red-500";
+      case "MEDIUM":
+        return "text-yellow-500";
+      case "LOW":
+        return "text-green-500";
       default:
-        return 'text-gray-500'
+        return "text-gray-500";
     }
-  }
+  };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'Alta'
-      case 'MEDIUM':
-        return 'Média'
-      case 'LOW':
-        return 'Baixa'
+      case "HIGH":
+        return "Alta";
+      case "MEDIUM":
+        return "Média";
+      case "LOW":
+        return "Baixa";
       default:
-        return priority
+        return priority;
     }
-  }
+  };
 
-  const formatPrice = (price?: number, currency: string = 'BRL') => {
-    if (!price) return 'Preço não informado'
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
+  const formatPrice = (price?: number, currency: string = "BRL") => {
+    if (!price) return "Preço não informado";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
       currency,
-    }).format(price)
-  }
+    }).format(price);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,7 +190,7 @@ export const WishlistPage = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="WISHED">Desejado</SelectItem>
                   <SelectItem value="PURCHASED">Comprado</SelectItem>
                   <SelectItem value="REMOVED">Removido</SelectItem>
@@ -201,7 +204,7 @@ export const WishlistPage = () => {
                   <SelectValue placeholder="Prioridade" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="HIGH">Alta</SelectItem>
                   <SelectItem value="MEDIUM">Média</SelectItem>
                   <SelectItem value="LOW">Baixa</SelectItem>
@@ -316,7 +319,7 @@ export const WishlistPage = () => {
                   <Label htmlFor="priority">Prioridade</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') =>
+                    onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") =>
                       setFormData({ ...formData, priority: value })
                     }
                   >
@@ -391,9 +394,9 @@ export const WishlistPage = () => {
               <Card
                 key={item.id}
                 className={
-                  item.status === 'PURCHASED'
-                    ? 'opacity-60 border-green-500'
-                    : ''
+                  item.status === "PURCHASED"
+                    ? "opacity-60 border-green-500"
+                    : ""
                 }
               >
                 <CardHeader>
@@ -408,7 +411,7 @@ export const WishlistPage = () => {
                     </div>
                     <span
                       className={`text-sm font-semibold ${getPriorityColor(
-                        item.priority
+                        item.priority,
                       )}`}
                     >
                       {getPriorityLabel(item.priority)}
@@ -422,7 +425,7 @@ export const WishlistPage = () => {
                       alt={item.name}
                       className="w-full h-48 object-cover rounded-md"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.style.display = "none";
                       }}
                     />
                   )}
@@ -459,26 +462,28 @@ export const WishlistPage = () => {
                   )}
 
                   {item.notes && (
-                    <p className="text-sm text-muted-foreground">{item.notes}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.notes}
+                    </p>
                   )}
 
-                  {item.status === 'PURCHASED' && item.purchasedAt && (
+                  {item.status === "PURCHASED" && item.purchasedAt && (
                     <div className="text-sm text-green-600 flex items-center gap-1">
                       <Check className="h-4 w-4" />
-                      Comprado em{' '}
-                      {new Date(item.purchasedAt).toLocaleDateString('pt-BR')}
+                      Comprado em{" "}
+                      {new Date(item.purchasedAt).toLocaleDateString("pt-BR")}
                     </div>
                   )}
 
                   <div className="flex gap-2 pt-2 border-t">
-                    {item.status !== 'PURCHASED' && (
+                    {item.status !== "PURCHASED" && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleMarkAsPurchased(item.id)}
+                        onClick={() => handlePurchase(item)}
                         className="flex-1"
                       >
-                        <Check className="h-4 w-4 mr-1" />
+                        <ShoppingCart className="h-4 w-4 mr-1" />
                         Comprado
                       </Button>
                     )}
@@ -497,6 +502,18 @@ export const WishlistPage = () => {
           </div>
         )}
       </main>
+
+      <PurchaseTransactionModal
+        open={!!purchaseItem}
+        onOpenChange={(open) => {
+          if (!open) setPurchaseItem(null);
+        }}
+        item={purchaseItem}
+        onSuccess={() => {
+          setPurchaseItem(null);
+          loadItems();
+        }}
+      />
     </div>
-  )
-}
+  );
+};

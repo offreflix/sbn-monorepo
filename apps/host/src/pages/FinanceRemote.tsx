@@ -1,7 +1,7 @@
-import React, { Suspense, lazy } from 'react'
-import { Header } from '../components/Header'
+import React, { Suspense, lazy } from "react";
+import { Header } from "../components/Header";
 
-const RemoteFinance = lazy(() => import('sbn_finance_mfe/App'))
+const RemoteFinance = lazy(() => import("sbn_finance_mfe/App"));
 
 export const FinanceRemotePage = () => {
   return (
@@ -21,5 +21,5 @@ export const FinanceRemotePage = () => {
         </Suspense>
       </main>
     </div>
-  )
-}
+  );
+};

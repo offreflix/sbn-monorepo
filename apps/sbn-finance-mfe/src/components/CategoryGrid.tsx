@@ -1,25 +1,23 @@
-import { useState } from 'react'
-import { Button } from '@repo/ui'
-import { Plus, TrendingUp, TrendingDown } from 'lucide-react'
-import { CreateCategoryModal } from './CreateCategoryModal'
-import type { Category } from '../types/finance'
+import { useState } from "react";
+import { Button } from "@repo/ui";
+import { Plus, TrendingUp, TrendingDown } from "lucide-react";
+import { CreateCategoryModal } from "./CreateCategoryModal";
+import type { Category } from "../types/finance";
 
 interface CategoryGridProps {
-  categories: Category[]
-  onRefresh: () => void
+  categories: Category[];
+  onRefresh: () => void;
 }
 
 export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'Receita' | 'Despesa'>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | "Receita" | "Despesa">("all");
 
   const filteredCategories =
-    filter === 'all'
-      ? categories
-      : categories.filter((c) => c.type === filter)
+    filter === "all" ? categories : categories.filter((c) => c.type === filter);
 
-  const incomeCount = categories.filter((c) => c.type === 'Receita').length
-  const expenseCount = categories.filter((c) => c.type === 'Despesa').length
+  const incomeCount = categories.filter((c) => c.type === "Receita").length;
+  const expenseCount = categories.filter((c) => c.type === "Despesa").length;
 
   return (
     <div className="space-y-6">
@@ -27,25 +25,25 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Button
-            variant={filter === 'all' ? 'secondary' : 'ghost'}
+            variant={filter === "all" ? "secondary" : "ghost"}
             size="sm"
-            onClick={() => setFilter('all')}
+            onClick={() => setFilter("all")}
           >
             Todas ({categories.length})
           </Button>
           <Button
-            variant={filter === 'Receita' ? 'secondary' : 'ghost'}
+            variant={filter === "Receita" ? "secondary" : "ghost"}
             size="sm"
-            onClick={() => setFilter('Receita')}
+            onClick={() => setFilter("Receita")}
             className="gap-2"
           >
             <TrendingUp className="h-4 w-4 text-emerald-400" />
             Receitas ({incomeCount})
           </Button>
           <Button
-            variant={filter === 'Despesa' ? 'secondary' : 'ghost'}
+            variant={filter === "Despesa" ? "secondary" : "ghost"}
             size="sm"
-            onClick={() => setFilter('Despesa')}
+            onClick={() => setFilter("Despesa")}
             className="gap-2"
           >
             <TrendingDown className="h-4 w-4 text-red-400" />
@@ -73,8 +71,8 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
               Nenhuma categoria encontrada
             </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              {filter === 'all'
-                ? 'Crie sua primeira categoria para organizar suas finanças'
+              {filter === "all"
+                ? "Crie sua primeira categoria para organizar suas finanças"
                 : `Nenhuma categoria de ${filter.toLowerCase()} encontrada`}
             </p>
             <Button
@@ -95,26 +93,26 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
                 <div
                   className="flex h-14 w-14 items-center justify-center rounded-xl text-2xl transition-transform group-hover:scale-110"
                   style={{
-                    backgroundColor: `${category.color || '#3b82f6'}20`,
+                    backgroundColor: `${category.color || "#3b82f6"}20`,
                   }}
                 >
-                  {category.icon || '🏷️'}
+                  {category.icon || "🏷️"}
                 </div>
                 <div>
                   <p className="font-medium text-sm text-foreground truncate max-w-[120px]">
                     {category.name}
                   </p>
                   <div className="flex items-center justify-center gap-1 mt-1">
-                    {category.type === 'Receita' ? (
+                    {category.type === "Receita" ? (
                       <TrendingUp className="h-3 w-3 text-emerald-400" />
                     ) : (
                       <TrendingDown className="h-3 w-3 text-red-400" />
                     )}
                     <span
                       className={`text-xs ${
-                        category.type === 'Receita'
-                          ? 'text-emerald-400'
-                          : 'text-red-400'
+                        category.type === "Receita"
+                          ? "text-emerald-400"
+                          : "text-red-400"
                       }`}
                     >
                       {category.type}
@@ -136,10 +134,10 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onSuccess={() => {
-          setIsCreateModalOpen(false)
-          onRefresh()
+          setIsCreateModalOpen(false);
+          onRefresh();
         }}
       />
     </div>
-  )
+  );
 }

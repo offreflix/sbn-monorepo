@@ -1,8 +1,8 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
-import type { CreateCategoryRequest } from '../types/finance'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
+import type { CreateCategoryRequest } from "../types/finance";
 import {
   Button,
   Card,
@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Input,
   Form,
@@ -23,73 +23,73 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@repo/ui'
-import { toast } from 'sonner'
-import { useState } from 'react'
+} from "@repo/ui";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const categorySchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.enum(['Receita', 'Despesa']),
+  name: z.string().min(1, "Nome é obrigatório"),
+  type: z.enum(["Receita", "Despesa"]),
   icon: z.string().optional(),
   color: z.string().optional(),
   isDefault: z.boolean().optional(),
-})
+});
 
-type CategoryFormData = z.infer<typeof categorySchema>
+type CategoryFormData = z.infer<typeof categorySchema>;
 
 interface CategoryFormProps {
-  onSuccess: () => void
-  onCancel: () => void
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 const commonIcons = [
-  '💰',
-  '🍔',
-  '🚗',
-  '🏠',
-  '💊',
-  '🎮',
-  '📱',
-  '👕',
-  '🎬',
-  '✈️',
-  '🍕',
-  '☕',
-]
+  "💰",
+  "🍔",
+  "🚗",
+  "🏠",
+  "💊",
+  "🎮",
+  "📱",
+  "👕",
+  "🎬",
+  "✈️",
+  "🍕",
+  "☕",
+];
 
 export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      type: 'Despesa',
+      type: "Despesa",
       isDefault: false,
     },
-  })
+  });
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const payload: CreateCategoryRequest = {
         name: data.name,
         type: data.type,
         icon: data.icon || undefined,
         color: data.color || undefined,
         isDefault: data.isDefault || false,
-      }
+      };
 
-      await financeApi.categories.create(payload)
-      toast.success('Categoria criada com sucesso!')
-      form.reset()
-      onSuccess()
+      await financeApi.categories.create(payload);
+      toast.success("Categoria criada com sucesso!");
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar categoria'
-      )
+        error instanceof Error ? error.message : "Erro ao criar categoria",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -151,11 +151,11 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                           <button
                             key={icon}
                             type="button"
-                            onClick={() => form.setValue('icon', icon)}
+                            onClick={() => form.setValue("icon", icon)}
                             className={`text-2xl p-2 rounded border ${
                               field.value === icon
-                                ? 'border-primary bg-primary/10'
-                                : 'border-border hover:bg-muted'
+                                ? "border-primary bg-primary/10"
+                                : "border-border hover:bg-muted"
                             }`}
                           >
                             {icon}
@@ -183,7 +183,7 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                         type="color"
                         className="w-16 h-10"
                         {...field}
-                        value={field.value || '#3b82f6'}
+                        value={field.value || "#3b82f6"}
                       />
                       <Input placeholder="#3b82f6" {...field} />
                     </div>
@@ -225,12 +225,12 @@ export function CategoryForm({ onSuccess, onCancel }: CategoryFormProps) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Salvando...' : 'Criar Categoria'}
+                {submitting ? "Salvando..." : "Criar Categoria"}
               </Button>
             </div>
           </div>
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

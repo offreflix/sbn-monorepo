@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,30 +11,30 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import { Input, Label } from '@repo/ui'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
-import type { CreateWalletRequest } from '../types/finance'
-import { toast } from 'sonner'
+} from "@repo/ui";
+import { Input, Label } from "@repo/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
+import type { CreateWalletRequest } from "../types/finance";
+import { toast } from "sonner";
 
 const walletSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.string().min(1, 'Tipo é obrigatório'),
+  name: z.string().min(1, "Nome é obrigatório"),
+  type: z.string().min(1, "Tipo é obrigatório"),
   currency: z.string().optional(),
   invoiceClosingDay: z.string().optional(),
   invoiceDueDay: z.string().optional(),
   limit: z.string().optional(),
-})
+});
 
-type WalletFormData = z.infer<typeof walletSchema>
+type WalletFormData = z.infer<typeof walletSchema>;
 
 interface CreateWalletModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 export function CreateWalletModal({
@@ -42,26 +42,26 @@ export function CreateWalletModal({
   onOpenChange,
   onSuccess,
 }: CreateWalletModalProps) {
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<WalletFormData>({
     resolver: zodResolver(walletSchema),
     defaultValues: {
-      currency: 'BRL',
-      type: 'Conta Corrente',
+      currency: "BRL",
+      type: "Conta Corrente",
     },
-  })
+  });
 
-  const walletType = form.watch('type')
+  const walletType = form.watch("type");
   const isCredit =
-    walletType.toLowerCase().includes('crédito') || walletType === 'credit'
+    walletType.toLowerCase().includes("crédito") || walletType === "credit";
 
   const onSubmit = async (data: WalletFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const payload: CreateWalletRequest = {
         name: data.name,
         type: data.type,
-        currency: data.currency || 'BRL',
+        currency: data.currency || "BRL",
         invoiceClosingDay: data.invoiceClosingDay
           ? parseInt(data.invoiceClosingDay)
           : undefined,
@@ -69,20 +69,20 @@ export function CreateWalletModal({
           ? parseInt(data.invoiceDueDay)
           : undefined,
         limit: data.limit ? parseFloat(data.limit) : undefined,
-      }
+      };
 
-      await financeApi.wallets.create(payload)
-      toast.success('Carteira criada com sucesso!')
-      form.reset()
-      onSuccess()
+      await financeApi.wallets.create(payload);
+      toast.success("Carteira criada com sucesso!");
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar carteira'
-      )
+        error instanceof Error ? error.message : "Erro ao criar carteira",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,7 +99,7 @@ export function CreateWalletModal({
             <Label htmlFor="name">Nome da Carteira</Label>
             <Input
               id="name"
-              {...form.register('name')}
+              {...form.register("name")}
               placeholder="Ex: Conta Corrente"
             />
             {form.formState.errors.name && (
@@ -112,8 +112,8 @@ export function CreateWalletModal({
           <div className="space-y-2">
             <Label htmlFor="type">Tipo</Label>
             <Select
-              value={form.watch('type')}
-              onValueChange={(value) => form.setValue('type', value)}
+              value={form.watch("type")}
+              onValueChange={(value) => form.setValue("type", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
@@ -145,7 +145,7 @@ export function CreateWalletModal({
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  {...form.register('limit')}
+                  {...form.register("limit")}
                 />
               </div>
 
@@ -158,7 +158,7 @@ export function CreateWalletModal({
                     min="1"
                     max="31"
                     placeholder="15"
-                    {...form.register('invoiceClosingDay')}
+                    {...form.register("invoiceClosingDay")}
                   />
                 </div>
 
@@ -170,7 +170,7 @@ export function CreateWalletModal({
                     min="1"
                     max="31"
                     placeholder="22"
-                    {...form.register('invoiceDueDay')}
+                    {...form.register("invoiceDueDay")}
                   />
                 </div>
               </div>
@@ -187,11 +187,11 @@ export function CreateWalletModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Salvando...' : 'Criar Carteira'}
+              {submitting ? "Salvando..." : "Criar Carteira"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
