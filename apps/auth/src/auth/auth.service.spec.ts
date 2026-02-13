@@ -5,6 +5,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mock-uuid'),
+}));
+
 const mockPrismaService = {
   user: {
     findUnique: jest.fn(),
@@ -95,7 +99,14 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should return tokens', async () => {
-      const user = { id: '1', email: 'test@example.com', name: 'Test' };
+      const user = {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test',
+        created_at: new Date(),
+        updated_at: new Date(),
+        deleted_at: null,
+      };
       const result = await service.login(user);
 
       expect(result).toHaveProperty('accessToken', 'signed-token');

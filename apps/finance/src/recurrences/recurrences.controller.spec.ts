@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecurrencesController } from './recurrences.controller';
+import { RecurrencesService } from './recurrences.service';
 
 describe('RecurrencesController', () => {
   let controller: RecurrencesController;
@@ -7,6 +8,12 @@ describe('RecurrencesController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RecurrencesController],
+      providers: [
+        {
+          provide: RecurrencesService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     controller = module.get<RecurrencesController>(RecurrencesController);

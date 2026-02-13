@@ -1,12 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecurrencesService } from './recurrences.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('RecurrencesService', () => {
   let service: RecurrencesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RecurrencesService],
+      providers: [
+        RecurrencesService,
+        {
+          provide: PrismaService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<RecurrencesService>(RecurrencesService);

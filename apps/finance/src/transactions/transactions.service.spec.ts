@@ -63,7 +63,7 @@ describe('TransactionsService', () => {
       const createdTx = { id: 'tx1', ...dto };
       mockPrismaService.transaction.create.mockResolvedValue(createdTx);
 
-      const result = await service.create({ ...dto, userId: 'u1' });
+      const result = await service.create('u1', dto);
 
       expect(mockPrismaService.wallet.findFirst).toHaveBeenCalledWith({
         where: { id: 'w1', userId: 'u1' },
@@ -88,7 +88,7 @@ describe('TransactionsService', () => {
         type: TransactionType.Despesa,
       };
 
-      await expect(service.create({ ...dto, userId: 'u1' })).rejects.toThrow(
+      await expect(service.create('u1', dto)).rejects.toThrow(
         NotFoundException,
       );
     });
