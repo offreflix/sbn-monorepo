@@ -11,6 +11,7 @@ import type {
 import { TransactionList } from "./components/TransactionList";
 import { Dashboard } from "./components/Dashboard";
 import { CategoryGrid } from "./components/CategoryGrid";
+import { CalendarView } from "./components/CalendarView";
 import {
   Select,
   SelectContent,
@@ -19,10 +20,10 @@ import {
   SelectValue,
   Button,
 } from "@repo/ui";
-import { LayoutDashboard, RefreshCcw, Receipt, Tags } from "lucide-react";
+import { LayoutDashboard, RefreshCcw, Receipt, Tags, Calendar } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
-type View = "dashboard" | "transactions" | "categories";
+type View = "dashboard" | "transactions" | "categories" | "calendar";
 
 const App = () => {
   const [view, setView] = useState<View>("dashboard");
@@ -118,6 +119,15 @@ const App = () => {
                 >
                   <Tags className="h-4 w-4" />
                   Categorias
+                </Button>
+                <Button
+                  variant={view === "calendar" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setView("calendar")}
+                  className="gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendário
                 </Button>
               </div>
             </div>
@@ -215,6 +225,14 @@ const App = () => {
                   onRefresh={handleTransactionSuccess}
                 />
               </div>
+            )}
+
+            {view === "calendar" && (
+              <CalendarView
+                transactions={transactions}
+                currentMonth={selectedMonth}
+                currentYear={selectedYear}
+              />
             )}
           </div>
         </main>
