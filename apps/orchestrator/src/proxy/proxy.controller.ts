@@ -2,7 +2,7 @@ import { All, Body, Controller, Req, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ProxyService } from './proxy.service';
 import { Request } from 'express';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CompositeAuthGuard } from '../auth/composite-auth.guard';
 import { JsonValue } from '../common/types';
 import type { AuthenticatedUser } from '../auth/auth.types';
 
@@ -37,7 +37,7 @@ export class ProxyController {
     return this.proxyService.forwardRequest(url, req.method, body, headers);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(CompositeAuthGuard)
   @All('finance/*')
   async handleFinanceRequest(
     @Req() req: AuthenticatedRequest,
