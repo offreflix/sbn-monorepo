@@ -163,3 +163,20 @@ export interface DashboardCategories {
   income: DashboardCategory[];
   expense: DashboardCategory[];
 }
+
+export interface DashboardYearOverviewMonth {
+  month: number;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface DashboardYearOverview {
+  year: number;
+  months: DashboardYearOverviewMonth[];
+  totals: {
+    income: number;
+    expense: number;
+    balance: number;
+  };
+}

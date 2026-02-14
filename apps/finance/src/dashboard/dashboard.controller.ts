@@ -42,4 +42,16 @@ export class DashboardController {
       parseInt(year),
     );
   }
+
+  @Get('year')
+  async getYearOverview(
+    @Headers('x-user-id') userId: string,
+    @Query('year') year?: string,
+  ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
+    const targetYear = year ? parseInt(year) : new Date().getFullYear();
+    return this.dashboardService.getYearOverview(userId, targetYear);
+  }
 }

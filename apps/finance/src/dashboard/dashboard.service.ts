@@ -121,6 +121,69 @@ export class DashboardService {
     };
   }
 
+  async getYearOverview(userId: string, year: number) {
+    const targetYear = year || new Date().getFullYear();
+    const startDate = new Date(targetYear, 0, 1);
+    const endDate = new Date(targetYear, 11, 31);
+    endDate.setHours(23, 59, 59, 999);
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        userId,
+        date: { gte: startDate, lte: endDate },
+      },
+      select: {
+        date: true,
+        amount: true,
+        type: true,
+      },
+    });
+
+    const months = Array.from({ length: 12 }, () => ({
+      income: 0,
+      expense: 0,
+      balance: 0,
+    }));
+
+    for (const tx of transactions) {
+      const m = new Date(tx.date).getMonth(); // 0-11
+      const amount = Number(tx.amount);
+      if (tx.type === 'Receita') {
+        months[m].income += amount;
+      } else {
+        months[m].expense += amount;
+      }
+    }
+
+    months.forEach((m) => {
+      m.balance = m.income - m.expense;
+    });
+
+    const totals = months.reduce(
+      (acc, m) => {
+        acc.income += m.income;
+        acc.expense += m.expense;
+        return acc;
+      },
+      { income: 0, expense: 0 },
+    );
+
+    return {
+      year: targetYear,
+      months: months.map((m, idx) => ({
+        month: idx + 1,
+        income: m.income,
+        expense: m.expense,
+        balance: m.balance,
+      })),
+      totals: {
+        income: totals.income,
+        expense: totals.expense,
+        balance: totals.income - totals.expense,
+      },
+    };
+  }
+
   async getCategories(userId: string, month: number, year: number) {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);

@@ -282,5 +282,14 @@ export const financeApi = {
         { method: "GET" },
       );
     },
+    year: (year?: number) => {
+      const params = new URLSearchParams();
+      if (year) params.append("year", year.toString());
+      const queryString = params.toString() ? `?${params.toString()}` : "";
+      return request<import("../types/finance").DashboardYearOverview>(
+        `/api/finance/dashboard/year${queryString}`,
+        { method: "GET" },
+      );
+    },
   },
 };
