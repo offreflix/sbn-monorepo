@@ -7,6 +7,7 @@ import { FinanceRemotePage } from "./pages/FinanceRemote";
 import { WishlistPage } from "./pages/Wishlist";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
+import { SettingsPage } from "./pages/Settings";
 
 const Protected = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -57,6 +58,14 @@ function App() {
               element={
                 <Protected>
                   <WishlistPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Protected>
+                  <SettingsPage />
                 </Protected>
               }
             />

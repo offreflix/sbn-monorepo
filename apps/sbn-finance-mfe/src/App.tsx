@@ -1,24 +1,24 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from "react";
 import {
   Routes,
   Route,
   useLocation,
   useNavigate,
   Navigate,
-} from 'react-router-dom'
-import './index.css'
-import { financeApi } from './api/finance'
+} from "react-router-dom";
+import "./index.css";
+import { financeApi } from "./api/finance";
 import type {
   Transaction,
   Wallet,
   Category,
   DashboardSummary,
   DashboardCategories,
-} from './types/finance'
-import { TransactionList } from './components/TransactionList'
-import { Dashboard } from './components/Dashboard'
-import { CategoryGrid } from './components/CategoryGrid'
-import { CalendarView } from './components/CalendarView'
+} from "./types/finance";
+import { TransactionList } from "./components/TransactionList";
+import { Dashboard } from "./components/Dashboard";
+import { CategoryGrid } from "./components/CategoryGrid";
+import { CalendarView } from "./components/CalendarView";
 import {
   Select,
   SelectContent,
@@ -26,42 +26,42 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   LayoutDashboard,
   RefreshCcw,
   Receipt,
   Tags,
   Calendar,
-} from 'lucide-react'
-import { toast, Toaster } from 'sonner'
+} from "lucide-react";
+import { toast, Toaster } from "sonner";
 
 const App = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [wallets, setWallets] = useState<Wallet[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Dashboard Data
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary>({
     cards: { balance: 0, currentInvoice: 0, nextInvoice: 0, totalInvoices: 0 },
     overview: { income: 0, expense: 0, balance: 0 },
-  })
+  });
   const [dashboardCategories, setDashboardCategories] =
     useState<DashboardCategories>({
       income: [],
       expense: [],
-    })
+    });
 
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
 
       // Parallel Fetch
       const [txs, wls, cats, dashSum, dashCats] = await Promise.all([
@@ -70,72 +70,72 @@ const App = () => {
         financeApi.categories.list(),
         financeApi.dashboard.summary(selectedMonth, selectedYear),
         financeApi.dashboard.categories(selectedMonth, selectedYear),
-      ])
+      ]);
 
-      setTransactions(txs)
-      setWallets(wls)
-      setCategories(cats)
-      setDashboardSummary(dashSum)
-      setDashboardCategories(dashCats)
+      setTransactions(txs);
+      setWallets(wls);
+      setCategories(cats);
+      setDashboardSummary(dashSum);
+      setDashboardCategories(dashCats);
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-      toast.error('Erro ao carregar dados. Tente novamente.')
+      console.error("Erro ao carregar dados:", error);
+      toast.error("Erro ao carregar dados. Tente novamente.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [selectedMonth, selectedYear])
+  }, [selectedMonth, selectedYear]);
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    loadData();
+  }, [loadData]);
 
   const handleTransactionSuccess = () => {
-    loadData()
-  }
+    loadData();
+  };
 
   const isTabActive = (path: string) => {
     // If path is empty (Dashboard), check if we are at root or just /finance
-    if (path === '') {
+    if (path === "") {
       const isSubRoute =
-        location.pathname.endsWith('/transactions') ||
-        location.pathname.endsWith('/categories') ||
-        location.pathname.endsWith('/calendar')
-      return !isSubRoute
+        location.pathname.endsWith("/transactions") ||
+        location.pathname.endsWith("/categories") ||
+        location.pathname.endsWith("/calendar");
+      return !isSubRoute;
     }
-    return location.pathname.endsWith(path)
-  }
+    return location.pathname.endsWith(path);
+  };
 
   const handleNavigate = (path: string) => {
     // If we are navigating to the same path, do nothing
-    const currentPath = location.pathname
-    const segments = currentPath.split('/').filter(Boolean)
-    const lastSegment = segments[segments.length - 1]
+    const currentPath = location.pathname;
+    const segments = currentPath.split("/").filter(Boolean);
+    const lastSegment = segments[segments.length - 1];
 
     // Define known routes (excluding root)
-    const knownRoutes = ['transactions', 'categories', 'calendar']
+    const knownRoutes = ["transactions", "categories", "calendar"];
 
     // Determine if we are currently in a sub-route
-    const isCurrentlyInSubRoute = knownRoutes.includes(lastSegment)
+    const isCurrentlyInSubRoute = knownRoutes.includes(lastSegment);
 
-    if (path === '.') {
+    if (path === ".") {
       // Target: Root (Dashboard)
       if (isCurrentlyInSubRoute) {
         // Go up one level to root
-        navigate('..', { relative: 'path', replace: true })
+        navigate("..", { relative: "path", replace: true });
       }
     } else {
       // Target: Sub-route (e.g., 'calendar')
       if (isCurrentlyInSubRoute) {
         if (lastSegment !== path) {
           // Replace sibling: go up and then to new path
-          navigate(`../${path}`, { relative: 'path', replace: true })
+          navigate(`../${path}`, { relative: "path", replace: true });
         }
       } else {
         // From root, append path
-        navigate(path, { replace: true })
+        navigate(path, { replace: true });
       }
     }
-  }
+  };
 
   return (
     <>
@@ -151,36 +151,36 @@ const App = () => {
               {/* View Switcher - Simple Buttons */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant={isTabActive('') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('.')}
+                  onClick={() => handleNavigate(".")}
                   className="gap-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
                 <Button
-                  variant={isTabActive('transactions') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("transactions") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('transactions')}
+                  onClick={() => handleNavigate("transactions")}
                   className="gap-2"
                 >
                   <Receipt className="h-4 w-4" />
                   Transações
                 </Button>
                 <Button
-                  variant={isTabActive('categories') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("categories") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('categories')}
+                  onClick={() => handleNavigate("categories")}
                   className="gap-2"
                 >
                   <Tags className="h-4 w-4" />
                   Categorias
                 </Button>
                 <Button
-                  variant={isTabActive('calendar') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("calendar") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('calendar')}
+                  onClick={() => handleNavigate("calendar")}
                   className="gap-2"
                 >
                   <Calendar className="h-4 w-4" />
@@ -204,8 +204,8 @@ const App = () => {
                       value={m.toString()}
                       className="text-xs"
                     >
-                      {new Date(0, m - 1).toLocaleString('pt-BR', {
-                        month: 'long',
+                      {new Date(0, m - 1).toLocaleString("pt-BR", {
+                        month: "long",
                       })}
                     </SelectItem>
                   ))}
@@ -310,10 +310,10 @@ const App = () => {
 
       <div
         className="hidden md:flex lg:flex xl:flex"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

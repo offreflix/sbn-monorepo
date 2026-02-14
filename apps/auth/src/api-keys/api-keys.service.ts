@@ -41,7 +41,9 @@ export class ApiKeysService {
     };
   }
 
-  async validateKey(rawKey: string): Promise<{ valid: boolean; userId?: string }> {
+  async validateKey(
+    rawKey: string,
+  ): Promise<{ valid: boolean; userId?: string }> {
     if (!rawKey || !rawKey.startsWith('sbn_k_')) {
       return { valid: false };
     }

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -10,15 +10,15 @@ import {
   addDays,
   startOfWeek,
   endOfWeek,
-} from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
-import { formatCurrency } from '../lib/utils'
-import type { Transaction } from '../types/finance'
+} from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
+import { formatCurrency } from "../lib/utils";
+import type { Transaction } from "../types/finance";
 
 interface CalendarViewProps {
-  transactions: Transaction[]
-  currentMonth: number // 1-12
-  currentYear: number
+  transactions: Transaction[];
+  currentMonth: number; // 1-12
+  currentYear: number;
 }
 
 export function CalendarView({
@@ -28,52 +28,52 @@ export function CalendarView({
 }: CalendarViewProps) {
   const monthDate = useMemo(
     () => new Date(currentYear, currentMonth - 1, 1),
-    [currentMonth, currentYear]
-  )
+    [currentMonth, currentYear],
+  );
 
   const daysInMonth = useMemo(() => {
-    const start = startOfWeek(startOfMonth(monthDate))
-    const end = endOfWeek(endOfMonth(monthDate))
-    return eachDayOfInterval({ start, end })
-  }, [monthDate])
+    const start = startOfWeek(startOfMonth(monthDate));
+    const end = endOfWeek(endOfMonth(monthDate));
+    return eachDayOfInterval({ start, end });
+  }, [monthDate]);
 
   const dailyData = useMemo(() => {
     const data = new Map<
       string,
       {
-        income: number
-        expense: number
-        balance: number
-        transactions: Transaction[]
+        income: number;
+        expense: number;
+        balance: number;
+        transactions: Transaction[];
       }
-    >()
+    >();
 
     transactions.forEach((tx) => {
-      const dateKey = format(new Date(tx.date), 'yyyy-MM-dd')
+      const dateKey = format(new Date(tx.date), "yyyy-MM-dd");
       const current = data.get(dateKey) || {
         income: 0,
         expense: 0,
         balance: 0,
         transactions: [],
-      }
+      };
 
-      const amount = Number(tx.amount)
-      if (tx.type === 'Receita') {
-        current.income += amount
-        current.balance += amount
+      const amount = Number(tx.amount);
+      if (tx.type === "Receita") {
+        current.income += amount;
+        current.balance += amount;
       } else {
-        current.expense += amount
-        current.balance -= amount
+        current.expense += amount;
+        current.balance -= amount;
       }
-      current.transactions.push(tx)
+      current.transactions.push(tx);
 
-      data.set(dateKey, current)
-    })
+      data.set(dateKey, current);
+    });
 
-    return data
-  }, [transactions])
+    return data;
+  }, [transactions]);
 
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   return (
     <Card variant="glass" className="h-full">
@@ -96,16 +96,16 @@ export function CalendarView({
 
           {/* Days */}
           {daysInMonth.map((day, index) => {
-            const dateKey = format(day, 'yyyy-MM-dd')
-            const data = dailyData.get(dateKey)
-            const isCurrentMonth = isSameMonth(day, monthDate)
-            const isToday = isSameDay(day, new Date())
+            const dateKey = format(day, "yyyy-MM-dd");
+            const data = dailyData.get(dateKey);
+            const isCurrentMonth = isSameMonth(day, monthDate);
+            const isToday = isSameDay(day, new Date());
 
-            const colIndex = index % 7
-            const rowIndex = Math.floor(index / 7)
-            const totalRows = Math.ceil(daysInMonth.length / 7)
-            const isRightSide = colIndex > 3
-            const isBottomHalf = rowIndex >= totalRows - 2 // Flip for last 2 rows
+            const colIndex = index % 7;
+            const rowIndex = Math.floor(index / 7);
+            const totalRows = Math.ceil(daysInMonth.length / 7);
+            const isRightSide = colIndex > 3;
+            const isBottomHalf = rowIndex >= totalRows - 2; // Flip for last 2 rows
 
             return (
               <div
@@ -115,21 +115,21 @@ export function CalendarView({
                   min-h-[100px] p-2 border rounded-md flex flex-col justify-between transition-colors
                   ${
                     isCurrentMonth
-                      ? 'bg-card/50 hover:bg-card/80'
-                      : 'bg-muted/10 text-muted-foreground opacity-50'
+                      ? "bg-card/50 hover:bg-card/80"
+                      : "bg-muted/10 text-muted-foreground opacity-50"
                   }
-                  ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
+                  ${isToday ? "border-primary ring-1 ring-primary" : "border-border/50"}
                 `}
               >
                 <div className="flex justify-between items-start">
                   <span
                     className={`text-sm font-medium ${
                       isToday
-                        ? 'bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full'
-                        : ''
+                        ? "bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full"
+                        : ""
                     }`}
                   >
-                    {format(day, 'd')}
+                    {format(day, "d")}
                   </span>
                   {data && (
                     <div className="text-[10px] text-right space-y-0.5">
@@ -150,7 +150,7 @@ export function CalendarView({
                 {data && (data.income > 0 || data.expense > 0) && (
                   <div
                     className={`text-xs font-bold text-right mt-1 pt-1 border-t border-border/30 ${
-                      data.balance >= 0 ? 'text-primary' : 'text-red-400'
+                      data.balance >= 0 ? "text-primary" : "text-red-400"
                     }`}
                   >
                     {formatCurrency(data.balance)}
@@ -163,8 +163,8 @@ export function CalendarView({
                     className={`
                       hidden group-hover:block absolute z-50 w-64 p-3
                       bg-popover text-popover-foreground rounded-md border shadow-xl
-                      ${isRightSide ? 'right-0' : 'left-0'}
-                      ${isBottomHalf ? 'bottom-full mb-2' : 'top-full mt-2'}
+                      ${isRightSide ? "right-0" : "left-0"}
+                      ${isBottomHalf ? "bottom-full mb-2" : "top-full mt-2"}
                     `}
                   >
                     <div className="text-xs font-semibold mb-2 pb-2 border-b">
@@ -178,15 +178,15 @@ export function CalendarView({
                         >
                           <span
                             className="truncate flex-1"
-                            title={tx.description || ''}
+                            title={tx.description || ""}
                           >
-                            {tx.description || 'Sem descrição'}
+                            {tx.description || "Sem descrição"}
                           </span>
                           <span
                             className={`whitespace-nowrap ${
-                              tx.type === 'Receita'
-                                ? 'text-emerald-400'
-                                : 'text-red-400'
+                              tx.type === "Receita"
+                                ? "text-emerald-400"
+                                : "text-red-400"
                             }`}
                           >
                             {formatCurrency(tx.amount)}
@@ -197,10 +197,10 @@ export function CalendarView({
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

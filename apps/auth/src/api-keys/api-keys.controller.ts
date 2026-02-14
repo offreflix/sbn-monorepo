@@ -26,10 +26,7 @@ export class ApiKeysController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(
-    @Req() req: AuthenticatedRequest,
-    @Body() dto: CreateApiKeyDto,
-  ) {
+  async create(@Req() req: AuthenticatedRequest, @Body() dto: CreateApiKeyDto) {
     return this.apiKeysService.create(req.user.userId, dto);
   }
 
@@ -42,10 +39,7 @@ export class ApiKeysController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async revoke(
-    @Param('id') id: string,
-    @Req() req: AuthenticatedRequest,
-  ) {
+  async revoke(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.apiKeysService.revokeKey(id, req.user.userId);
   }
 }
