@@ -19,14 +19,7 @@ import { TransactionList } from "./components/TransactionList";
 import { Dashboard } from "./components/Dashboard";
 import { CategoryGrid } from "./components/CategoryGrid";
 import { CalendarView } from "./components/CalendarView";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Button,
-} from "@repo/ui";
+import { Button } from "@repo/ui";
 import {
   LayoutDashboard,
   RefreshCcw,
@@ -35,6 +28,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { MonthYearSelector } from "./components/MonthYearSelector";
 
 const App = () => {
   const location = useLocation();
@@ -190,47 +184,14 @@ const App = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Select
-                value={selectedMonth.toString()}
-                onValueChange={(value) => setSelectedMonth(Number(value))}
-              >
-                <SelectTrigger className="w-[120px] h-8 text-xs">
-                  <SelectValue placeholder="Mês" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <SelectItem
-                      key={m}
-                      value={m.toString()}
-                      className="text-xs"
-                    >
-                      {new Date(0, m - 1).toLocaleString("pt-BR", {
-                        month: "long",
-                      })}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={selectedYear.toString()}
-                onValueChange={(value) => setSelectedYear(Number(value))}
-              >
-                <SelectTrigger className="w-[80px] h-8 text-xs">
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 5 }, (_, i) => 2023 + i).map((y) => (
-                    <SelectItem
-                      key={y}
-                      value={y.toString()}
-                      className="text-xs"
-                    >
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <MonthYearSelector
+                month={selectedMonth}
+                year={selectedYear}
+                onChange={(m, y) => {
+                  setSelectedMonth(m);
+                  setSelectedYear(y);
+                }}
+              />
 
               <Button
                 variant="ghost"
