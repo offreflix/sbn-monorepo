@@ -3,12 +3,40 @@ import { ConfigService } from '@nestjs/config';
 import { ProxyService } from './proxy.service';
 import { Request } from 'express';
 import { CompositeAuthGuard } from '../auth/composite-auth.guard';
-import { JsonValue } from '../common/types';
+import { JsonValue, HeadersDictionary } from '../common/types';
 import type { AuthenticatedUser } from '../auth/auth.types';
 
 interface AuthenticatedRequest extends Request {
   user: AuthenticatedUser;
 }
+
+/**
+ * Hop-by-hop headers (RFC 2616 §13.5.1) and internal trust headers that must
+ * never be forwarded from an untrusted client to internal services.
+ *
+ * Hop-by-hop headers are meaningful only for a single transport link and must
+ * not be re-transmitted by proxies.
+ *
+ * Internal trust headers (x-user-id, etc.) are set exclusively by the
+ * orchestrator after validating the JWT; allowing clients to inject them
+ * would enable identity spoofing.
+ */
+const BLOCKED_CLIENT_HEADERS = new Set([
+  'host',
+  'content-length',
+  'connection',
+  'keep-alive',
+  'transfer-encoding',
+  'te',
+  'upgrade',
+  'proxy-authorization',
+  'proxy-authenticate',
+  'x-user-id',
+  'x-forwarded-for',
+]);
+
+/** Detects CR or LF characters used in CRLF/header-injection attacks. */
+const CRLF_PATTERN = /[\r\n]/;
 
 @Controller('api')
 export class ProxyController {
@@ -16,6 +44,35 @@ export class ProxyController {
     private readonly proxyService: ProxyService,
     private readonly configService: ConfigService,
   ) {}
+
+  /**
+   * Returns a copy of the incoming headers with all unsafe entries removed:
+   *  - hop-by-hop and internal trust headers (allowlist-based block)
+   *  - any header whose value contains CR or LF (CRLF injection guard)
+   */
+  sanitizeClientHeaders(
+    headers: Record<string, string | string[] | undefined>,
+  ): HeadersDictionary {
+    const sanitized: HeadersDictionary = {};
+
+    for (const [key, value] of Object.entries(headers)) {
+      if (BLOCKED_CLIENT_HEADERS.has(key.toLowerCase())) {
+        continue;
+      }
+
+      if (typeof value === 'string' && CRLF_PATTERN.test(value)) {
+        continue;
+      }
+
+      if (Array.isArray(value) && value.some((v) => CRLF_PATTERN.test(v))) {
+        continue;
+      }
+
+      sanitized[key] = value;
+    }
+
+    return sanitized;
+  }
 
   @All('auth/*')
   async handleAuthRequest(
@@ -29,11 +86,7 @@ export class ProxyController {
     const url = `${authUrl}${req.originalUrl.replace('/api', '')}`;
     console.log(`[Proxy] Forwarding auth request to: ${url}`);
 
-    // Remove host and content-length headers to avoid conflicts
-    const { host, 'content-length': contentLength, ...headers } = req.headers;
-    void host;
-    void contentLength;
-
+    const headers = this.sanitizeClientHeaders(req.headers);
     return this.proxyService.forwardRequest(url, req.method, body, headers);
   }
 
@@ -48,14 +101,16 @@ export class ProxyController {
       'http://localhost:56082',
     );
     const url = `${financeUrl}${req.originalUrl.replace('/api/finance', '')}`;
-    // Inject User ID into headers
     const { user } = req;
-    const { host, 'content-length': contentLength, ...headers } = req.headers;
-    void host;
-    void contentLength;
 
-    const finalHeaders = {
-      ...headers,
+    // Sanitize client headers, then strip the raw JWT — the finance service
+    // must rely solely on the x-user-id set by the orchestrator below.
+    const { authorization: _auth, ...sanitized } =
+      this.sanitizeClientHeaders(req.headers);
+    void _auth;
+
+    const finalHeaders: HeadersDictionary = {
+      ...sanitized,
       'x-user-id': user.userId,
     };
 
