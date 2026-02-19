@@ -1,13 +1,13 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
 import type {
   Wallet,
   Category,
   CreateTransactionRequest,
-} from '../types/finance'
-import { Button } from '@repo/ui'
+} from "../types/finance";
+import { Button } from "@repo/ui";
 import {
   Input,
   Card,
@@ -20,41 +20,41 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@repo/ui'
-import { toast } from 'sonner'
-import { useState } from 'react'
+} from "@repo/ui";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const transactionSchema = z.object({
-  walletId: z.string().min(1, 'Selecione uma carteira'),
-  categoryId: z.string().min(1, 'Selecione uma categoria'),
+  walletId: z.string().min(1, "Selecione uma carteira"),
+  categoryId: z.string().min(1, "Selecione uma categoria"),
   amount: z
     .string()
-    .min(1, 'Valor é obrigatório')
+    .min(1, "Valor é obrigatório")
     .refine((val) => {
-      const num = parseFloat(val)
-      return !isNaN(num) && num > 0
-    }, 'Valor deve ser um número positivo'),
-  date: z.string().min(1, 'Data é obrigatória'),
+      const num = parseFloat(val);
+      return !isNaN(num) && num > 0;
+    }, "Valor deve ser um número positivo"),
+  date: z.string().min(1, "Data é obrigatória"),
   description: z.string().optional(),
-  type: z.enum(['Receita', 'Despesa']),
-  status: z.enum(['Pendente', 'Pago', 'Cancelado']).optional(),
+  type: z.enum(["Receita", "Despesa"]),
+  status: z.enum(["Pendente", "Pago", "Cancelado"]).optional(),
   isPaid: z.boolean().optional(),
   installments: z
     .string()
-    .default('1')
+    .default("1")
     .refine((val) => {
-      const n = parseInt(val)
-      return !isNaN(n) && n >= 1
-    }, 'Mínimo 1 parcela'),
-})
+      const n = parseInt(val);
+      return !isNaN(n) && n >= 1;
+    }, "Mínimo 1 parcela"),
+});
 
-type TransactionFormData = z.infer<typeof transactionSchema>
+type TransactionFormData = z.infer<typeof transactionSchema>;
 
 interface TransactionFormProps {
-  wallets: Wallet[]
-  categories: Category[]
-  onSuccess: () => void
-  onCancel: () => void
+  wallets: Wallet[];
+  categories: Category[];
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export function TransactionForm({
@@ -63,30 +63,30 @@ export function TransactionForm({
   onSuccess,
   onCancel,
 }: TransactionFormProps) {
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      type: 'Despesa',
-      status: 'Pendente',
+      type: "Despesa",
+      status: "Pendente",
       isPaid: false,
-      installments: '1',
-      date: new Date().toLocaleDateString('sv'), // 'sv' locale formats as YYYY-MM-DD
+      installments: "1",
+      date: new Date().toLocaleDateString("sv"), // 'sv' locale formats as YYYY-MM-DD
     },
-  })
+  });
 
-  const selectedType = form.watch('type')
+  const selectedType = form.watch("type");
   const filteredCategories = categories.filter(
-    (cat) => cat.type === selectedType
-  )
+    (cat) => cat.type === selectedType,
+  );
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
 
       // Create date at 12:00 local time to prevent timezone shifts when converting to UTC
-      const [year, month, day] = data.date.split('-').map(Number)
-      const date = new Date(year, month - 1, day, 12, 0, 0)
+      const [year, month, day] = data.date.split("-").map(Number);
+      const date = new Date(year, month - 1, day, 12, 0, 0);
 
       const payload: CreateTransactionRequest = {
         walletId: data.walletId,
@@ -95,24 +95,24 @@ export function TransactionForm({
         date: date.toISOString(),
         description: data.description,
         type: data.type,
-        status: data.status || 'Pendente',
+        status: data.status || "Pendente",
         isPaid: data.isPaid || false,
         installments: parseInt(data.installments),
-        currency: 'BRL',
-      }
+        currency: "BRL",
+      };
 
-      await financeApi.transactions.create(payload)
-      toast.success('Transação criada com sucesso!')
-      form.reset()
-      onSuccess()
+      await financeApi.transactions.create(payload);
+      toast.success("Transação criada com sucesso!");
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar transação'
-      )
+        error instanceof Error ? error.message : "Erro ao criar transação",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -185,7 +185,7 @@ export function TransactionForm({
                       <option value="">Selecione uma categoria</option>
                       {filteredCategories.map((category) => (
                         <option key={category.id} value={category.id}>
-                          {category.icon || ''} {category.name}
+                          {category.icon || ""} {category.name}
                         </option>
                       ))}
                     </select>
@@ -297,12 +297,12 @@ export function TransactionForm({
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? 'Salvando...' : 'Criar Transação'}
+                {submitting ? "Salvando..." : "Criar Transação"}
               </Button>
             </div>
           </div>
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

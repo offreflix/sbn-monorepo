@@ -1,9 +1,14 @@
 {
-  "name": "sbn-mfe-repo",
+  "name": "sbn-monorepo",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=@sbn/auth --filter=@sbn/finance --filter=@sbn/orchestrator",
+    "dev:frontend": "turbo run dev --filter=host --filter=sbn-finance-mfe",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "prisma:generate": "turbo run prisma:generate",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

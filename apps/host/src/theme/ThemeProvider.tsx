@@ -1,64 +1,70 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
-type Theme = 'light' | 'dark' | 'system'
+type Theme = "light" | "dark" | "system";
 
 interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  resolvedTheme: 'light' | 'dark'
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  resolvedTheme: "light" | "dark";
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('theme') as Theme | null
-      return stored || 'system'
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("theme") as Theme | null;
+      return stored || "dark";
     }
-    return 'system'
-  })
+    return "dark";
+  });
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
-    const root = window.document.documentElement
+    const root = window.document.documentElement;
 
     const updateTheme = () => {
-      root.classList.remove('light', 'dark')
+      root.classList.remove("light", "dark");
 
-      let resolved: 'light' | 'dark' = 'light'
+      let resolved: "light" | "dark" = "dark";
 
-      if (theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+      if (theme === "system") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
           .matches
-          ? 'dark'
-          : 'light'
-        resolved = systemTheme
+          ? "dark"
+          : "light";
+        resolved = systemTheme;
       } else {
-        resolved = theme
+        resolved = theme;
       }
 
-      root.classList.add(resolved)
-      setResolvedTheme(resolved)
-    }
+      root.classList.add(resolved);
+      setResolvedTheme(resolved);
+    };
 
-    updateTheme()
+    updateTheme();
 
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleChange = () => updateTheme()
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => updateTheme();
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
     }
-  }, [theme])
+  }, [theme]);
 
   const handleSetTheme = (newTheme: Theme) => {
-    setTheme(newTheme)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', newTheme)
+    setTheme(newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", newTheme);
     }
-  }
+  };
 
   return (
     <ThemeContext.Provider
@@ -66,14 +72,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </ThemeContext.Provider>
-  )
+  );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext)
+  const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
-  return context
+  return context;
 }
-

@@ -1,16 +1,16 @@
-import { Card } from '@repo/ui'
+import { Card } from "@repo/ui";
 import {
   Wallet,
   TrendingUp,
   TrendingDown,
   ArrowUpRight,
   ArrowDownRight,
-} from 'lucide-react'
+} from "lucide-react";
 
 interface BalanceOverviewProps {
-  totalBalance: number
-  totalIncome: number
-  totalExpenses: number
+  totalBalance: number;
+  totalIncome: number;
+  totalExpenses: number;
 }
 
 export function BalanceOverview({
@@ -19,11 +19,11 @@ export function BalanceOverview({
   totalExpenses,
 }: BalanceOverviewProps) {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value)
-  }
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -98,5 +98,5 @@ export function BalanceOverview({
         </div>
       </Card>
     </div>
-  )
+  );
 }

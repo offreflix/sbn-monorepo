@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -12,27 +12,27 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-} from '@repo/ui'
-import type { ChartConfig } from '@repo/ui'
-import type { Transaction } from '../types/finance'
-import { TrendingUp, TrendingDown } from 'lucide-react'
+} from "@repo/ui";
+import type { ChartConfig } from "@repo/ui";
+import type { Transaction } from "../types/finance";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface IncomeExpenseChartProps {
-  transactions: Transaction[]
-  year: number
-  month: number
+  transactions: Transaction[];
+  year: number;
+  month: number;
 }
 
 const chartConfig: ChartConfig = {
   receitas: {
-    label: 'Receitas',
-    color: '#059669', // emerald-600
+    label: "Receitas",
+    color: "#059669", // emerald-600
   },
   despesas: {
-    label: 'Despesas',
-    color: '#e11d48', // rose-600
+    label: "Despesas",
+    color: "#e11d48", // rose-600
   },
-}
+};
 
 export function IncomeExpenseChart({
   transactions,
@@ -41,28 +41,28 @@ export function IncomeExpenseChart({
 }: IncomeExpenseChartProps) {
   const data = useMemo(() => {
     const income = transactions
-      .filter((t) => t.type === 'Receita')
-      .reduce((acc, t) => acc + parseFloat(String(t.amount)), 0)
+      .filter((t) => t.type === "Receita")
+      .reduce((acc, t) => acc + parseFloat(String(t.amount)), 0);
 
     const expense = transactions
-      .filter((t) => t.type === 'Despesa')
-      .reduce((acc, t) => acc + parseFloat(String(t.amount)), 0)
+      .filter((t) => t.type === "Despesa")
+      .reduce((acc, t) => acc + parseFloat(String(t.amount)), 0);
 
     return [
-      { type: 'receitas', value: income, fill: chartConfig.receitas.color },
-      { type: 'despesas', value: expense, fill: chartConfig.despesas.color },
-    ]
-  }, [transactions])
+      { type: "receitas", value: income, fill: chartConfig.receitas.color },
+      { type: "despesas", value: expense, fill: chartConfig.despesas.color },
+    ];
+  }, [transactions]);
 
-  const monthName = new Date(year, month - 1).toLocaleString('pt-BR', {
-    month: 'long',
-  })
+  const monthName = new Date(year, month - 1).toLocaleString("pt-BR", {
+    month: "long",
+  });
 
   // Calculate percentage delta (dummy logic for visual, ideally would compare to last month)
-  const incomeVal = data[0].value
-  const expenseVal = data[1].value
+  const incomeVal = data[0].value;
+  const expenseVal = data[1].value;
   const savingRate =
-    incomeVal > 0 ? ((incomeVal - expenseVal) / incomeVal) * 100 : 0
+    incomeVal > 0 ? ((incomeVal - expenseVal) / incomeVal) * 100 : 0;
 
   return (
     <Card className="w-full border-none shadow-none bg-transparent">
@@ -77,15 +77,15 @@ export function IncomeExpenseChart({
         </div>
         {incomeVal > 0 && (
           <div
-            className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full ${savingRate >= 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'}`}
+            className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full ${savingRate >= 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"}`}
           >
             {savingRate >= 0 ? (
               <TrendingUp className="h-3 w-3" />
             ) : (
               <TrendingDown className="h-3 w-3" />
             )}
-            {Math.abs(savingRate).toFixed(1)}%{' '}
-            {savingRate >= 0 ? 'economia' : 'deficit'}
+            {Math.abs(savingRate).toFixed(1)}%{" "}
+            {savingRate >= 0 ? "economia" : "deficit"}
           </div>
         )}
       </CardHeader>
@@ -122,16 +122,16 @@ export function IncomeExpenseChart({
               className="text-sm font-medium fill-muted-foreground/80"
             />
             <ChartTooltip
-              cursor={{ fill: 'transparent' }}
+              cursor={{ fill: "transparent" }}
               content={
                 <ChartTooltipContent
                   indicator="line"
                   nameKey="type"
                   hideLabel
                   formatter={(value) =>
-                    new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
+                    new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
                     }).format(Number(value))
                   }
                 />
@@ -141,7 +141,7 @@ export function IncomeExpenseChart({
               dataKey="value"
               radius={[0, 6, 6, 0]}
               background={{
-                fill: 'var(--muted)',
+                fill: "var(--muted)",
                 radius: [0, 6, 6, 0],
                 opacity: 0.2,
               }}
@@ -150,5 +150,5 @@ export function IncomeExpenseChart({
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

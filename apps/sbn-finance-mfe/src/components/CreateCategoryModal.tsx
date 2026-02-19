@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,53 +11,53 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import { Input, Label } from '@repo/ui'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
-import type { CreateCategoryRequest } from '../types/finance'
-import { toast } from 'sonner'
+} from "@repo/ui";
+import { Input, Label } from "@repo/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
+import type { CreateCategoryRequest } from "../types/finance";
+import { toast } from "sonner";
 
 const EMOJI_OPTIONS = [
-  '🍔',
-  '🚗',
-  '🏥',
-  '🎮',
-  '💰',
-  '💼',
-  '🏠',
-  '✈️',
-  '📚',
-  '💳',
-  '🎬',
-  '🛒',
-]
+  "🍔",
+  "🚗",
+  "🏥",
+  "🎮",
+  "💰",
+  "💼",
+  "🏠",
+  "✈️",
+  "📚",
+  "💳",
+  "🎬",
+  "🛒",
+];
 const COLOR_OPTIONS = [
-  { name: 'Vermelho', value: '#ef4444' },
-  { name: 'Laranja', value: '#f59e0b' },
-  { name: 'Amarelo', value: '#eab308' },
-  { name: 'Verde', value: '#10b981' },
-  { name: 'Azul', value: '#3b82f6' },
-  { name: 'Roxo', value: '#8b5cf6' },
-  { name: 'Rosa', value: '#ec4899' },
-  { name: 'Cinza', value: '#6b7280' },
-]
+  { name: "Vermelho", value: "#ef4444" },
+  { name: "Laranja", value: "#f59e0b" },
+  { name: "Amarelo", value: "#eab308" },
+  { name: "Verde", value: "#10b981" },
+  { name: "Azul", value: "#3b82f6" },
+  { name: "Roxo", value: "#8b5cf6" },
+  { name: "Rosa", value: "#ec4899" },
+  { name: "Cinza", value: "#6b7280" },
+];
 
 const categorySchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.enum(['Receita', 'Despesa']),
+  name: z.string().min(1, "Nome é obrigatório"),
+  type: z.enum(["Receita", "Despesa"]),
   icon: z.string().optional(),
   color: z.string().optional(),
-})
+});
 
-type CategoryFormData = z.infer<typeof categorySchema>
+type CategoryFormData = z.infer<typeof categorySchema>;
 
 interface CreateCategoryModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
 export function CreateCategoryModal({
@@ -65,41 +65,41 @@ export function CreateCategoryModal({
   onOpenChange,
   onSuccess,
 }: CreateCategoryModalProps) {
-  const [submitting, setSubmitting] = useState(false)
-  const [selectedEmoji, setSelectedEmoji] = useState('🍔')
-  const [selectedColor, setSelectedColor] = useState('#ef4444')
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedEmoji, setSelectedEmoji] = useState("🍔");
+  const [selectedColor, setSelectedColor] = useState("#ef4444");
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      type: 'Despesa',
+      type: "Despesa",
     },
-  })
+  });
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const payload: CreateCategoryRequest = {
         name: data.name,
         type: data.type,
         icon: selectedEmoji,
         color: selectedColor,
-      }
+      };
 
-      await financeApi.categories.create(payload)
-      toast.success('Categoria criada com sucesso!')
-      form.reset()
-      setSelectedEmoji('🍔')
-      setSelectedColor('#ef4444')
-      onSuccess()
+      await financeApi.categories.create(payload);
+      toast.success("Categoria criada com sucesso!");
+      form.reset();
+      setSelectedEmoji("🍔");
+      setSelectedColor("#ef4444");
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao criar categoria'
-      )
+        error instanceof Error ? error.message : "Erro ao criar categoria",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -116,7 +116,7 @@ export function CreateCategoryModal({
             <Label htmlFor="name">Nome da Categoria</Label>
             <Input
               id="name"
-              {...form.register('name')}
+              {...form.register("name")}
               placeholder="Ex: Alimentação"
             />
             {form.formState.errors.name && (
@@ -129,9 +129,9 @@ export function CreateCategoryModal({
           <div className="space-y-2">
             <Label htmlFor="type">Tipo</Label>
             <Select
-              value={form.watch('type')}
+              value={form.watch("type")}
               onValueChange={(value) =>
-                form.setValue('type', value as 'Receita' | 'Despesa')
+                form.setValue("type", value as "Receita" | "Despesa")
               }
             >
               <SelectTrigger>
@@ -154,8 +154,8 @@ export function CreateCategoryModal({
                   onClick={() => setSelectedEmoji(emoji)}
                   className={`h-12 w-12 rounded-lg border-2 text-2xl transition-all hover:scale-110 ${
                     selectedEmoji === emoji
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border'
+                      ? "border-primary bg-primary/10"
+                      : "border-border"
                   }`}
                 >
                   {emoji}
@@ -174,8 +174,8 @@ export function CreateCategoryModal({
                   onClick={() => setSelectedColor(color.value)}
                   className={`h-12 rounded-lg border-2 transition-all hover:scale-105 ${
                     selectedColor === color.value
-                      ? 'border-foreground ring-2 ring-offset-2'
-                      : 'border-border'
+                      ? "border-foreground ring-2 ring-offset-2"
+                      : "border-border"
                   }`}
                   style={{ backgroundColor: color.value }}
                   title={color.name}
@@ -194,11 +194,11 @@ export function CreateCategoryModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Salvando...' : 'Criar Categoria'}
+              {submitting ? "Salvando..." : "Criar Categoria"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

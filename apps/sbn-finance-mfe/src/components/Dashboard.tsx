@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import {
   Wallet,
   TrendingUp,
@@ -6,65 +6,74 @@ import {
   CreditCard,
   DollarSign,
   Calendar,
-} from 'lucide-react'
-import { formatCurrency } from '../lib/utils'
+} from "lucide-react";
+import { formatCurrency } from "../lib/utils";
 import type {
   DashboardSummary,
   DashboardCategories,
   Wallet as WalletType,
-} from '../types/finance'
-import { WalletCards } from './WalletCards'
+  Category,
+  Transaction,
+} from "../types/finance";
+import { WalletCards } from "./WalletCards";
+import { CategoryGrid } from "./CategoryGrid";
+import { TransactionList } from "./TransactionList";
 
 interface DashboardProps {
-  summary: DashboardSummary
-  categories: DashboardCategories
-  wallets: WalletType[]
-  loading: boolean
-  onRefresh: () => void
+  summary: DashboardSummary;
+  categories: DashboardCategories;
+  wallets: WalletType[];
+  allCategories: Category[];
+  transactions: Transaction[];
+  loading: boolean;
+  onRefresh: () => void;
 }
 
 export function Dashboard({
   summary,
   categories,
   wallets,
+  allCategories,
+  transactions,
   loading,
   onRefresh,
 }: DashboardProps) {
   // Helper for Skeleton or value
   const Val = ({
     val,
-    type = 'currency',
+    type = "currency",
   }: {
-    val: number | undefined
-    type?: 'currency' | 'text'
+    val: number | undefined;
+    type?: "currency" | "text";
   }) => {
     if (loading || val === undefined)
-      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />;
     return (
-      <span className={type === 'currency' ? 'tabular-nums' : ''}>
-        {type === 'currency' ? formatCurrency(val) : val}
+      <span className={type === "currency" ? "tabular-nums" : ""}>
+        {type === "currency" ? formatCurrency(val) : val}
       </span>
-    )
-  }
+    );
+  };
 
   // Simple Progress Component
   const SimpleProgress = ({
     value,
     colorClass,
   }: {
-    value: number
-    colorClass: string
+    value: number;
+    colorClass: string;
   }) => (
     <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
       <div
-        className={`h-full ${colorClass}`}
+        className={`h-full ${colorClass} transition-all duration-500`}
         style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
       />
     </div>
-  )
+  );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <p className="text-muted-foreground">
@@ -72,13 +81,12 @@ export function Dashboard({
         </p>
       </div>
 
-      {/* Top Cards */}
+      {/* Top Cards - Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Valor em conta(s) */}
-        <Card>
+        <Card variant="glass">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+              <div className="h-12 w-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
                 <Wallet className="h-6 w-6" />
               </div>
               <div>
@@ -93,11 +101,10 @@ export function Dashboard({
           </CardContent>
         </Card>
 
-        {/* Fatura atual */}
-        <Card>
+        <Card variant="glass">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-600 dark:text-red-400">
+              <div className="h-12 w-12 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400">
                 <CreditCard className="h-6 w-6" />
               </div>
               <div>
@@ -112,11 +119,10 @@ export function Dashboard({
           </CardContent>
         </Card>
 
-        {/* Próxima fatura */}
-        <Card>
+        <Card variant="glass">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+              <div className="h-12 w-12 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400">
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
@@ -131,11 +137,10 @@ export function Dashboard({
           </CardContent>
         </Card>
 
-        {/* Todas as faturas */}
-        <Card>
+        <Card variant="glass">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400">
+              <div className="h-12 w-12 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400">
                 <CreditCard className="h-6 w-6" />
               </div>
               <div>
@@ -151,57 +156,54 @@ export function Dashboard({
         </Card>
       </div>
 
-      {/* Visão Geral */}
+      {/* Overview - Income/Expense/Balance */}
       <section className="space-y-4">
-        <h3 className="text-xl font-semibold">Visão geral</h3>
+        <h3 className="text-xl font-semibold">Visão geral do mês</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Receita */}
-          <Card>
+          <Card variant="glass">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="bg-emerald-100 dark:bg-emerald-900/20 p-2 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <div className="bg-emerald-500/20 p-2 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-emerald-400" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">
                   Receita
                 </span>
               </div>
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="text-2xl font-bold text-emerald-400">
                 <Val val={summary.overview.income} />
               </div>
             </CardContent>
           </Card>
 
-          {/* Despesa */}
-          <Card>
+          <Card variant="glass">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="bg-red-100 dark:bg-red-900/20 p-2 rounded-lg">
-                  <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <div className="bg-red-500/20 p-2 rounded-lg">
+                  <TrendingDown className="h-5 w-5 text-red-400" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">
                   Despesa
                 </span>
               </div>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <div className="text-2xl font-bold text-red-400">
                 <Val val={summary.overview.expense} />
               </div>
             </CardContent>
           </Card>
 
-          {/* Saldo */}
-          <Card>
+          <Card variant="glass">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="bg-purple-100 dark:bg-purple-900/20 p-2 rounded-lg">
-                  <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div className="bg-primary/20 p-2 rounded-lg">
+                  <DollarSign className="h-5 w-5 text-primary" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">
                   Saldo
                 </span>
               </div>
               <div
-                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? 'text-foreground' : 'text-red-600 dark:text-red-400'}`}
+                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? "text-primary" : "text-red-400"}`}
               >
                 <Val val={summary.overview.balance} />
               </div>
@@ -210,10 +212,9 @@ export function Dashboard({
         </div>
       </section>
 
-      {/* Categories Charts */}
+      {/* Categories by Type - Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Receitas por categoria */}
-        <Card>
+        <Card variant="glass">
           <CardHeader>
             <CardTitle className="text-lg font-medium">
               Receitas por categoria
@@ -227,19 +228,19 @@ export function Dashboard({
                 <div key={cat.name} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
-                      <span className="text-emerald-600 dark:text-emerald-400">
-                        💰
-                      </span>
-                      {cat.name}{' '}
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
                     </span>
-                    <span>{formatCurrency(cat.value)}</span>
+                    <span className="tabular-nums">
+                      {formatCurrency(cat.value)}
+                    </span>
                   </div>
                   <SimpleProgress
                     value={cat.percentage}
-                    colorClass="bg-emerald-600 dark:bg-emerald-400"
+                    colorClass="bg-emerald-400"
                   />
                 </div>
               ))
@@ -247,8 +248,7 @@ export function Dashboard({
           </CardContent>
         </Card>
 
-        {/* Despesas por categoria */}
-        <Card>
+        <Card variant="glass">
           <CardHeader>
             <CardTitle className="text-lg font-medium">
               Despesas por categoria
@@ -262,18 +262,19 @@ export function Dashboard({
                 <div key={cat.name} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
-                      {/* TODO: Add icons dynamically if possible */}
-                      <span className="text-red-600 dark:text-red-400">🛒</span>
-                      {cat.name}{' '}
+                      <span className="w-2 h-2 rounded-full bg-red-400" />
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
                     </span>
-                    <span>{formatCurrency(cat.value)}</span>
+                    <span className="tabular-nums">
+                      {formatCurrency(cat.value)}
+                    </span>
                   </div>
                   <SimpleProgress
                     value={cat.percentage}
-                    colorClass="bg-red-600 dark:bg-red-400"
+                    colorClass="bg-red-400"
                   />
                 </div>
               ))
@@ -281,14 +282,32 @@ export function Dashboard({
           </CardContent>
         </Card>
       </div>
-      {/* Wallets Section */}
-      <section className="space-y-4">
-        <h3 className="text-xl font-semibold">Carteiras</h3>
-        {/* Reuse WalletCards but adjust visuals if needed. For now keeping it simple. */}
-        <div className="max-w-md">
+
+      {/* Wallets & Categories Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Wallets Section */}
+        <section className="space-y-4">
+          <h3 className="text-xl font-semibold">Carteiras</h3>
           <WalletCards wallets={wallets} onRefresh={onRefresh} />
-        </div>
+        </section>
+
+        {/* Categories Section */}
+        <section className="space-y-4">
+          <h3 className="text-xl font-semibold">Categorias</h3>
+          <CategoryGrid categories={allCategories} onRefresh={onRefresh} />
+        </section>
+      </div>
+
+      {/* Transactions Section */}
+      <section className="space-y-4">
+        <h3 className="text-xl font-semibold">Transações</h3>
+        <TransactionList
+          transactions={transactions}
+          wallets={wallets}
+          categories={allCategories}
+          onRefresh={onRefresh}
+        />
       </section>
     </div>
-  )
+  );
 }

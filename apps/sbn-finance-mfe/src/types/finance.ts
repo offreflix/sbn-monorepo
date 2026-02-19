@@ -98,7 +98,7 @@ export interface CreateWalletRequest {
   currency?: string
   invoiceClosingDay?: number
   invoiceDueDay?: number
-  limit?: string
+  limit?: number
 }
 
 export interface CreateTransactionRequest {
@@ -162,4 +162,29 @@ export interface DashboardCategory {
 export interface DashboardCategories {
   income: DashboardCategory[]
   expense: DashboardCategory[]
+}
+
+export interface DashboardYearOverviewMonth {
+  month: number
+  income: number
+  expense: number
+  balance: number
+  days?: DashboardYearOverviewDay[]
+}
+
+export interface DashboardYearOverviewDay {
+  day: number
+  income: number
+  expense: number
+  balance: number
+}
+
+export interface DashboardYearOverview {
+  year: number
+  months: DashboardYearOverviewMonth[]
+  totals: {
+    income: number
+    expense: number
+    balance: number
+  }
 }

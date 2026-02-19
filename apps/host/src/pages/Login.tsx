@@ -1,16 +1,16 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-import { Button } from '@repo/ui'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Form,
   FormControl,
@@ -19,47 +19,47 @@ import {
   FormLabel,
   FormMessage,
   Input,
-} from '@repo/ui'
-import { useAuth } from '../auth/AuthProvider'
-import { z } from 'zod'
+} from "@repo/ui";
+import { useAuth } from "../auth/AuthProvider";
+import { z } from "zod";
 
 const schema = z.object({
-  email: z.string().email('Informe um e-mail válido'),
-  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-})
+  email: z.string().email("Informe um e-mail válido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>;
 
 export const LoginPage = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' },
-  })
+    defaultValues: { email: "", password: "" },
+  });
 
-  const [submitting, setSubmitting] = useState(false)
-  const { login, user, loading } = useAuth()
-  const navigate = useNavigate()
+  const [submitting, setSubmitting] = useState(false);
+  const { login, user, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate('/dashboard', { replace: true })
-  }, [user, loading, navigate])
+    if (!loading && user) navigate("/dashboard", { replace: true });
+  }, [user, loading, navigate]);
 
   const onSubmit = async (data: FormValues) => {
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await login(data)
-      toast.success('Login realizado')
-      navigate('/dashboard', { replace: true })
+      await login(data);
+      toast.success("Login realizado");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao entrar')
+      toast.error(err instanceof Error ? err.message : "Erro ao entrar");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#e2e8f0,_#f8fafc)] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md glass-card">
         <CardHeader>
           <CardTitle>Entrar</CardTitle>
           <CardDescription>Use suas credenciais para acessar</CardDescription>
@@ -105,12 +105,12 @@ export const LoginPage = () => {
             />
 
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? 'Entrando...' : 'Entrar'}
+              {submitting ? "Entrando..." : "Entrar"}
             </Button>
           </Form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Não tem conta?{' '}
+            Não tem conta?{" "}
             <Link
               to="/register"
               className="font-medium text-primary hover:underline"
@@ -121,5 +121,5 @@ export const LoginPage = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
