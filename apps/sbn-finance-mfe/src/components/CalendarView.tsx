@@ -10,6 +10,7 @@ import {
   endOfWeek,
   addDays,
 } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import {
   Card,
   CardContent,
@@ -41,7 +42,17 @@ export function CalendarView({
 }: CalendarViewProps) {
   const [view, setView] = useState<
     'day' | 'week' | 'month' | 'agenda' | '4days' | 'year'
-  >('month')
+  >(() => {
+    const saved = localStorage.getItem('calendar-view')
+    const valid = ['day', 'week', 'month', 'agenda', '4days', 'year']
+    return (valid.includes(saved ?? '') ? saved : 'month') as
+      | 'day'
+      | 'week'
+      | 'month'
+      | 'agenda'
+      | '4days'
+      | 'year'
+  })
 
   const monthDate = useMemo(
     () => new Date(currentYear, currentMonth - 1, 1),
@@ -92,19 +103,26 @@ export function CalendarView({
 
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
-  const firstWeekRange = useMemo(() => {
-    const start = startOfWeek(startOfMonth(monthDate))
+  const selectedDay = useMemo(() => {
+    const today = new Date()
+    if (
+      today.getFullYear() === currentYear &&
+      today.getMonth() + 1 === currentMonth
+    ) {
+      return today
+    }
+    return new Date(currentYear, currentMonth - 1, 1)
+  }, [currentYear, currentMonth])
+
+  const weekRange = useMemo(() => {
+    const start = startOfWeek(selectedDay)
     const end = addDays(start, 6)
     return eachDayOfInterval({ start, end })
-  }, [monthDate])
+  }, [selectedDay])
 
-  const firstDay = useMemo(
-    () => new Date(currentYear, currentMonth - 1, 1),
-    [currentMonth, currentYear]
-  )
-  const firstFourDays = useMemo(
-    () => eachDayOfInterval({ start: firstDay, end: addDays(firstDay, 3) }),
-    [firstDay]
+  const fourDays = useMemo(
+    () => eachDayOfInterval({ start: selectedDay, end: addDays(selectedDay, 3) }),
+    [selectedDay]
   )
 
   // Year overview state and fetch
@@ -132,7 +150,7 @@ export function CalendarView({
             Calendário Financeiro
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Select value={view} onValueChange={(v: any) => setView(v)}>
+            <Select value={view} onValueChange={(v: any) => { setView(v); localStorage.setItem('calendar-view', v) }}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Visão" />
               </SelectTrigger>
@@ -321,12 +339,12 @@ export function CalendarView({
                 {day}
               </div>
             ))}
-            {firstWeekRange.map((day, index) => {
+            {weekRange.map((day, index) => {
               const dateKey = format(day, 'yyyy-MM-dd')
               const data = dailyData.get(dateKey)
               const isToday = isSameDay(day, new Date())
               const isRightSide = index % 7 > 3
-              const isBottomHalf = true
+              const isBottomHalf = false
               return (
                 <div
                   key={dateKey}
@@ -339,7 +357,7 @@ export function CalendarView({
                 >
                   <div className="flex justify-between items-start">
                     <span className="text-sm font-medium">
-                      {format(day, 'EEE d', {})}
+                      {format(day, 'EEE d', { locale: ptBR })}
                     </span>
                     {data && (
                       <div className="text-[10px] text-right space-y-0.5">
@@ -429,14 +447,14 @@ export function CalendarView({
 
         {view === '4days' && (
           <div className="grid grid-cols-4 gap-2 min-w-[600px]">
-            {firstFourDays.map((day) => {
+            {fourDays.map((day) => {
               const dateKey = format(day, 'yyyy-MM-dd')
               const data = dailyData.get(dateKey)
               return (
                 <div key={dateKey} className="p-3 border rounded-md bg-card/60">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">
-                      {format(day, 'EEE d')}
+                      {format(day, 'EEE d', { locale: ptBR })}
                     </span>
                     {data && (
                       <span
@@ -485,11 +503,11 @@ export function CalendarView({
         {view === 'day' && (
           <div className="space-y-3">
             <div className="text-sm font-medium">
-              {format(firstDay, "EEEE, d 'de' MMMM", {})}
+              {format(selectedDay, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </div>
             <div className="space-y-2">
               {(
-                dailyData.get(format(firstDay, 'yyyy-MM-dd'))?.transactions ||
+                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))?.transactions ||
                 []
               ).map((tx) => (
                 <div
@@ -511,7 +529,7 @@ export function CalendarView({
                 </div>
               ))}
               {(
-                dailyData.get(format(firstDay, 'yyyy-MM-dd'))?.transactions ||
+                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))?.transactions ||
                 []
               ).length === 0 && (
                 <div className="text-sm text-muted-foreground">
@@ -531,7 +549,7 @@ export function CalendarView({
               return (
                 <div key={dateKey} className="border rounded-md p-3 bg-card/60">
                   <div className="text-xs font-semibold mb-2">
-                    {format(day, "EEE, d 'de' MMMM")}
+                    {format(day, "EEE, d 'de' MMMM", { locale: ptBR })}
                   </div>
                   <div className="space-y-2">
                     {data.transactions.map((tx) => (
@@ -557,7 +575,7 @@ export function CalendarView({
                 </div>
               )
             })}
-            {Array.from(dailyData.keys()).length === 0 && (
+            {transactions.length === 0 && (
               <div className="text-sm text-muted-foreground">
                 Sem transações neste período
               </div>

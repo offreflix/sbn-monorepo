@@ -65,9 +65,9 @@ export function AnnualCalendar({
             </CardHeader>
             <CardContent className="pt-0">
               <div className="grid grid-cols-7 gap-1">
-                {weekDays.map((d) => (
+                {weekDays.map((d, i) => (
                   <div
-                    key={d}
+                    key={i}
                     className="text-center text-[10px] text-muted-foreground"
                   >
                     {d}
