@@ -56,7 +56,7 @@ export function CalendarView({
 
   const monthDate = useMemo(
     () => new Date(currentYear, currentMonth - 1, 1),
-    [currentMonth, currentYear]
+    [currentMonth, currentYear],
   )
 
   const daysInMonth = useMemo(() => {
@@ -121,8 +121,9 @@ export function CalendarView({
   }, [selectedDay])
 
   const fourDays = useMemo(
-    () => eachDayOfInterval({ start: selectedDay, end: addDays(selectedDay, 3) }),
-    [selectedDay]
+    () =>
+      eachDayOfInterval({ start: selectedDay, end: addDays(selectedDay, 3) }),
+    [selectedDay],
   )
 
   // Year overview state and fetch
@@ -143,14 +144,20 @@ export function CalendarView({
   }, [view, currentYear])
 
   return (
-    <Card variant="glass" className="h-full">
+    <Card variant="glass" className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-medium">
             Calendário Financeiro
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Select value={view} onValueChange={(v: any) => { setView(v); localStorage.setItem('calendar-view', v) }}>
+            <Select
+              value={view}
+              onValueChange={(v: any) => {
+                setView(v)
+                localStorage.setItem('calendar-view', v)
+              }}
+            >
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Visão" />
               </SelectTrigger>
@@ -166,7 +173,7 @@ export function CalendarView({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 min-h-0 flex flex-col">
         {view === 'year' && (
           <div className="space-y-4">
             {yearLoading && (
@@ -210,36 +217,37 @@ export function CalendarView({
         )}
 
         {view === 'month' && (
-          <div className="grid grid-cols-7 gap-1 min-w-[800px]">
-            {/* Header */}
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className="text-center text-sm font-medium text-muted-foreground py-2 bg-muted/30 rounded-t-md"
-              >
-                {day}
-              </div>
-            ))}
-
-            {/* Days */}
-            {daysInMonth.map((day, index) => {
-              const dateKey = format(day, 'yyyy-MM-dd')
-              const data = dailyData.get(dateKey)
-              const isCurrentMonth = isSameMonth(day, monthDate)
-              const isToday = isSameDay(day, new Date())
-
-              const colIndex = index % 7
-              const rowIndex = Math.floor(index / 7)
-              const totalRows = Math.ceil(daysInMonth.length / 7)
-              const isRightSide = colIndex > 3
-              const isBottomHalf = rowIndex >= totalRows - 2 // Flip for last 2 rows
-
-              return (
+          <div className="overflow-x-auto p-px">
+            <div className="grid grid-cols-7 gap-1 min-w-[560px]">
+              {/* Header */}
+              {weekDays.map((day) => (
                 <div
-                  key={dateKey}
-                  className={`
+                  key={day}
+                  className="text-center text-sm font-medium text-muted-foreground py-2 bg-muted/30 rounded-t-md"
+                >
+                  {day}
+                </div>
+              ))}
+
+              {/* Days */}
+              {daysInMonth.map((day, index) => {
+                const dateKey = format(day, 'yyyy-MM-dd')
+                const data = dailyData.get(dateKey)
+                const isCurrentMonth = isSameMonth(day, monthDate)
+                const isToday = isSameDay(day, new Date())
+
+                const colIndex = index % 7
+                const rowIndex = Math.floor(index / 7)
+                const totalRows = Math.ceil(daysInMonth.length / 7)
+                const isRightSide = colIndex > 3
+                const isBottomHalf = rowIndex >= totalRows - 2 // Flip for last 2 rows
+
+                return (
+                  <div
+                    key={dateKey}
+                    className={`
                   relative group
-                  min-h-[100px] p-2 border rounded-md flex flex-col justify-between transition-colors
+                  min-h-[70px] sm:min-h-[100px] p-1 sm:p-2 border rounded-md flex flex-col justify-between transition-colors
                   ${
                     isCurrentMonth
                       ? 'bg-card/50 hover:bg-card/80'
@@ -247,58 +255,138 @@ export function CalendarView({
                   }
                   ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
                 `}
-                >
-                  <div className="flex justify-between items-start">
-                    <span
-                      className={`text-sm font-medium ${
-                        isToday
-                          ? 'bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full'
-                          : ''
-                      }`}
-                    >
-                      {format(day, 'd')}
-                    </span>
-                    {data && (
-                      <div className="text-[10px] text-right space-y-0.5">
-                        {data.income > 0 && (
-                          <div className="text-emerald-400 font-medium">
-                            +{formatCurrency(data.income)}
-                          </div>
-                        )}
-                        {data.expense > 0 && (
-                          <div className="text-red-400 font-medium">
-                            -{formatCurrency(data.expense)}
-                          </div>
-                        )}
+                  >
+                    <div className="flex justify-between items-start">
+                      <span
+                        className={`text-sm font-medium ${
+                          isToday
+                            ? 'bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full'
+                            : ''
+                        }`}
+                      >
+                        {format(day, 'd')}
+                      </span>
+                      {data && (
+                        <div className="text-[10px] text-right space-y-0.5">
+                          {data.income > 0 && (
+                            <div className="text-emerald-400 font-medium">
+                              +{formatCurrency(data.income)}
+                            </div>
+                          )}
+                          {data.expense > 0 && (
+                            <div className="text-red-400 font-medium">
+                              -{formatCurrency(data.expense)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {data && (data.income > 0 || data.expense > 0) && (
+                      <div
+                        className={`text-xs font-bold text-right mt-1 pt-1 border-t border-border/30 ${
+                          data.balance >= 0 ? 'text-primary' : 'text-red-400'
+                        }`}
+                      >
+                        {formatCurrency(data.balance)}
                       </div>
                     )}
-                  </div>
 
-                  {data && (data.income > 0 || data.expense > 0) && (
-                    <div
-                      className={`text-xs font-bold text-right mt-1 pt-1 border-t border-border/30 ${
-                        data.balance >= 0 ? 'text-primary' : 'text-red-400'
-                      }`}
-                    >
-                      {formatCurrency(data.balance)}
-                    </div>
-                  )}
-
-                  {/* Hover Tooltip */}
-                  {data && data.transactions.length > 0 && (
-                    <div
-                      className={`
+                    {/* Hover Tooltip */}
+                    {data && data.transactions.length > 0 && (
+                      <div
+                        className={`
                       hidden group-hover:block absolute z-50 w-64 p-3
                       bg-popover text-popover-foreground rounded-md border shadow-xl
                       ${isRightSide ? 'right-0' : 'left-0'}
                       ${isBottomHalf ? 'bottom-full mb-2' : 'top-full mt-2'}
                     `}
-                    >
-                      <div className="text-xs font-semibold mb-2 pb-2 border-b">
-                        Transações do dia
+                      >
+                        <div className="text-xs font-semibold mb-2 pb-2 border-b">
+                          Transações do dia
+                        </div>
+                        <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                          {data.transactions.map((tx) => (
+                            <div
+                              key={tx.id}
+                              className="flex justify-between items-center text-xs gap-2"
+                            >
+                              <span
+                                className="truncate flex-1"
+                                title={tx.description || ''}
+                              >
+                                {tx.description || 'Sem descrição'}
+                              </span>
+                              <span
+                                className={`whitespace-nowrap ${
+                                  tx.type === 'Receita'
+                                    ? 'text-emerald-400'
+                                    : 'text-red-400'
+                                }`}
+                              >
+                                {formatCurrency(tx.amount)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                        {data.transactions.map((tx) => (
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {view === 'week' && (
+          <div className="overflow-x-auto flex-1 min-h-0 p-px">
+            <div className="grid grid-cols-7 grid-rows-[auto_1fr] gap-1 min-w-[560px] h-full">
+              {weekDays.map((day) => (
+                <div
+                  key={day}
+                  className="text-center text-sm font-medium text-muted-foreground py-2 bg-muted/30 rounded-t-md"
+                >
+                  {day}
+                </div>
+              ))}
+              {weekRange.map((day, index) => {
+                const dateKey = format(day, 'yyyy-MM-dd')
+                const data = dailyData.get(dateKey)
+                const isToday = isSameDay(day, new Date())
+                const isRightSide = index % 7 > 3
+                const isBottomHalf = false
+                return (
+                  <div
+                    key={dateKey}
+                    className={`
+                    relative group
+                    min-h-[100px] sm:min-h-[140px] p-1 sm:p-2 border rounded-md flex flex-col justify-between transition-colors
+                    bg-card/60 hover:bg-card
+                    ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
+                  `}
+                  >
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm font-medium">
+                        {format(day, 'EEE d', { locale: ptBR })}
+                      </span>
+                      {data && (
+                        <div className="text-[10px] text-right space-y-0.5">
+                          {data.income > 0 && (
+                            <div className="text-emerald-400 font-medium">
+                              +{formatCurrency(data.income)}
+                            </div>
+                          )}
+                          {data.expense > 0 && (
+                            <div className="text-red-400 font-medium">
+                              -{formatCurrency(data.expense)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {data && data.transactions.length > 0 && (
+                      <div className="space-y-1 mt-2 max-h-32 overflow-y-auto custom-scrollbar">
+                        {data.transactions.slice(0, 5).map((tx) => (
                           <div
                             key={tx.id}
                             className="flex justify-between items-center text-xs gap-2"
@@ -321,132 +409,55 @@ export function CalendarView({
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {view === 'week' && (
-          <div className="grid grid-cols-7 gap-1 min-w-[800px]">
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className="text-center text-sm font-medium text-muted-foreground py-2 bg-muted/30 rounded-t-md"
-              >
-                {day}
-              </div>
-            ))}
-            {weekRange.map((day, index) => {
-              const dateKey = format(day, 'yyyy-MM-dd')
-              const data = dailyData.get(dateKey)
-              const isToday = isSameDay(day, new Date())
-              const isRightSide = index % 7 > 3
-              const isBottomHalf = false
-              return (
-                <div
-                  key={dateKey}
-                  className={`
-                    relative group
-                    min-h-[140px] p-2 border rounded-md flex flex-col justify-between transition-colors
-                    bg-card/60 hover:bg-card
-                    ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
-                  `}
-                >
-                  <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium">
-                      {format(day, 'EEE d', { locale: ptBR })}
-                    </span>
-                    {data && (
-                      <div className="text-[10px] text-right space-y-0.5">
-                        {data.income > 0 && (
-                          <div className="text-emerald-400 font-medium">
-                            +{formatCurrency(data.income)}
-                          </div>
-                        )}
-                        {data.expense > 0 && (
-                          <div className="text-red-400 font-medium">
-                            -{formatCurrency(data.expense)}
-                          </div>
-                        )}
-                      </div>
                     )}
-                  </div>
-                  {data && data.transactions.length > 0 && (
-                    <div className="space-y-1 mt-2 max-h-32 overflow-y-auto custom-scrollbar">
-                      {data.transactions.slice(0, 5).map((tx) => (
-                        <div
-                          key={tx.id}
-                          className="flex justify-between items-center text-xs gap-2"
-                        >
-                          <span
-                            className="truncate flex-1"
-                            title={tx.description || ''}
-                          >
-                            {tx.description || 'Sem descrição'}
-                          </span>
-                          <span
-                            className={`whitespace-nowrap ${
-                              tx.type === 'Receita'
-                                ? 'text-emerald-400'
-                                : 'text-red-400'
-                            }`}
-                          >
-                            {formatCurrency(tx.amount)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* Tooltip reuse */}
-                  {data && data.transactions.length > 0 && (
-                    <div
-                      className={`
+                    {/* Tooltip reuse */}
+                    {data && data.transactions.length > 0 && (
+                      <div
+                        className={`
                         hidden group-hover:block absolute z-50 w-64 p-3
                         bg-popover text-popover-foreground rounded-md border shadow-xl
                         ${isRightSide ? 'right-0' : 'left-0'}
                         ${isBottomHalf ? 'bottom-full mb-2' : 'top-full mt-2'}
                       `}
-                    >
-                      <div className="text-xs font-semibold mb-2 pb-2 border-b">
-                        Transações do dia
-                      </div>
-                      <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                        {data.transactions.map((tx) => (
-                          <div
-                            key={tx.id}
-                            className="flex justify-between items-center text-xs gap-2"
-                          >
-                            <span
-                              className="truncate flex-1"
-                              title={tx.description || ''}
+                      >
+                        <div className="text-xs font-semibold mb-2 pb-2 border-b">
+                          Transações do dia
+                        </div>
+                        <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                          {data.transactions.map((tx) => (
+                            <div
+                              key={tx.id}
+                              className="flex justify-between items-center text-xs gap-2"
                             >
-                              {tx.description || 'Sem descrição'}
-                            </span>
-                            <span
-                              className={`whitespace-nowrap ${
-                                tx.type === 'Receita'
-                                  ? 'text-emerald-400'
-                                  : 'text-red-400'
-                              }`}
-                            >
-                              {formatCurrency(tx.amount)}
-                            </span>
-                          </div>
-                        ))}
+                              <span
+                                className="truncate flex-1"
+                                title={tx.description || ''}
+                              >
+                                {tx.description || 'Sem descrição'}
+                              </span>
+                              <span
+                                className={`whitespace-nowrap ${
+                                  tx.type === 'Receita'
+                                    ? 'text-emerald-400'
+                                    : 'text-red-400'
+                                }`}
+                              >
+                                {formatCurrency(tx.amount)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
 
         {view === '4days' && (
-          <div className="grid grid-cols-4 gap-2 min-w-[600px]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {fourDays.map((day) => {
               const dateKey = format(day, 'yyyy-MM-dd')
               const data = dailyData.get(dateKey)
@@ -507,8 +518,8 @@ export function CalendarView({
             </div>
             <div className="space-y-2">
               {(
-                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))?.transactions ||
-                []
+                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))
+                  ?.transactions || []
               ).map((tx) => (
                 <div
                   key={tx.id}
@@ -529,8 +540,8 @@ export function CalendarView({
                 </div>
               ))}
               {(
-                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))?.transactions ||
-                []
+                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))
+                  ?.transactions || []
               ).length === 0 && (
                 <div className="text-sm text-muted-foreground">
                   Sem transações neste dia
