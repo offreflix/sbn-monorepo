@@ -139,10 +139,12 @@ export class DashboardService {
       },
     });
 
+    // Month aggregates + per-day aggregates (only days with transactions)
     const months = Array.from({ length: 12 }, () => ({
       income: 0,
       expense: 0,
       balance: 0,
+      days: new Map<number, { income: number; expense: number }>(),
     }));
 
     for (const tx of transactions) {
@@ -150,8 +152,16 @@ export class DashboardService {
       const amount = Number(tx.amount);
       if (tx.type === 'Receita') {
         months[m].income += amount;
+        const d = new Date(tx.date).getDate();
+        const day = months[m].days.get(d) || { income: 0, expense: 0 };
+        day.income += amount;
+        months[m].days.set(d, day);
       } else {
         months[m].expense += amount;
+        const d = new Date(tx.date).getDate();
+        const day = months[m].days.get(d) || { income: 0, expense: 0 };
+        day.expense += amount;
+        months[m].days.set(d, day);
       }
     }
 
@@ -170,12 +180,23 @@ export class DashboardService {
 
     return {
       year: targetYear,
-      months: months.map((m, idx) => ({
-        month: idx + 1,
-        income: m.income,
-        expense: m.expense,
-        balance: m.balance,
-      })),
+      months: months.map((m, idx) => {
+        const days = Array.from(m.days.entries())
+          .map(([day, agg]) => ({
+            day,
+            income: agg.income,
+            expense: agg.expense,
+            balance: agg.income - agg.expense,
+          }))
+          .sort((a, b) => a.day - b.day);
+        return {
+          month: idx + 1,
+          income: m.income,
+          expense: m.expense,
+          balance: m.balance,
+          days,
+        };
+      }),
       totals: {
         income: totals.income,
         expense: totals.expense,
