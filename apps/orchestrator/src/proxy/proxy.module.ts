@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ProxyController } from './proxy.controller';
 import { ProxyService } from './proxy.service';
 import { HttpModule } from '@nestjs/axios';

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,50 +11,50 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import { Input, Label, Switch } from '@repo/ui'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { financeApi } from '../api/finance'
+} from "@repo/ui";
+import { Input, Label, Switch } from "@repo/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { financeApi } from "../api/finance";
 import type {
   Wallet,
   Category,
   CreateTransactionRequest,
   Transaction,
-} from '../types/finance'
-import { toast } from 'sonner'
+} from "../types/finance";
+import { toast } from "sonner";
 
 const transactionSchema = z.object({
-  walletId: z.string().min(1, 'Selecione uma carteira'),
-  categoryId: z.string().min(1, 'Selecione uma categoria'),
+  walletId: z.string().min(1, "Selecione uma carteira"),
+  categoryId: z.string().min(1, "Selecione uma categoria"),
   amount: z
     .string()
-    .min(1, 'Valor é obrigatório')
+    .min(1, "Valor é obrigatório")
     .refine((val) => {
-      const num = parseFloat(val)
-      return !isNaN(num) && num > 0
-    }, 'Valor deve ser um número positivo'),
-  date: z.string().min(1, 'Data é obrigatória'),
+      const num = parseFloat(val);
+      return !isNaN(num) && num > 0;
+    }, "Valor deve ser um número positivo"),
+  date: z.string().min(1, "Data é obrigatória"),
   description: z.string().optional(),
-  type: z.enum(['Receita', 'Despesa']),
-  status: z.enum(['Pendente', 'Pago', 'Cancelado']).optional(),
+  type: z.enum(["Receita", "Despesa"]),
+  status: z.enum(["Pendente", "Pago", "Cancelado"]).optional(),
   isPaid: z.boolean().optional(),
   installmentNumber: z.string().optional(),
   totalInstallments: z.string().optional(),
   isRecurring: z.boolean().default(false),
-  frequency: z.enum(['MONTHLY', 'WEEKLY']).default('MONTHLY'),
-})
+  frequency: z.enum(["MONTHLY", "WEEKLY"]).default("MONTHLY"),
+});
 
-type TransactionFormData = z.infer<typeof transactionSchema>
+type TransactionFormData = z.infer<typeof transactionSchema>;
 
 interface CreateTransactionModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  wallets: Wallet[]
-  categories: Category[]
-  onSuccess: () => void
-  initialData?: Transaction | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  wallets: Wallet[];
+  categories: Category[];
+  onSuccess: () => void;
+  initialData?: Transaction | null;
 }
 
 export function CreateTransactionModal({
@@ -65,22 +65,22 @@ export function CreateTransactionModal({
   onSuccess,
   initialData,
 }: CreateTransactionModalProps) {
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState(false);
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      type: 'Despesa',
-      status: 'Pendente',
+      type: "Despesa",
+      status: "Pendente",
       isPaid: false,
-      date: new Date().toISOString().split('T')[0],
-      description: '',
-      amount: '',
-      walletId: '',
-      categoryId: '',
+      date: new Date().toISOString().split("T")[0],
+      description: "",
+      amount: "",
+      walletId: "",
+      categoryId: "",
       isRecurring: false,
-      frequency: 'MONTHLY',
+      frequency: "MONTHLY",
     },
-  })
+  });
 
   useEffect(() => {
     if (open) {
@@ -89,43 +89,43 @@ export function CreateTransactionModal({
           walletId: initialData.walletId,
           categoryId: initialData.categoryId,
           amount: initialData.amount.toString(),
-          date: new Date(initialData.date).toISOString().split('T')[0],
-          description: initialData.description || '',
+          date: new Date(initialData.date).toISOString().split("T")[0],
+          description: initialData.description || "",
           type: initialData.type,
           status: initialData.status,
           isPaid: initialData.isPaid,
           installmentNumber: initialData.installmentNumber?.toString(),
           totalInstallments: initialData.totalInstallments?.toString(),
           isRecurring: !!initialData.recurrenceId, // Simple inference
-        })
+        });
       } else {
         form.reset({
-          type: 'Despesa',
-          status: 'Pendente',
+          type: "Despesa",
+          status: "Pendente",
           isPaid: false,
-          date: new Date().toISOString().split('T')[0],
-          description: '',
-          amount: '',
-          walletId: '',
-          categoryId: '',
+          date: new Date().toISOString().split("T")[0],
+          description: "",
+          amount: "",
+          walletId: "",
+          categoryId: "",
           isRecurring: false,
-          frequency: 'MONTHLY',
-        })
+          frequency: "MONTHLY",
+        });
       }
     }
-  }, [open, initialData, form])
+  }, [open, initialData, form]);
 
-  const selectedType = form.watch('type')
+  const selectedType = form.watch("type");
   const filteredCategories = categories.filter(
-    (cat) => cat.type === selectedType
-  )
+    (cat) => cat.type === selectedType,
+  );
   const hasInstallments =
-    form.watch('installmentNumber') && form.watch('totalInstallments')
-  const isRecurring = form.watch('isRecurring')
+    form.watch("installmentNumber") && form.watch("totalInstallments");
+  const isRecurring = form.watch("isRecurring");
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const payload: CreateTransactionRequest = {
         walletId: data.walletId,
         categoryId: data.categoryId,
@@ -133,9 +133,9 @@ export function CreateTransactionModal({
         date: new Date(data.date).toISOString(),
         description: data.description,
         type: data.type,
-        status: data.isPaid ? 'Pago' : data.status || 'Pendente',
+        status: data.isPaid ? "Pago" : data.status || "Pendente",
         isPaid: data.isPaid || false,
-        currency: 'BRL',
+        currency: "BRL",
         installmentNumber: data.installmentNumber
           ? parseInt(data.installmentNumber)
           : undefined,
@@ -143,31 +143,31 @@ export function CreateTransactionModal({
           ? parseInt(data.totalInstallments)
           : undefined,
         installments:
-          data.installmentNumber === '1' && data.totalInstallments
+          data.installmentNumber === "1" && data.totalInstallments
             ? parseInt(data.totalInstallments)
             : undefined,
         isRecurring: data.isRecurring,
         frequency: data.frequency,
-      }
+      };
 
       if (initialData) {
-        await financeApi.transactions.update(initialData.id, payload)
-        toast.success('Transação atualizada com sucesso!')
+        await financeApi.transactions.update(initialData.id, payload);
+        toast.success("Transação atualizada com sucesso!");
       } else {
-        await financeApi.transactions.create(payload)
-        toast.success('Transação criada com sucesso!')
+        await financeApi.transactions.create(payload);
+        toast.success("Transação criada com sucesso!");
       }
 
-      form.reset()
-      onSuccess()
+      form.reset();
+      onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Erro ao salvar transação'
-      )
+        error instanceof Error ? error.message : "Erro ao salvar transação",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -175,13 +175,13 @@ export function CreateTransactionModal({
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             {initialData
-              ? 'Editar Transação'
-              : 'Criar nova despesa, ou cadastrar em lote'}
+              ? "Editar Transação"
+              : "Criar nova despesa, ou cadastrar em lote"}
           </DialogTitle>
           <DialogDescription>
             {initialData
-              ? 'Edite os detalhes da transação.'
-              : 'Preencha os dados da nova transação.'}
+              ? "Edite os detalhes da transação."
+              : "Preencha os dados da nova transação."}
           </DialogDescription>
         </DialogHeader>
 
@@ -190,7 +190,7 @@ export function CreateTransactionModal({
             <Label htmlFor="description">Descrição</Label>
             <Input
               id="description"
-              {...form.register('description')}
+              {...form.register("description")}
               placeholder="Compra no varejão"
             />
           </div>
@@ -199,8 +199,8 @@ export function CreateTransactionModal({
             <div className="space-y-2">
               <Label htmlFor="categoryId">Categoria</Label>
               <Select
-                value={form.watch('categoryId')}
-                onValueChange={(value) => form.setValue('categoryId', value)}
+                value={form.watch("categoryId")}
+                onValueChange={(value) => form.setValue("categoryId", value)}
                 disabled={filteredCategories.length === 0}
               >
                 <SelectTrigger>
@@ -210,7 +210,7 @@ export function CreateTransactionModal({
                   {filteredCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       <div className="flex items-center gap-2">
-                        <span>{category.icon || '💰'}</span>
+                        <span>{category.icon || "💰"}</span>
                         <span>{category.name}</span>
                       </div>
                     </SelectItem>
@@ -227,8 +227,8 @@ export function CreateTransactionModal({
             <div className="space-y-2">
               <Label htmlFor="walletId">Conta bancária</Label>
               <Select
-                value={form.watch('walletId')}
-                onValueChange={(value) => form.setValue('walletId', value)}
+                value={form.watch("walletId")}
+                onValueChange={(value) => form.setValue("walletId", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a conta" />
@@ -259,7 +259,7 @@ export function CreateTransactionModal({
                   step="0.01"
                   placeholder="0.00"
                   className="pl-8" // Add padding for currency symbol if needed?
-                  {...form.register('amount')}
+                  {...form.register("amount")}
                 />
               </div>
               {form.formState.errors.amount && (
@@ -273,8 +273,8 @@ export function CreateTransactionModal({
               <Label>Tipo de transação</Label>
               <Select
                 value={selectedType}
-                onValueChange={(value: 'Receita' | 'Despesa') =>
-                  form.setValue('type', value)
+                onValueChange={(value: "Receita" | "Despesa") =>
+                  form.setValue("type", value)
                 }
               >
                 <SelectTrigger>
@@ -299,11 +299,11 @@ export function CreateTransactionModal({
                 checked={!!hasInstallments}
                 onCheckedChange={(checked) => {
                   if (!checked) {
-                    form.setValue('installmentNumber', undefined)
-                    form.setValue('totalInstallments', undefined)
+                    form.setValue("installmentNumber", undefined);
+                    form.setValue("totalInstallments", undefined);
                   } else {
-                    form.setValue('installmentNumber', '1')
-                    form.setValue('totalInstallments', '1')
+                    form.setValue("installmentNumber", "1");
+                    form.setValue("totalInstallments", "1");
                   }
                 }}
               />
@@ -313,11 +313,11 @@ export function CreateTransactionModal({
                 <Input
                   placeholder="Qtd Parcelas (ex: 12)"
                   type="number"
-                  {...form.register('totalInstallments')}
+                  {...form.register("totalInstallments")}
                 />
                 <div className="flex items-center text-sm text-muted-foreground">
-                  {form.watch('amount') && form.watch('totalInstallments')
-                    ? `${form.watch('totalInstallments')}x de R$ ${(parseFloat(form.watch('amount')) / parseInt(form.watch('totalInstallments') || '1')).toFixed(2)}`
+                  {form.watch("amount") && form.watch("totalInstallments")
+                    ? `${form.watch("totalInstallments")}x de R$ ${(parseFloat(form.watch("amount")) / parseInt(form.watch("totalInstallments") || "1")).toFixed(2)}`
                     : null}
                 </div>
               </div>
@@ -338,7 +338,7 @@ export function CreateTransactionModal({
                 id="isRecurring"
                 checked={isRecurring}
                 onCheckedChange={(checked) =>
-                  form.setValue('isRecurring', checked)
+                  form.setValue("isRecurring", checked)
                 }
               />
             </div>
@@ -346,9 +346,9 @@ export function CreateTransactionModal({
               <div className="pt-2">
                 <Label className="mb-2 block">Frequência</Label>
                 <Select
-                  value={form.watch('frequency')}
+                  value={form.watch("frequency")}
                   onValueChange={(val) =>
-                    form.setValue('frequency', val as 'MONTHLY' | 'WEEKLY')
+                    form.setValue("frequency", val as "MONTHLY" | "WEEKLY")
                   }
                 >
                   <SelectTrigger>
@@ -365,7 +365,7 @@ export function CreateTransactionModal({
 
           <div className="space-y-2">
             <Label htmlFor="date">Data da transação</Label>
-            <Input id="date" type="date" {...form.register('date')} />
+            <Input id="date" type="date" {...form.register("date")} />
           </div>
 
           {/* Payment Status */}
@@ -381,10 +381,10 @@ export function CreateTransactionModal({
               </div>
               <Switch
                 id="isPaid"
-                checked={form.watch('isPaid') || false}
+                checked={form.watch("isPaid") || false}
                 onCheckedChange={(checked) => {
-                  form.setValue('isPaid', checked)
-                  form.setValue('status', checked ? 'Pago' : 'Pendente')
+                  form.setValue("isPaid", checked);
+                  form.setValue("status", checked ? "Pago" : "Pendente");
                 }}
               />
             </div>
@@ -400,11 +400,11 @@ export function CreateTransactionModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Salvando...' : initialData ? 'Salvar' : 'Criar'}
+              {submitting ? "Salvando..." : initialData ? "Salvar" : "Criar"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

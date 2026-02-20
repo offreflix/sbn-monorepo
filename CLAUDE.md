@@ -95,7 +95,7 @@ After schema changes: run `pnpm prisma:generate`, then create migrations in the 
 ## Service Ports
 
 | Service          | Port  |
-|------------------|-------|
+| ---------------- | ----- |
 | Host (frontend)  | 9000  |
 | Finance MFE      | 9001  |
 | Orchestrator API | 56080 |

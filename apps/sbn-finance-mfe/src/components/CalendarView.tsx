@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -9,8 +9,8 @@ import {
   startOfWeek,
   endOfWeek,
   addDays,
-} from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Card,
   CardContent,
@@ -21,18 +21,18 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import { formatCurrency } from '../lib/utils'
-import type { Transaction } from '../types/finance'
-import type { DashboardYearOverview } from '../types/finance'
-import { financeApi } from '../api/finance'
-import { YearOverviewChart } from './YearOverviewChart'
-import { AnnualCalendar } from './AnnualCalendar'
+} from "@repo/ui";
+import { formatCurrency } from "../lib/utils";
+import type { Transaction } from "../types/finance";
+import type { DashboardYearOverview } from "../types/finance";
+import { financeApi } from "../api/finance";
+import { YearOverviewChart } from "./YearOverviewChart";
+import { AnnualCalendar } from "./AnnualCalendar";
 
 interface CalendarViewProps {
-  transactions: Transaction[]
-  currentMonth: number // 1-12
-  currentYear: number
+  transactions: Transaction[];
+  currentMonth: number; // 1-12
+  currentYear: number;
 }
 
 export function CalendarView({
@@ -41,107 +41,107 @@ export function CalendarView({
   currentYear,
 }: CalendarViewProps) {
   const [view, setView] = useState<
-    'day' | 'week' | 'month' | 'agenda' | '4days' | 'year'
+    "day" | "week" | "month" | "agenda" | "4days" | "year"
   >(() => {
-    const saved = localStorage.getItem('calendar-view')
-    const valid = ['day', 'week', 'month', 'agenda', '4days', 'year']
-    return (valid.includes(saved ?? '') ? saved : 'month') as
-      | 'day'
-      | 'week'
-      | 'month'
-      | 'agenda'
-      | '4days'
-      | 'year'
-  })
+    const saved = localStorage.getItem("calendar-view");
+    const valid = ["day", "week", "month", "agenda", "4days", "year"];
+    return (valid.includes(saved ?? "") ? saved : "month") as
+      | "day"
+      | "week"
+      | "month"
+      | "agenda"
+      | "4days"
+      | "year";
+  });
 
   const monthDate = useMemo(
     () => new Date(currentYear, currentMonth - 1, 1),
     [currentMonth, currentYear],
-  )
+  );
 
   const daysInMonth = useMemo(() => {
-    const start = startOfWeek(startOfMonth(monthDate))
-    const end = endOfWeek(endOfMonth(monthDate))
-    return eachDayOfInterval({ start, end })
-  }, [monthDate])
+    const start = startOfWeek(startOfMonth(monthDate));
+    const end = endOfWeek(endOfMonth(monthDate));
+    return eachDayOfInterval({ start, end });
+  }, [monthDate]);
 
   const dailyData = useMemo(() => {
     const data = new Map<
       string,
       {
-        income: number
-        expense: number
-        balance: number
-        transactions: Transaction[]
+        income: number;
+        expense: number;
+        balance: number;
+        transactions: Transaction[];
       }
-    >()
+    >();
 
     transactions.forEach((tx) => {
-      const dateKey = format(new Date(tx.date), 'yyyy-MM-dd')
+      const dateKey = format(new Date(tx.date), "yyyy-MM-dd");
       const current = data.get(dateKey) || {
         income: 0,
         expense: 0,
         balance: 0,
         transactions: [],
-      }
+      };
 
-      const amount = Number(tx.amount)
-      if (tx.type === 'Receita') {
-        current.income += amount
-        current.balance += amount
+      const amount = Number(tx.amount);
+      if (tx.type === "Receita") {
+        current.income += amount;
+        current.balance += amount;
       } else {
-        current.expense += amount
-        current.balance -= amount
+        current.expense += amount;
+        current.balance -= amount;
       }
-      current.transactions.push(tx)
+      current.transactions.push(tx);
 
-      data.set(dateKey, current)
-    })
+      data.set(dateKey, current);
+    });
 
-    return data
-  }, [transactions])
+    return data;
+  }, [transactions]);
 
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   const selectedDay = useMemo(() => {
-    const today = new Date()
+    const today = new Date();
     if (
       today.getFullYear() === currentYear &&
       today.getMonth() + 1 === currentMonth
     ) {
-      return today
+      return today;
     }
-    return new Date(currentYear, currentMonth - 1, 1)
-  }, [currentYear, currentMonth])
+    return new Date(currentYear, currentMonth - 1, 1);
+  }, [currentYear, currentMonth]);
 
   const weekRange = useMemo(() => {
-    const start = startOfWeek(selectedDay)
-    const end = addDays(start, 6)
-    return eachDayOfInterval({ start, end })
-  }, [selectedDay])
+    const start = startOfWeek(selectedDay);
+    const end = addDays(start, 6);
+    return eachDayOfInterval({ start, end });
+  }, [selectedDay]);
 
   const fourDays = useMemo(
     () =>
       eachDayOfInterval({ start: selectedDay, end: addDays(selectedDay, 3) }),
     [selectedDay],
-  )
+  );
 
   // Year overview state and fetch
-  const [yearData, setYearData] = useState<DashboardYearOverview | null>(null)
-  const [yearLoading, setYearLoading] = useState(false)
+  const [yearData, setYearData] = useState<DashboardYearOverview | null>(null);
+  const [yearLoading, setYearLoading] = useState(false);
 
   useEffect(() => {
-    if (view === 'year') {
-      setYearLoading(true)
+    if (view === "year") {
+      setYearLoading(true);
       financeApi.dashboard
         .year(currentYear)
         .then((res) => setYearData(res))
-        .finally(() => setYearLoading(false))
+        .finally(() => setYearLoading(false));
     } else {
-      setYearData(null)
-      setYearLoading(false)
+      setYearData(null);
+      setYearLoading(false);
     }
-  }, [view, currentYear])
+  }, [view, currentYear]);
 
   return (
     <Card variant="glass" className="h-full flex flex-col">
@@ -154,8 +154,8 @@ export function CalendarView({
             <Select
               value={view}
               onValueChange={(v: any) => {
-                setView(v)
-                localStorage.setItem('calendar-view', v)
+                setView(v);
+                localStorage.setItem("calendar-view", v);
               }}
             >
               <SelectTrigger className="w-[160px] h-8 text-xs">
@@ -174,7 +174,7 @@ export function CalendarView({
         </div>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 flex flex-col">
-        {view === 'year' && (
+        {view === "year" && (
           <div className="space-y-4">
             {yearLoading && (
               <div className="text-sm text-muted-foreground">
@@ -186,8 +186,8 @@ export function CalendarView({
                 <YearOverviewChart
                   data={yearData.months.map((m) => ({
                     name: new Date(currentYear, m.month - 1, 1)
-                      .toLocaleString('pt-BR', { month: 'short' })
-                      .replace('.', '')
+                      .toLocaleString("pt-BR", { month: "short" })
+                      .replace(".", "")
                       .replace(/^./, (s) => s.toUpperCase()),
                     income: m.income,
                     expense: m.expense,
@@ -203,8 +203,8 @@ export function CalendarView({
                   <div
                     className={`px-2 py-1 rounded ${
                       yearData.totals.balance >= 0
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-rose-500/10 text-rose-600'
+                        ? "bg-primary/10 text-primary"
+                        : "bg-rose-500/10 text-rose-600"
                     }`}
                   >
                     Saldo: {formatCurrency(yearData.totals.balance)}
@@ -216,7 +216,7 @@ export function CalendarView({
           </div>
         )}
 
-        {view === 'month' && (
+        {view === "month" && (
           <div className="overflow-x-auto p-px">
             <div className="grid grid-cols-7 gap-1 min-w-[560px]">
               {/* Header */}
@@ -231,16 +231,16 @@ export function CalendarView({
 
               {/* Days */}
               {daysInMonth.map((day, index) => {
-                const dateKey = format(day, 'yyyy-MM-dd')
-                const data = dailyData.get(dateKey)
-                const isCurrentMonth = isSameMonth(day, monthDate)
-                const isToday = isSameDay(day, new Date())
+                const dateKey = format(day, "yyyy-MM-dd");
+                const data = dailyData.get(dateKey);
+                const isCurrentMonth = isSameMonth(day, monthDate);
+                const isToday = isSameDay(day, new Date());
 
-                const colIndex = index % 7
-                const rowIndex = Math.floor(index / 7)
-                const totalRows = Math.ceil(daysInMonth.length / 7)
-                const isRightSide = colIndex > 3
-                const isBottomHalf = rowIndex >= totalRows - 2 // Flip for last 2 rows
+                const colIndex = index % 7;
+                const rowIndex = Math.floor(index / 7);
+                const totalRows = Math.ceil(daysInMonth.length / 7);
+                const isRightSide = colIndex > 3;
+                const isBottomHalf = rowIndex >= totalRows - 2; // Flip for last 2 rows
 
                 return (
                   <div
@@ -250,21 +250,21 @@ export function CalendarView({
                   min-h-[70px] sm:min-h-[100px] p-1 sm:p-2 border rounded-md flex flex-col justify-between transition-colors
                   ${
                     isCurrentMonth
-                      ? 'bg-card/50 hover:bg-card/80'
-                      : 'bg-muted/10 text-muted-foreground opacity-50'
+                      ? "bg-card/50 hover:bg-card/80"
+                      : "bg-muted/10 text-muted-foreground opacity-50"
                   }
-                  ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
+                  ${isToday ? "border-primary ring-1 ring-primary" : "border-border/50"}
                 `}
                   >
                     <div className="flex justify-between items-start">
                       <span
                         className={`text-sm font-medium ${
                           isToday
-                            ? 'bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full'
-                            : ''
+                            ? "bg-primary text-primary-foreground w-6 h-6 flex items-center justify-center rounded-full"
+                            : ""
                         }`}
                       >
-                        {format(day, 'd')}
+                        {format(day, "d")}
                       </span>
                       {data && (
                         <div className="text-[10px] text-right space-y-0.5">
@@ -285,7 +285,7 @@ export function CalendarView({
                     {data && (data.income > 0 || data.expense > 0) && (
                       <div
                         className={`text-xs font-bold text-right mt-1 pt-1 border-t border-border/30 ${
-                          data.balance >= 0 ? 'text-primary' : 'text-red-400'
+                          data.balance >= 0 ? "text-primary" : "text-red-400"
                         }`}
                       >
                         {formatCurrency(data.balance)}
@@ -298,8 +298,8 @@ export function CalendarView({
                         className={`
                       hidden group-hover:block absolute z-50 w-64 p-3
                       bg-popover text-popover-foreground rounded-md border shadow-xl
-                      ${isRightSide ? 'right-0' : 'left-0'}
-                      ${isBottomHalf ? 'bottom-full mb-2' : 'top-full mt-2'}
+                      ${isRightSide ? "right-0" : "left-0"}
+                      ${isBottomHalf ? "bottom-full mb-2" : "top-full mt-2"}
                     `}
                       >
                         <div className="text-xs font-semibold mb-2 pb-2 border-b">
@@ -313,15 +313,15 @@ export function CalendarView({
                             >
                               <span
                                 className="truncate flex-1"
-                                title={tx.description || ''}
+                                title={tx.description || ""}
                               >
-                                {tx.description || 'Sem descrição'}
+                                {tx.description || "Sem descrição"}
                               </span>
                               <span
                                 className={`whitespace-nowrap ${
-                                  tx.type === 'Receita'
-                                    ? 'text-emerald-400'
-                                    : 'text-red-400'
+                                  tx.type === "Receita"
+                                    ? "text-emerald-400"
+                                    : "text-red-400"
                                 }`}
                               >
                                 {formatCurrency(tx.amount)}
@@ -332,13 +332,13 @@ export function CalendarView({
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         )}
 
-        {view === 'week' && (
+        {view === "week" && (
           <div className="overflow-x-auto flex-1 min-h-0 p-px">
             <div className="grid grid-cols-7 grid-rows-[auto_1fr] gap-1 min-w-[560px] h-full">
               {weekDays.map((day) => (
@@ -350,11 +350,11 @@ export function CalendarView({
                 </div>
               ))}
               {weekRange.map((day, index) => {
-                const dateKey = format(day, 'yyyy-MM-dd')
-                const data = dailyData.get(dateKey)
-                const isToday = isSameDay(day, new Date())
-                const isRightSide = index % 7 > 3
-                const isBottomHalf = false
+                const dateKey = format(day, "yyyy-MM-dd");
+                const data = dailyData.get(dateKey);
+                const isToday = isSameDay(day, new Date());
+                const isRightSide = index % 7 > 3;
+                const isBottomHalf = false;
                 return (
                   <div
                     key={dateKey}
@@ -362,12 +362,12 @@ export function CalendarView({
                     relative group
                     min-h-[100px] sm:min-h-[140px] p-1 sm:p-2 border rounded-md flex flex-col justify-between transition-colors
                     bg-card/60 hover:bg-card
-                    ${isToday ? 'border-primary ring-1 ring-primary' : 'border-border/50'}
+                    ${isToday ? "border-primary ring-1 ring-primary" : "border-border/50"}
                   `}
                   >
                     <div className="flex justify-between items-start">
                       <span className="text-sm font-medium">
-                        {format(day, 'EEE d', { locale: ptBR })}
+                        {format(day, "EEE d", { locale: ptBR })}
                       </span>
                       {data && (
                         <div className="text-[10px] text-right space-y-0.5">
@@ -393,15 +393,15 @@ export function CalendarView({
                           >
                             <span
                               className="truncate flex-1"
-                              title={tx.description || ''}
+                              title={tx.description || ""}
                             >
-                              {tx.description || 'Sem descrição'}
+                              {tx.description || "Sem descrição"}
                             </span>
                             <span
                               className={`whitespace-nowrap ${
-                                tx.type === 'Receita'
-                                  ? 'text-emerald-400'
-                                  : 'text-red-400'
+                                tx.type === "Receita"
+                                  ? "text-emerald-400"
+                                  : "text-red-400"
                               }`}
                             >
                               {formatCurrency(tx.amount)}
@@ -416,8 +416,8 @@ export function CalendarView({
                         className={`
                         hidden group-hover:block absolute z-50 w-64 p-3
                         bg-popover text-popover-foreground rounded-md border shadow-xl
-                        ${isRightSide ? 'right-0' : 'left-0'}
-                        ${isBottomHalf ? 'bottom-full mb-2' : 'top-full mt-2'}
+                        ${isRightSide ? "right-0" : "left-0"}
+                        ${isBottomHalf ? "bottom-full mb-2" : "top-full mt-2"}
                       `}
                       >
                         <div className="text-xs font-semibold mb-2 pb-2 border-b">
@@ -431,15 +431,15 @@ export function CalendarView({
                             >
                               <span
                                 className="truncate flex-1"
-                                title={tx.description || ''}
+                                title={tx.description || ""}
                               >
-                                {tx.description || 'Sem descrição'}
+                                {tx.description || "Sem descrição"}
                               </span>
                               <span
                                 className={`whitespace-nowrap ${
-                                  tx.type === 'Receita'
-                                    ? 'text-emerald-400'
-                                    : 'text-red-400'
+                                  tx.type === "Receita"
+                                    ? "text-emerald-400"
+                                    : "text-red-400"
                                 }`}
                               >
                                 {formatCurrency(tx.amount)}
@@ -450,29 +450,29 @@ export function CalendarView({
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         )}
 
-        {view === '4days' && (
+        {view === "4days" && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {fourDays.map((day) => {
-              const dateKey = format(day, 'yyyy-MM-dd')
-              const data = dailyData.get(dateKey)
+              const dateKey = format(day, "yyyy-MM-dd");
+              const data = dailyData.get(dateKey);
               return (
                 <div key={dateKey} className="p-3 border rounded-md bg-card/60">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">
-                      {format(day, 'EEE d', { locale: ptBR })}
+                      {format(day, "EEE d", { locale: ptBR })}
                     </span>
                     {data && (
                       <span
                         className={`text-xs font-bold ${
                           (data.balance || 0) >= 0
-                            ? 'text-primary'
-                            : 'text-red-400'
+                            ? "text-primary"
+                            : "text-red-400"
                         }`}
                       >
                         {formatCurrency(data.balance || 0)}
@@ -486,13 +486,13 @@ export function CalendarView({
                         className="flex justify-between items-center text-xs gap-2"
                       >
                         <span className="truncate flex-1">
-                          {tx.description || 'Sem descrição'}
+                          {tx.description || "Sem descrição"}
                         </span>
                         <span
                           className={`whitespace-nowrap ${
-                            tx.type === 'Receita'
-                              ? 'text-emerald-400'
-                              : 'text-red-400'
+                            tx.type === "Receita"
+                              ? "text-emerald-400"
+                              : "text-red-400"
                           }`}
                         >
                           {formatCurrency(tx.amount)}
@@ -506,19 +506,19 @@ export function CalendarView({
                     )}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
 
-        {view === 'day' && (
+        {view === "day" && (
           <div className="space-y-3">
             <div className="text-sm font-medium">
               {format(selectedDay, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </div>
             <div className="space-y-2">
               {(
-                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))
+                dailyData.get(format(selectedDay, "yyyy-MM-dd"))
                   ?.transactions || []
               ).map((tx) => (
                 <div
@@ -526,13 +526,13 @@ export function CalendarView({
                   className="flex items-center justify-between p-2 rounded-md border"
                 >
                   <span className="text-sm truncate">
-                    {tx.description || 'Sem descrição'}
+                    {tx.description || "Sem descrição"}
                   </span>
                   <span
                     className={`text-sm font-medium ${
-                      tx.type === 'Receita'
-                        ? 'text-emerald-400'
-                        : 'text-red-400'
+                      tx.type === "Receita"
+                        ? "text-emerald-400"
+                        : "text-red-400"
                     }`}
                   >
                     {formatCurrency(tx.amount)}
@@ -540,7 +540,7 @@ export function CalendarView({
                 </div>
               ))}
               {(
-                dailyData.get(format(selectedDay, 'yyyy-MM-dd'))
+                dailyData.get(format(selectedDay, "yyyy-MM-dd"))
                   ?.transactions || []
               ).length === 0 && (
                 <div className="text-sm text-muted-foreground">
@@ -551,12 +551,12 @@ export function CalendarView({
           </div>
         )}
 
-        {view === 'agenda' && (
+        {view === "agenda" && (
           <div className="space-y-4">
             {daysInMonth.map((day) => {
-              const dateKey = format(day, 'yyyy-MM-dd')
-              const data = dailyData.get(dateKey)
-              if (!data || data.transactions.length === 0) return null
+              const dateKey = format(day, "yyyy-MM-dd");
+              const data = dailyData.get(dateKey);
+              if (!data || data.transactions.length === 0) return null;
               return (
                 <div key={dateKey} className="border rounded-md p-3 bg-card/60">
                   <div className="text-xs font-semibold mb-2">
@@ -569,13 +569,13 @@ export function CalendarView({
                         className="flex items-center justify-between text-sm"
                       >
                         <span className="truncate">
-                          {tx.description || 'Sem descrição'}
+                          {tx.description || "Sem descrição"}
                         </span>
                         <span
                           className={`whitespace-nowrap ${
-                            tx.type === 'Receita'
-                              ? 'text-emerald-400'
-                              : 'text-red-400'
+                            tx.type === "Receita"
+                              ? "text-emerald-400"
+                              : "text-red-400"
                           }`}
                         >
                           {formatCurrency(tx.amount)}
@@ -584,7 +584,7 @@ export function CalendarView({
                     ))}
                   </div>
                 </div>
-              )
+              );
             })}
             {transactions.length === 0 && (
               <div className="text-sm text-muted-foreground">
@@ -595,5 +595,5 @@ export function CalendarView({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -350,11 +350,7 @@ export class TransactionsService {
     };
   }
 
-  async importNubank(params: {
-    userId: string;
-    walletId: string;
-    file: any;
-  }) {
+  async importNubank(params: { userId: string; walletId: string; file: any }) {
     const { userId, walletId, file } = params;
 
     const wallet = await this.prisma.wallet.findFirst({
@@ -503,10 +499,7 @@ export class TransactionsService {
       where: {
         deletedAt: null,
         type,
-        OR: [
-          { userId },
-          { userId: null, isDefault: true },
-        ],
+        OR: [{ userId }, { userId: null, isDefault: true }],
       },
     });
 
@@ -514,7 +507,10 @@ export class TransactionsService {
       const created = await this.prisma.category.create({
         data: {
           userId,
-          name: type === TransactionType.Receita ? 'Outras receitas' : 'Outras despesas',
+          name:
+            type === TransactionType.Receita
+              ? 'Outras receitas'
+              : 'Outras despesas',
           type,
           isDefault: false,
         },

@@ -41,17 +41,17 @@ Personal finance management system built with microservices architecture (NestJS
 
 **Monorepo** managed by **Turborepo + pnpm workspaces** (`apps/*` and `packages/*`).
 
-| Layer | App | Tech | Port |
-|-------|-----|------|------|
-| Frontend | Host (Shell) | React 19, Rsbuild, Module Federation | 9000 |
-| Frontend | Finance MFE | React 19, Rsbuild, Recharts | 9001 |
-| Backend | Orchestrator (API Gateway) | NestJS 10 | 56080 |
-| Backend | Auth Service | NestJS 10, Passport, JWT, Redis | 56081 |
-| Backend | Finance Service | NestJS 10, Prisma | 56082 |
-| Shared | `@repo/ui` | Radix UI, Tailwind CSS 4, CVA | — |
-| Tooling | MCP Server | Python, MCP protocol | — |
-| Infra | PostgreSQL 15 | Multi-schema (auth + finance) | 5433 |
-| Infra | Redis 7 | Session storage | 6379 |
+| Layer    | App                        | Tech                                 | Port  |
+| -------- | -------------------------- | ------------------------------------ | ----- |
+| Frontend | Host (Shell)               | React 19, Rsbuild, Module Federation | 9000  |
+| Frontend | Finance MFE                | React 19, Rsbuild, Recharts          | 9001  |
+| Backend  | Orchestrator (API Gateway) | NestJS 10                            | 56080 |
+| Backend  | Auth Service               | NestJS 10, Passport, JWT, Redis      | 56081 |
+| Backend  | Finance Service            | NestJS 10, Prisma                    | 56082 |
+| Shared   | `@repo/ui`                 | Radix UI, Tailwind CSS 4, CVA        | —     |
+| Tooling  | MCP Server                 | Python, MCP protocol                 | —     |
+| Infra    | PostgreSQL 15              | Multi-schema (auth + finance)        | 5433  |
+| Infra    | Redis 7                    | Session storage                      | 6379  |
 
 For detailed developer guidance, see [CLAUDE.md](./CLAUDE.md).
 

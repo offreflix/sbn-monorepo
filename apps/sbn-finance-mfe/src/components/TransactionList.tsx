@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Button } from '@repo/ui'
+import { useState, useMemo } from "react";
+import { Button } from "@repo/ui";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -9,13 +9,13 @@ import {
   Trash2,
   CheckCircle2,
   CalendarDays,
-} from 'lucide-react'
-import { format, isToday, isYesterday } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { CreateTransactionModal } from './CreateTransactionModal'
-import type { Transaction, Wallet, Category } from '../types/finance'
-import { financeApi } from '../api/finance'
-import { toast } from 'sonner'
+} from "lucide-react";
+import { format, isToday, isYesterday } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CreateTransactionModal } from "./CreateTransactionModal";
+import type { Transaction, Wallet, Category } from "../types/finance";
+import { financeApi } from "../api/finance";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,13 +37,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
+} from "@repo/ui";
 
 interface TransactionListProps {
-  transactions: Transaction[]
-  wallets: Wallet[]
-  categories: Category[]
-  onRefresh: () => void
+  transactions: Transaction[];
+  wallets: Wallet[];
+  categories: Category[];
+  onRefresh: () => void;
 }
 
 export function TransactionList({
@@ -52,105 +52,106 @@ export function TransactionList({
   categories,
   onRefresh,
 }: TransactionListProps) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] =
-    useState<Transaction | null>(null)
+    useState<Transaction | null>(null);
   const [transactionToDelete, setTransactionToDelete] =
-    useState<Transaction | null>(null)
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
-  const [importWalletId, setImportWalletId] = useState('')
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [isImporting, setIsImporting] = useState(false)
+    useState<Transaction | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importWalletId, setImportWalletId] = useState("");
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Filters
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
-  const [walletFilter, setWalletFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [walletFilter, setWalletFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(parseFloat(value))
-  }
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(parseFloat(value));
+  };
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
       const matchesSearch =
-        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false;
       const matchesCategory =
-        categoryFilter === 'all' || t.categoryId === categoryFilter
+        categoryFilter === "all" || t.categoryId === categoryFilter;
       const matchesWallet =
-        walletFilter === 'all' || t.walletId === walletFilter
-      const matchesType = typeFilter === 'all' || t.type === typeFilter
-      return matchesSearch && matchesCategory && matchesWallet && matchesType
-    })
-  }, [transactions, searchTerm, categoryFilter, walletFilter, typeFilter])
+        walletFilter === "all" || t.walletId === walletFilter;
+      const matchesType = typeFilter === "all" || t.type === typeFilter;
+      return matchesSearch && matchesCategory && matchesWallet && matchesType;
+    });
+  }, [transactions, searchTerm, categoryFilter, walletFilter, typeFilter]);
 
   // Group transactions by date
   const groupedTransactions = useMemo(() => {
-    const groups: Record<string, Transaction[]> = {}
+    const groups: Record<string, Transaction[]> = {};
 
     // Sort by date desc first
     const sorted = [...filteredTransactions].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
 
     sorted.forEach((t) => {
-      const dateKey = format(new Date(t.date), 'yyyy-MM-dd')
-      if (!groups[dateKey]) groups[dateKey] = []
-      groups[dateKey].push(t)
-    })
+      const dateKey = format(new Date(t.date), "yyyy-MM-dd");
+      if (!groups[dateKey]) groups[dateKey] = [];
+      groups[dateKey].push(t);
+    });
 
-    return groups
-  }, [filteredTransactions])
+    return groups;
+  }, [filteredTransactions]);
 
   const getDateLabel = (dateStr: string) => {
-    const date = new Date(dateStr)
-    if (isToday(date)) return 'Hoje'
-    if (isYesterday(date)) return 'Ontem'
-    return format(date, "dd 'de' MMMM", { locale: ptBR })
-  }
+    const date = new Date(dateStr);
+    if (isToday(date)) return "Hoje";
+    if (isYesterday(date)) return "Ontem";
+    return format(date, "dd 'de' MMMM", { locale: ptBR });
+  };
 
   const handleDelete = async () => {
-    if (!transactionToDelete) return
+    if (!transactionToDelete) return;
     try {
-      await financeApi.transactions.delete(transactionToDelete.id)
-      toast.success('Transação excluída com sucesso')
-      onRefresh()
+      await financeApi.transactions.delete(transactionToDelete.id);
+      toast.success("Transação excluída com sucesso");
+      onRefresh();
     } catch {
-      toast.error('Erro ao excluir transação')
+      toast.error("Erro ao excluir transação");
     } finally {
-      setTransactionToDelete(null)
+      setTransactionToDelete(null);
     }
-  }
+  };
 
   const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction)
-    setIsCreateModalOpen(true)
-  }
+    setEditingTransaction(transaction);
+    setIsCreateModalOpen(true);
+  };
 
   const handleImportNubank = async () => {
     if (!importWalletId || !importFile) {
-      toast.error('Selecione carteira e arquivo antes de importar')
-      return
+      toast.error("Selecione carteira e arquivo antes de importar");
+      return;
     }
 
     try {
-      setIsImporting(true)
-      await financeApi.transactions.importNubank(importWalletId, importFile)
-      toast.success('Fatura Nubank importada com sucesso')
-      setIsImportModalOpen(false)
-      setImportWalletId('')
-      setImportFile(null)
-      onRefresh()
+      setIsImporting(true);
+      await financeApi.transactions.importNubank(importWalletId, importFile);
+      toast.success("Fatura Nubank importada com sucesso");
+      setIsImportModalOpen(false);
+      setImportWalletId("");
+      setImportFile(null);
+      onRefresh();
     } catch {
-      toast.error('Erro ao importar fatura Nubank')
+      toast.error("Erro ao importar fatura Nubank");
     } finally {
-      setIsImporting(false)
+      setIsImporting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -167,8 +168,8 @@ export function TransactionList({
           <div className="flex gap-2">
             <Button
               onClick={() => {
-                setEditingTransaction(null)
-                setIsCreateModalOpen(true)
+                setEditingTransaction(null);
+                setIsCreateModalOpen(true);
               }}
               size="sm"
               className="gap-2"
@@ -232,10 +233,10 @@ export function TransactionList({
       <Dialog
         open={isImportModalOpen}
         onOpenChange={(open) => {
-          setIsImportModalOpen(open)
+          setIsImportModalOpen(open);
           if (!open) {
-            setImportWalletId('')
-            setImportFile(null)
+            setImportWalletId("");
+            setImportFile(null);
           }
         }}
       >
@@ -272,8 +273,8 @@ export function TransactionList({
                 type="file"
                 accept=".csv,.ofx,.pdf"
                 onChange={(e) => {
-                  const file = e.target.files?.[0] || null
-                  setImportFile(file)
+                  const file = e.target.files?.[0] || null;
+                  setImportFile(file);
                 }}
               />
             </div>
@@ -292,7 +293,7 @@ export function TransactionList({
                 onClick={handleImportNubank}
                 disabled={isImporting}
               >
-                {isImporting ? 'Importando...' : 'Importar'}
+                {isImporting ? "Importando..." : "Importar"}
               </Button>
             </div>
           </div>
@@ -319,12 +320,12 @@ export function TransactionList({
               <div className="space-y-2">
                 {txs.map((transaction) => {
                   const category = categories.find(
-                    (c) => c.id === transaction.categoryId
-                  )
+                    (c) => c.id === transaction.categoryId,
+                  );
                   const wallet = wallets.find(
-                    (w) => w.id === transaction.walletId
-                  )
-                  const isIncome = transaction.type === 'Receita'
+                    (w) => w.id === transaction.walletId,
+                  );
+                  const isIncome = transaction.type === "Receita";
 
                   return (
                     <div
@@ -338,8 +339,8 @@ export function TransactionList({
                           style={{
                             backgroundColor: category?.color
                               ? `${category.color}20`
-                              : '#f3f4f6',
-                            color: category?.color || '#6b7280',
+                              : "#f3f4f6",
+                            color: category?.color || "#6b7280",
                           }}
                         >
                           {category?.icon ||
@@ -354,7 +355,7 @@ export function TransactionList({
                           <p className="font-medium text-sm text-foreground">
                             {transaction.description ||
                               category?.name ||
-                              'Sem descrição'}
+                              "Sem descrição"}
                           </p>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
                             {wallet?.name}
@@ -367,9 +368,9 @@ export function TransactionList({
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p
-                            className={`font-semibold tabular-nums text-sm ${isIncome ? 'text-emerald-600' : 'text-foreground'}`}
+                            className={`font-semibold tabular-nums text-sm ${isIncome ? "text-emerald-600" : "text-foreground"}`}
                           >
-                            {isIncome ? '+' : '-'}{' '}
+                            {isIncome ? "+" : "-"}{" "}
                             {formatCurrency(transaction.amount)}
                           </p>
                           <div className="flex justify-end mt-0.5">
@@ -402,7 +403,7 @@ export function TransactionList({
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -413,16 +414,16 @@ export function TransactionList({
       <CreateTransactionModal
         open={isCreateModalOpen}
         onOpenChange={(open) => {
-          setIsCreateModalOpen(open)
-          if (!open) setEditingTransaction(null)
+          setIsCreateModalOpen(open);
+          if (!open) setEditingTransaction(null);
         }}
         wallets={wallets}
         categories={categories}
         initialData={editingTransaction}
         onSuccess={() => {
-          setIsCreateModalOpen(false)
-          setEditingTransaction(null)
-          onRefresh()
+          setIsCreateModalOpen(false);
+          setEditingTransaction(null);
+          onRefresh();
         }}
       />
 
@@ -450,5 +451,5 @@ export function TransactionList({
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
