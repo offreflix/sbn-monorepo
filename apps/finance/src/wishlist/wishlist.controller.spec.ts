@@ -1,0 +1,118 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
+import { WishlistController } from './wishlist.controller';
+import { WishlistService } from './wishlist.service';
+
+const mockWishlistService = {
+  create: jest.fn(),
+  findAll: jest.fn(),
+  findOne: jest.fn(),
+  update: jest.fn(),
+  markAsPurchased: jest.fn(),
+  remove: jest.fn(),
+};
+
+describe('WishlistController', () => {
+  let controller: WishlistController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [WishlistController],
+      providers: [{ provide: WishlistService, useValue: mockWishlistService }],
+    }).compile();
+
+    controller = module.get<WishlistController>(WishlistController);
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should call service create with userId merged', () => {
+      const dto: any = { name: 'Teclado', price: 200 };
+      const mockItem = { id: 'wi1', ...dto };
+      mockWishlistService.create.mockResolvedValue(mockItem);
+
+      controller.create(dto, 'u1');
+
+      expect(mockWishlistService.create).toHaveBeenCalledWith({ ...dto, userId: 'u1' });
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.create({} as any, '')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should call service findAll with filters', () => {
+      mockWishlistService.findAll.mockResolvedValue([]);
+
+      controller.findAll('u1', 'WISHED', 'HIGH');
+
+      expect(mockWishlistService.findAll).toHaveBeenCalledWith('u1', { status: 'WISHED', priority: 'HIGH' });
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.findAll('')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should call service findOne with id and userId', () => {
+      mockWishlistService.findOne.mockResolvedValue({ id: 'wi1' });
+
+      controller.findOne('wi1', 'u1');
+
+      expect(mockWishlistService.findOne).toHaveBeenCalledWith('wi1', 'u1');
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.findOne('wi1', '')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('update', () => {
+    it('should call service update with id, userId and body', () => {
+      const body: any = { name: 'Updated' };
+      mockWishlistService.update.mockResolvedValue({ id: 'wi1', name: 'Updated' });
+
+      controller.update('wi1', body, 'u1');
+
+      expect(mockWishlistService.update).toHaveBeenCalledWith('wi1', 'u1', body);
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.update('wi1', {} as any, '')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('markAsPurchased', () => {
+    it('should call service markAsPurchased with id and userId', () => {
+      mockWishlistService.markAsPurchased.mockResolvedValue({ id: 'wi1', status: 'PURCHASED' });
+
+      controller.markAsPurchased('wi1', 'u1');
+
+      expect(mockWishlistService.markAsPurchased).toHaveBeenCalledWith('wi1', 'u1');
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.markAsPurchased('wi1', '')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should call service remove with id and userId', () => {
+      mockWishlistService.remove.mockResolvedValue({ id: 'wi1', deletedAt: new Date() });
+
+      controller.remove('wi1', 'u1');
+
+      expect(mockWishlistService.remove).toHaveBeenCalledWith('wi1', 'u1');
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.remove('wi1', '')).toThrow(BadRequestException);
+    });
+  });
+});
