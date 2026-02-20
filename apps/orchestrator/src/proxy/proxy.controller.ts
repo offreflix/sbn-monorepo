@@ -105,8 +105,9 @@ export class ProxyController {
 
     // Sanitize client headers, then strip the raw JWT — the finance service
     // must rely solely on the x-user-id set by the orchestrator below.
-    const { authorization: _auth, ...sanitized } =
-      this.sanitizeClientHeaders(req.headers);
+    const { authorization: _auth, ...sanitized } = this.sanitizeClientHeaders(
+      req.headers,
+    );
     void _auth;
 
     const finalHeaders: HeadersDictionary = {
@@ -114,10 +115,21 @@ export class ProxyController {
       'x-user-id': user.userId,
     };
 
+    const rawContentType = req.headers['content-type'];
+    const contentType =
+      typeof rawContentType === 'string'
+        ? rawContentType.toLowerCase()
+        : Array.isArray(rawContentType)
+          ? String(rawContentType[0]).toLowerCase()
+          : '';
+    const isMultipart = contentType.startsWith('multipart/form-data');
+
+    const data = isMultipart ? (req as any) : (body as JsonValue | undefined);
+
     return this.proxyService.forwardRequest(
       url,
       req.method,
-      body,
+      data,
       finalHeaders,
     );
   }

@@ -150,7 +150,8 @@ describe('ProxyController', () => {
 
       await controller.handleAuthRequest(req, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders).not.toHaveProperty('x-user-id');
     });
 
@@ -168,8 +169,12 @@ describe('ProxyController', () => {
 
       await controller.handleAuthRequest(req, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
-      expect(forwardedHeaders).toHaveProperty('content-type', 'application/json');
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
+      expect(forwardedHeaders).toHaveProperty(
+        'content-type',
+        'application/json',
+      );
       expect(forwardedHeaders).toHaveProperty('accept', 'application/json');
     });
   });
@@ -191,9 +196,10 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ 'x-user-id': 'spoofed-id' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req, undefined);
+      await controller.handleFinanceRequest(req as any, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders['x-user-id']).toBe('real-user-id');
     });
 
@@ -201,9 +207,10 @@ describe('ProxyController', () => {
       const req = makeAuthReq();
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req, undefined);
+      await controller.handleFinanceRequest(req as any, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders).not.toHaveProperty('authorization');
     });
 
@@ -211,9 +218,10 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ connection: 'keep-alive', upgrade: 'h2c' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req, undefined);
+      await controller.handleFinanceRequest(req as any, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders).not.toHaveProperty('connection');
       expect(forwardedHeaders).not.toHaveProperty('upgrade');
     });
@@ -222,9 +230,10 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ 'x-custom': 'val\r\nX-Evil: injected' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req, undefined);
+      await controller.handleFinanceRequest(req as any, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders).not.toHaveProperty('x-custom');
     });
 
@@ -232,11 +241,15 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ 'accept-language': 'pt-BR' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req, undefined);
+      await controller.handleFinanceRequest(req as any, undefined);
 
-      const [, , , forwardedHeaders] = mockProxyService.forwardRequest.mock.calls[0];
+      const [, , , forwardedHeaders] =
+        mockProxyService.forwardRequest.mock.calls[0];
       expect(forwardedHeaders).toHaveProperty('x-user-id', 'real-user-id');
-      expect(forwardedHeaders).toHaveProperty('content-type', 'application/json');
+      expect(forwardedHeaders).toHaveProperty(
+        'content-type',
+        'application/json',
+      );
       expect(forwardedHeaders).toHaveProperty('accept-language', 'pt-BR');
     });
   });

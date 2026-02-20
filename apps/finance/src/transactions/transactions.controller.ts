@@ -9,7 +9,10 @@ import {
   Delete,
   Query,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -93,5 +96,28 @@ export class TransactionsController {
       throw new BadRequestException('x-user-id header is required');
     }
     return this.transactionsService.remove(id, userId);
+  }
+
+  @Post('import/nubank')
+  @UseInterceptors(FileInterceptor('file'))
+  importNubank(
+    @UploadedFile() file: any,
+    @Body('walletId') walletId: string,
+    @Headers('x-user-id') userId: string,
+  ) {
+    if (!userId) {
+      throw new BadRequestException('x-user-id header is required');
+    }
+    if (!file) {
+      throw new BadRequestException('file is required');
+    }
+    if (!walletId) {
+      throw new BadRequestException('walletId is required');
+    }
+    return this.transactionsService.importNubank({
+      userId,
+      walletId,
+      file,
+    });
   }
 }

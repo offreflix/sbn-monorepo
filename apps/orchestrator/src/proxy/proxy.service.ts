@@ -15,10 +15,10 @@ export class ProxyService {
   async forwardRequest<TResponse = unknown>(
     url: string,
     method: string,
-    data?: JsonValue,
+    data?: any,
     headers?: HeadersDictionary,
   ): Promise<TResponse> {
-    const config: AxiosRequestConfig<JsonValue> = {
+    const config: AxiosRequestConfig<any> = {
       method,
       url,
       data,

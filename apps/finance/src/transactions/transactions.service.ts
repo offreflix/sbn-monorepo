@@ -1,8 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import {
+  CreateTransactionDto,
+  TransactionType,
+} from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Prisma } from '@prisma/client-finance';
+import * as path from 'path';
+
+declare const require: any;
+
+type NubankParsedRow = {
+  date: Date;
+  description: string;
+  amount: number;
+  type: TransactionType;
+};
 
 @Injectable()
 export class TransactionsService {
@@ -334,6 +347,363 @@ export class TransactionsService {
       totalBalance,
       totalIncome,
       totalExpenses,
+    };
+  }
+
+  async importNubank(params: {
+    userId: string;
+    walletId: string;
+    file: any;
+  }) {
+    const { userId, walletId, file } = params;
+
+    const wallet = await this.prisma.wallet.findFirst({
+      where: { id: walletId, userId },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found');
+    }
+
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    let rows: NubankParsedRow[] = [];
+
+    if (ext === '.csv') {
+      rows = this.parseNubankCsv(file.buffer.toString('utf8'));
+    } else if (ext === '.ofx') {
+      rows = this.parseNubankOfx(file.buffer.toString('utf8'));
+    } else if (ext === '.pdf') {
+      rows = await this.parseNubankPdf(file.buffer);
+    } else {
+      throw new Error('Unsupported Nubank file type');
+    }
+
+    const createdTransactions = [];
+
+    for (const row of rows) {
+      const categoryId = await this.resolveCategoryIdForNubank(
+        userId,
+        row.type,
+        row.description,
+      );
+      const installmentInfo = this.parseInstallmentInfo(row.description);
+
+      if (installmentInfo) {
+        const existingSeries = await this.prisma.transaction.findFirst({
+          where: {
+            userId,
+            walletId,
+            totalInstallments: installmentInfo.totalInstallments,
+            amount: row.amount,
+            description: {
+              contains: installmentInfo.baseDescription,
+              mode: 'insensitive',
+            },
+          },
+        });
+
+        if (existingSeries) {
+          continue;
+        }
+
+        const firstDate = new Date(row.date);
+        firstDate.setHours(0, 0, 0, 0);
+        firstDate.setMonth(
+          firstDate.getMonth() - (installmentInfo.installmentNumber - 1),
+        );
+
+        const purchaseGroupId = crypto.randomUUID();
+
+        for (let i = 1; i <= installmentInfo.totalInstallments; i++) {
+          const installmentDate = new Date(firstDate);
+          installmentDate.setMonth(firstDate.getMonth() + (i - 1));
+
+          const description = `${installmentInfo.baseDescription} - Parcela ${i}/${installmentInfo.totalInstallments}`;
+
+          const existingInstallment = await this.prisma.transaction.findFirst({
+            where: {
+              userId,
+              walletId,
+              installmentNumber: i,
+              totalInstallments: installmentInfo.totalInstallments,
+              description,
+            },
+          });
+
+          if (existingInstallment) {
+            continue;
+          }
+
+          const created = await this.prisma.transaction.create({
+            data: {
+              userId,
+              walletId,
+              categoryId,
+              amount: row.amount,
+              date: installmentDate,
+              description,
+              tags: [] as string[],
+              status: 'Pendente',
+              type: row.type,
+              isPaid: false,
+              installmentNumber: i,
+              totalInstallments: installmentInfo.totalInstallments,
+              purchaseGroupId,
+            },
+          });
+
+          createdTransactions.push(created);
+        }
+      } else {
+        const date = new Date(row.date);
+        date.setHours(0, 0, 0, 0);
+
+        const existing = await this.prisma.transaction.findFirst({
+          where: {
+            userId,
+            walletId,
+            date,
+            amount: row.amount,
+            description: row.description,
+          },
+        });
+
+        if (existing) {
+          continue;
+        }
+
+        const created = await this.prisma.transaction.create({
+          data: {
+            userId,
+            walletId,
+            categoryId,
+            amount: row.amount,
+            date,
+            description: row.description,
+            tags: [] as string[],
+            status: 'Pendente',
+            type: row.type,
+            isPaid: false,
+          },
+        });
+
+        createdTransactions.push(created);
+      }
+    }
+
+    return createdTransactions;
+  }
+
+  private async resolveCategoryIdForNubank(
+    userId: string,
+    type: TransactionType,
+    description: string,
+  ): Promise<string> {
+    const categories = await this.prisma.category.findMany({
+      where: {
+        deletedAt: null,
+        type,
+        OR: [
+          { userId },
+          { userId: null, isDefault: true },
+        ],
+      },
+    });
+
+    if (!categories.length) {
+      const created = await this.prisma.category.create({
+        data: {
+          userId,
+          name: type === TransactionType.Receita ? 'Outras receitas' : 'Outras despesas',
+          type,
+          isDefault: false,
+        },
+      });
+      return created.id;
+    }
+
+    const descLower = (description || '').toLowerCase();
+    const byName = categories.find((cat) =>
+      descLower.includes(cat.name.toLowerCase()),
+    );
+    if (byName) {
+      return byName.id;
+    }
+
+    const outros = categories.find((cat) =>
+      cat.name.toLowerCase().includes('outro'),
+    );
+    if (outros) {
+      return outros.id;
+    }
+
+    return categories[0].id;
+  }
+
+  private parseNubankCsv(content: string): NubankParsedRow[] {
+    const lines = content.split(/\r?\n/).map((line) => line.trim());
+    const rows: NubankParsedRow[] = [];
+
+    for (const line of lines) {
+      if (!line || line.startsWith('date,')) {
+        continue;
+      }
+
+      const match = line.match(/^([^,]+),(.*),([^,]+)$/);
+      if (!match) {
+        continue;
+      }
+
+      const dateStr = match[1].trim();
+      let title = match[2].trim();
+      const amountStr = match[3].trim();
+
+      if (title.startsWith('"') && title.endsWith('"')) {
+        title = title.slice(1, -1).replace(/""/g, '"');
+      }
+
+      const rawAmount = parseFloat(amountStr.replace(',', '.'));
+      if (Number.isNaN(rawAmount)) {
+        continue;
+      }
+
+      const type: TransactionType =
+        rawAmount < 0 ? TransactionType.Receita : TransactionType.Despesa;
+      const amount = Math.abs(rawAmount);
+
+      const date = new Date(dateStr);
+
+      rows.push({
+        date,
+        description: title,
+        amount,
+        type,
+      });
+    }
+
+    return rows;
+  }
+
+  private parseNubankOfx(content: string): NubankParsedRow[] {
+    const rows: NubankParsedRow[] = [];
+    const parts = content.split('<STMTTRN>').slice(1);
+
+    for (const part of parts) {
+      const block = part.split('</STMTTRN>')[0];
+
+      const trnTypeMatch = block.match(/<TRNTYPE>([^<]+)/);
+      const dtPostedMatch = block.match(/<DTPOSTED>([^<]+)/);
+      const trnAmtMatch = block.match(/<TRNAMT>([^<]+)/);
+      const memoMatch = block.match(/<MEMO>([^<]+)/);
+
+      if (!trnTypeMatch || !dtPostedMatch || !trnAmtMatch || !memoMatch) {
+        continue;
+      }
+
+      const trnType = trnTypeMatch[1].trim();
+      const dtPosted = dtPostedMatch[1].trim();
+      const trnAmtStr = trnAmtMatch[1].trim();
+      const memo = memoMatch[1].trim();
+
+      const rawAmount = parseFloat(trnAmtStr.replace(',', '.'));
+      if (Number.isNaN(rawAmount)) {
+        continue;
+      }
+
+      const type: TransactionType =
+        trnType.toUpperCase() === 'CREDIT'
+          ? TransactionType.Receita
+          : TransactionType.Despesa;
+      const amount = Math.abs(rawAmount);
+
+      const year = Number(dtPosted.slice(0, 4));
+      const month = Number(dtPosted.slice(4, 6)) - 1;
+      const day = Number(dtPosted.slice(6, 8));
+
+      const date = new Date(year, month, day);
+
+      rows.push({
+        date,
+        description: memo,
+        amount,
+        type,
+      });
+    }
+
+    return rows;
+  }
+
+  private async parseNubankPdf(buffer: Buffer): Promise<NubankParsedRow[]> {
+    const pdfParse = require('pdf-parse');
+    const result = await pdfParse(buffer);
+    const text: string = result.text || '';
+
+    const lines = text.split(/\r?\n/).map((line: string) => line.trim());
+    const rows: NubankParsedRow[] = [];
+
+    for (const line of lines) {
+      const match = line.match(
+        /^(\d{2}\/\d{2}\/\d{4})\s+(.+?)\s+(-?\d{1,3}(\.\d{3})*,\d{2})/,
+      );
+
+      if (!match) {
+        continue;
+      }
+
+      const dateStr = match[1];
+      const description = match[2].trim();
+      const amountRawStr = match[3].replace(/\./g, '').replace(',', '.').trim();
+
+      const rawAmount = parseFloat(amountRawStr);
+      if (Number.isNaN(rawAmount)) {
+        continue;
+      }
+
+      const type: TransactionType =
+        rawAmount < 0 ? TransactionType.Receita : TransactionType.Despesa;
+      const amount = Math.abs(rawAmount);
+
+      const [dayStr, monthStr, yearStr] = dateStr.split('/');
+      const day = Number(dayStr);
+      const month = Number(monthStr) - 1;
+      const year = Number(yearStr);
+
+      const date = new Date(year, month, day);
+
+      rows.push({
+        date,
+        description,
+        amount,
+        type,
+      });
+    }
+
+    return rows;
+  }
+
+  private parseInstallmentInfo(description: string): {
+    baseDescription: string;
+    installmentNumber: number;
+    totalInstallments: number;
+  } | null {
+    const match = description.match(/^(.*?)-\s*Parcela\s*(\d+)\s*\/\s*(\d+)/i);
+
+    if (!match) {
+      return null;
+    }
+
+    const baseDescription = match[1].trim();
+    const installmentNumber = Number(match[2]);
+    const totalInstallments = Number(match[3]);
+
+    if (!installmentNumber || !totalInstallments) {
+      return null;
+    }
+
+    return {
+      baseDescription,
+      installmentNumber,
+      totalInstallments,
     };
   }
 }
