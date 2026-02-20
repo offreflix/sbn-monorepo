@@ -35,3 +35,16 @@ def register(mcp: FastMCP):
             params["year"] = year
         result = await api_request("GET", "/api/finance/dashboard/categories", params=params)
         return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def get_year_overview(year: int | None = None) -> str:
+        """Get the full year financial overview, including monthly income, expenses and balance for each month.
+
+        Args:
+            year: Year (e.g. 2025). Defaults to current year.
+        """
+        params = {}
+        if year is not None:
+            params["year"] = year
+        result = await api_request("GET", "/api/finance/dashboard/year", params=params)
+        return json.dumps(result, ensure_ascii=False, indent=2)
