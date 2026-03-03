@@ -1,4 +1,15 @@
-import { Button } from "@repo/ui";
+import { useState } from "react";
+import {
+  Button,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui";
 import {
   Plus,
   CreditCard,
@@ -9,10 +20,13 @@ import {
   TrendingUp,
   Eye,
   EyeOff,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import type { Wallet as WalletType } from "../types/finance";
 import { CreateWalletModal } from "./CreateWalletModal";
-import { useState } from "react";
+import { financeApi } from "../api/finance";
+import { toast } from "sonner";
 
 interface WalletCardsProps {
   wallets: WalletType[];
@@ -21,6 +35,9 @@ interface WalletCardsProps {
 
 export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingWallet, setEditingWallet] = useState<WalletType | null>(null);
+  const [deletingWallet, setDeletingWallet] = useState<WalletType | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [showBalances, setShowBalances] = useState(true);
 
   const formatCurrency = (value: string | number) => {
@@ -33,7 +50,6 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
 
   const hiddenValue = "•••••";
 
-  // Get icon based on wallet type
   const getWalletIcon = (type: string) => {
     const t = type.toLowerCase();
     if (t.includes("crédito") || t.includes("credit")) {
@@ -54,7 +70,6 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
     return <Wallet className="h-5 w-5" />;
   };
 
-  // Get accent color based on wallet type
   const getWalletAccent = (type: string) => {
     const t = type.toLowerCase();
     if (t.includes("crédito") || t.includes("credit")) {
@@ -78,7 +93,6 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
         border: "border-purple-500/30",
       };
     }
-    // Default - primary green
     return {
       bg: "bg-primary/20",
       text: "text-primary",
@@ -86,7 +100,23 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
     };
   };
 
-  // Calculate totals
+  const handleDelete = async () => {
+    if (!deletingWallet) return;
+    try {
+      setIsDeleting(true);
+      await financeApi.wallets.delete(deletingWallet.id);
+      toast.success("Carteira excluída com sucesso!");
+      setDeletingWallet(null);
+      onRefresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao excluir carteira",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const totalBalance = wallets
     .filter((w) => !w.type.toLowerCase().includes("crédito"))
     .reduce((acc, w) => acc + parseFloat(w.balance), 0);
@@ -96,12 +126,12 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
     .reduce((acc, w) => {
       const limit = w.limit ? parseFloat(w.limit) : 0;
       const balance = parseFloat(w.balance);
-      return acc + (limit + balance); // Available credit
+      return acc + (limit + balance);
     }, 0);
 
   return (
     <div className="space-y-6">
-      {/* Header with toggle and add button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -161,7 +191,7 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
           return (
             <div
               key={wallet.id}
-              className="glass-dark rounded-xl p-4 hover:border-white/15 transition-all duration-300 cursor-pointer group"
+              className="glass-dark rounded-xl p-4 hover:border-white/15 transition-all duration-300 group"
             >
               <div className="flex items-start justify-between">
                 {/* Left side - Icon and info */}
@@ -181,30 +211,52 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
                   </div>
                 </div>
 
-                {/* Right side - Balance */}
-                <div className="text-right">
-                  <p
-                    className={`text-lg font-semibold tabular-nums ${
-                      isCredit
-                        ? "text-orange-400"
-                        : balance >= 0
-                          ? "text-primary"
-                          : "text-red-400"
-                    }`}
-                  >
-                    {showBalances
-                      ? isCredit
-                        ? formatCurrency(availableCredit)
-                        : formatCurrency(balance)
-                      : hiddenValue}
-                  </p>
-                  {isCredit && (
-                    <p className="text-xs text-muted-foreground">
+                {/* Right side - Balance + actions */}
+                <div className="flex items-start gap-2">
+                  <div className="text-right">
+                    <p
+                      className={`text-lg font-semibold tabular-nums ${
+                        isCredit
+                          ? "text-orange-400"
+                          : balance >= 0
+                            ? "text-primary"
+                            : "text-red-400"
+                      }`}
+                    >
                       {showBalances
-                        ? `Limite: ${formatCurrency(limit)}`
-                        : "Limite: •••••"}
+                        ? isCredit
+                          ? formatCurrency(availableCredit)
+                          : formatCurrency(balance)
+                        : hiddenValue}
                     </p>
-                  )}
+                    {isCredit && (
+                      <p className="text-xs text-muted-foreground">
+                        {showBalances
+                          ? `Limite: ${formatCurrency(limit)}`
+                          : "Limite: •••••"}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                      onClick={() => setEditingWallet(wallet)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => setDeletingWallet(wallet)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -233,13 +285,6 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
                   </div>
                 </div>
               )}
-
-              {/* Hover indicator */}
-              <div className="mt-3 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-xs text-muted-foreground">
-                  Clique para ver detalhes
-                </span>
-              </div>
             </div>
           );
         })}
@@ -268,6 +313,7 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
         )}
       </div>
 
+      {/* Create modal */}
       <CreateWalletModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
@@ -276,6 +322,44 @@ export function WalletCards({ wallets, onRefresh }: WalletCardsProps) {
           onRefresh();
         }}
       />
+
+      {/* Edit modal */}
+      <CreateWalletModal
+        open={!!editingWallet}
+        onOpenChange={(open) => !open && setEditingWallet(null)}
+        initialData={editingWallet ?? undefined}
+        onSuccess={() => {
+          setEditingWallet(null);
+          onRefresh();
+        }}
+      />
+
+      {/* Delete confirmation */}
+      <AlertDialog
+        open={!!deletingWallet}
+        onOpenChange={(open) => !open && setDeletingWallet(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Carteira</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a carteira{" "}
+              <strong>{deletingWallet?.name}</strong>? Esta ação não pode ser
+              desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

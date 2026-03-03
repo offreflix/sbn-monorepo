@@ -127,6 +127,23 @@ export interface CreateCategoryRequest {
   isDefault?: boolean;
 }
 
+export interface UpdateWalletRequest {
+  name?: string;
+  type?: string;
+  currency?: string;
+  invoiceClosingDay?: number;
+  invoiceDueDay?: number;
+  limit?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  type?: CategoryType;
+  icon?: string;
+  color?: string;
+}
+
 export interface CreateRecurrenceRequest {
   walletId: string;
   categoryId: string;

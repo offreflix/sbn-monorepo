@@ -85,18 +85,27 @@ export function CreateTransactionModal({
   useEffect(() => {
     if (open) {
       if (initialData) {
+        const isGrouped =
+          initialData.totalInstallments && initialData.totalInstallments > 1;
+        const displayAmount = isGrouped
+          ? (initialData.amount * initialData.totalInstallments!).toString()
+          : initialData.amount.toString();
+        const displayDescription = isGrouped
+          ? (initialData.description ?? "").replace(/\s*\(\d+\/\d+\)$/, "")
+          : (initialData.description ?? "");
+
         form.reset({
           walletId: initialData.walletId,
           categoryId: initialData.categoryId,
-          amount: initialData.amount.toString(),
+          amount: displayAmount,
           date: new Date(initialData.date).toISOString().split("T")[0],
-          description: initialData.description || "",
+          description: displayDescription,
           type: initialData.type,
           status: initialData.status,
           isPaid: initialData.isPaid,
           installmentNumber: initialData.installmentNumber?.toString(),
           totalInstallments: initialData.totalInstallments?.toString(),
-          isRecurring: !!initialData.recurrenceId, // Simple inference
+          isRecurring: !!initialData.recurrenceId,
         });
       } else {
         form.reset({
@@ -126,24 +135,31 @@ export function CreateTransactionModal({
   const onSubmit = async (data: TransactionFormData) => {
     try {
       setSubmitting(true);
+      const isEditingGroup =
+        !!initialData &&
+        !!initialData.totalInstallments &&
+        initialData.totalInstallments > 1;
+
       const payload: CreateTransactionRequest = {
         walletId: data.walletId,
         categoryId: data.categoryId,
-        amount: parseFloat(data.amount).toString(), // Ensure valid number format
+        amount: parseFloat(data.amount).toString(),
         date: new Date(data.date).toISOString(),
         description: data.description,
         type: data.type,
         status: data.isPaid ? "Pago" : data.status || "Pendente",
         isPaid: data.isPaid || false,
         currency: "BRL",
-        installmentNumber: data.installmentNumber
-          ? parseInt(data.installmentNumber)
-          : undefined,
         totalInstallments: data.totalInstallments
           ? parseInt(data.totalInstallments)
           : undefined,
+        // installmentNumber and installments are only relevant for creation
+        installmentNumber:
+          !initialData && data.installmentNumber
+            ? parseInt(data.installmentNumber)
+            : undefined,
         installments:
-          data.installmentNumber === "1" && data.totalInstallments
+          !isEditingGroup && data.installmentNumber === "1" && data.totalInstallments
             ? parseInt(data.totalInstallments)
             : undefined,
         isRecurring: data.isRecurring,

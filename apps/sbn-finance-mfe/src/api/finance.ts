@@ -5,8 +5,10 @@ import type {
   Recurrence,
   Projection,
   CreateWalletRequest,
+  UpdateWalletRequest,
   CreateTransactionRequest,
   CreateCategoryRequest,
+  UpdateCategoryRequest,
   CreateRecurrenceRequest,
   DashboardSummary,
   DashboardCategories,
@@ -195,6 +197,13 @@ export const financeApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+    update: (id: string, payload: UpdateWalletRequest) =>
+      request<Wallet>(`/api/finance/wallets/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      request<void>(`/api/finance/wallets/${id}`, { method: "DELETE" }),
   },
 
   // Transactions
@@ -253,6 +262,13 @@ export const financeApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+    update: (id: string, payload: UpdateCategoryRequest) =>
+      request<Category>(`/api/finance/categories/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    delete: (id: string) =>
+      request<void>(`/api/finance/categories/${id}`, { method: "DELETE" }),
   },
 
   // Recurrences

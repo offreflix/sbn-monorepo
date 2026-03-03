@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type { CreateWalletRequest } from "../types/finance";
+import type { CreateWalletRequest, Wallet } from "../types/finance";
 import { toast } from "sonner";
 
 const walletSchema = z.object({
@@ -35,13 +35,16 @@ interface CreateWalletModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  initialData?: Wallet;
 }
 
 export function CreateWalletModal({
   open,
   onOpenChange,
   onSuccess,
+  initialData,
 }: CreateWalletModalProps) {
+  const isEditing = !!initialData;
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<WalletFormData>({
     resolver: zodResolver(walletSchema),
@@ -51,9 +54,28 @@ export function CreateWalletModal({
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        form.reset({
+          name: initialData.name,
+          type: initialData.type,
+          currency: initialData.currency,
+          invoiceClosingDay: initialData.invoiceClosingDay?.toString() ?? "",
+          invoiceDueDay: initialData.invoiceDueDay?.toString() ?? "",
+          limit: initialData.limit
+            ? parseFloat(initialData.limit).toString()
+            : "",
+        });
+      } else {
+        form.reset({ currency: "BRL", type: "Conta Corrente" });
+      }
+    }
+  }, [open, initialData]);
+
   const walletType = form.watch("type");
   const isCredit =
-    walletType.toLowerCase().includes("crédito") || walletType === "credit";
+    walletType?.toLowerCase().includes("crédito") || walletType === "credit";
 
   const onSubmit = async (data: WalletFormData) => {
     try {
@@ -71,13 +93,22 @@ export function CreateWalletModal({
         limit: data.limit ? parseFloat(data.limit) : undefined,
       };
 
-      await financeApi.wallets.create(payload);
-      toast.success("Carteira criada com sucesso!");
+      if (isEditing) {
+        await financeApi.wallets.update(initialData.id, payload);
+        toast.success("Carteira atualizada com sucesso!");
+      } else {
+        await financeApi.wallets.create(payload);
+        toast.success("Carteira criada com sucesso!");
+      }
       form.reset();
       onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erro ao criar carteira",
+        error instanceof Error
+          ? error.message
+          : isEditing
+            ? "Erro ao atualizar carteira"
+            : "Erro ao criar carteira",
       );
     } finally {
       setSubmitting(false);
@@ -88,9 +119,13 @@ export function CreateWalletModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Criar Nova Carteira</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Carteira" : "Criar Nova Carteira"}
+          </DialogTitle>
           <DialogDescription>
-            Adicione uma nova carteira para gerenciar suas finanças.
+            {isEditing
+              ? "Atualize as informações da sua carteira."
+              : "Adicione uma nova carteira para gerenciar suas finanças."}
           </DialogDescription>
         </DialogHeader>
 
@@ -187,7 +222,11 @@ export function CreateWalletModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : "Criar Carteira"}
+              {submitting
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar Alterações"
+                  : "Criar Carteira"}
             </Button>
           </div>
         </form>

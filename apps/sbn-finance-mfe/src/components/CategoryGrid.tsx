@@ -1,7 +1,19 @@
 import { useState } from "react";
-import { Button } from "@repo/ui";
-import { Plus, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  Button,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@repo/ui";
+import { Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from "lucide-react";
 import { CreateCategoryModal } from "./CreateCategoryModal";
+import { financeApi } from "../api/finance";
+import { toast } from "sonner";
 import type { Category } from "../types/finance";
 
 interface CategoryGridProps {
@@ -11,6 +23,11 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
+    null,
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<"all" | "Receita" | "Despesa">("all");
 
   const filteredCategories =
@@ -19,9 +36,26 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
   const incomeCount = categories.filter((c) => c.type === "Receita").length;
   const expenseCount = categories.filter((c) => c.type === "Despesa").length;
 
+  const handleDelete = async () => {
+    if (!deletingCategory) return;
+    try {
+      setIsDeleting(true);
+      await financeApi.categories.delete(deletingCategory.id);
+      toast.success("Categoria excluída com sucesso!");
+      setDeletingCategory(null);
+      onRefresh();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao excluir categoria",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header with filter and add button */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Button
@@ -87,8 +121,30 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
           filteredCategories.map((category) => (
             <div
               key={category.id}
-              className="glass-dark rounded-xl p-4 hover:border-white/15 transition-all duration-300 cursor-pointer group"
+              className="glass-dark rounded-xl p-4 hover:border-white/15 transition-all duration-300 group relative"
             >
+              {/* Action buttons (non-default only) */}
+              {!category.isDefault && (
+                <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                    onClick={() => setEditingCategory(category)}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={() => setDeletingCategory(category)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+
               <div className="flex flex-col items-center text-center gap-3">
                 <div
                   className="flex h-14 w-14 items-center justify-center rounded-xl text-2xl transition-transform group-hover:scale-110"
@@ -130,6 +186,7 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
         )}
       </div>
 
+      {/* Create modal */}
       <CreateCategoryModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
@@ -138,6 +195,44 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
           onRefresh();
         }}
       />
+
+      {/* Edit modal */}
+      <CreateCategoryModal
+        open={!!editingCategory}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        initialData={editingCategory ?? undefined}
+        onSuccess={() => {
+          setEditingCategory(null);
+          onRefresh();
+        }}
+      />
+
+      {/* Delete confirmation */}
+      <AlertDialog
+        open={!!deletingCategory}
+        onOpenChange={(open) => !open && setDeletingCategory(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Categoria</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a categoria{" "}
+              <strong>{deletingCategory?.name}</strong>? Transações associadas
+              não serão excluídas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

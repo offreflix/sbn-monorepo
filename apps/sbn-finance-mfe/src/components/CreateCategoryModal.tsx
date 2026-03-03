@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type { CreateCategoryRequest } from "../types/finance";
+import type { CreateCategoryRequest, Category } from "../types/finance";
 import { toast } from "sonner";
 
 const EMOJI_OPTIONS = [
@@ -58,13 +58,16 @@ interface CreateCategoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  initialData?: Category;
 }
 
 export function CreateCategoryModal({
   open,
   onOpenChange,
   onSuccess,
+  initialData,
 }: CreateCategoryModalProps) {
+  const isEditing = !!initialData;
   const [submitting, setSubmitting] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState("🍔");
   const [selectedColor, setSelectedColor] = useState("#ef4444");
@@ -76,6 +79,23 @@ export function CreateCategoryModal({
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        form.reset({
+          name: initialData.name,
+          type: initialData.type,
+        });
+        setSelectedEmoji(initialData.icon || "🍔");
+        setSelectedColor(initialData.color || "#ef4444");
+      } else {
+        form.reset({ type: "Despesa" });
+        setSelectedEmoji("🍔");
+        setSelectedColor("#ef4444");
+      }
+    }
+  }, [open, initialData]);
+
   const onSubmit = async (data: CategoryFormData) => {
     try {
       setSubmitting(true);
@@ -86,15 +106,24 @@ export function CreateCategoryModal({
         color: selectedColor,
       };
 
-      await financeApi.categories.create(payload);
-      toast.success("Categoria criada com sucesso!");
+      if (isEditing) {
+        await financeApi.categories.update(initialData.id, payload);
+        toast.success("Categoria atualizada com sucesso!");
+      } else {
+        await financeApi.categories.create(payload);
+        toast.success("Categoria criada com sucesso!");
+      }
       form.reset();
       setSelectedEmoji("🍔");
       setSelectedColor("#ef4444");
       onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erro ao criar categoria",
+        error instanceof Error
+          ? error.message
+          : isEditing
+            ? "Erro ao atualizar categoria"
+            : "Erro ao criar categoria",
       );
     } finally {
       setSubmitting(false);
@@ -105,9 +134,13 @@ export function CreateCategoryModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Criar Nova Categoria</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Categoria" : "Criar Nova Categoria"}
+          </DialogTitle>
           <DialogDescription>
-            Adicione uma nova categoria para organizar suas transações.
+            {isEditing
+              ? "Atualize as informações da categoria."
+              : "Adicione uma nova categoria para organizar suas transações."}
           </DialogDescription>
         </DialogHeader>
 
@@ -194,7 +227,11 @@ export function CreateCategoryModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvando..." : "Criar Categoria"}
+              {submitting
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar Alterações"
+                  : "Criar Categoria"}
             </Button>
           </div>
         </form>
