@@ -3,7 +3,22 @@
     "allow": [
       "Bash(node -e:*)",
       "Bash(find:*)",
-      "Bash(pnpm jest:*)"
+      "Bash(pnpm jest:*)",
+      "Bash(npm install -g @fission-ai/openspec@latest)",
+      "Bash(openspec --version)",
+      "Bash(openspec new change \"wishlist-improvements\")",
+      "Bash(openspec instructions specs --change \"wishlist-improvements\" --json)",
+      "Bash(grep -r \"wishlist\\\\|Wishlist\\\\|Route\" apps/host/src/App.tsx apps/host/src/main.tsx apps/host/src/router*)",
+      "Bash(openspec status --change \"wishlist-improvements\" --json)",
+      "Bash(openspec instructions tasks --change \"wishlist-improvements\" --json)",
+      "Bash(openspec status --change \"wishlist-improvements\")",
+      "Bash(openspec instructions apply --change \"wishlist-improvements\" --json)",
+      "Bash(npx prisma migrate dev --name add-wishlist-price-entries)",
+      "Bash(npx prisma migrate dev --name add-wishlist-price-entries --create-only)",
+      "Bash(pnpm prisma:generate)",
+      "Bash(pnpm --filter host add recharts)",
+      "Bash(pnpm --filter host exec tsc --noEmit)",
+      "Bash(pnpm --filter @sbn/finance exec tsc --noEmit)"
     ]
   }
 }

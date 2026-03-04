@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import { Header } from "../components/Header";
-import { wishlistApi, type WishlistItem } from "../api/wishlist";
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Header } from '../components/Header'
+import { MoneyInput } from '../components/MoneyInput'
+import { wishlistApi, type WishlistItem } from '../api/wishlist'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui";
-import { Button } from "@repo/ui";
+} from '@repo/ui'
+import { Button } from '@repo/ui'
 import {
   Dialog,
   DialogContent,
@@ -16,17 +18,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@repo/ui";
-import { Input } from "@repo/ui";
-import { Label } from "@repo/ui";
+} from '@repo/ui'
+import { Input } from '@repo/ui'
+import { Label } from '@repo/ui'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui";
-import { Textarea } from "@repo/ui";
+} from '@repo/ui'
+import { Textarea } from '@repo/ui'
 import {
   Plus,
   Heart,
@@ -35,141 +37,142 @@ import {
   ExternalLink,
   Filter,
   ShoppingCart,
-} from "lucide-react";
-import { toast } from "sonner";
-import { PurchaseTransactionModal } from "../components/PurchaseTransactionModal";
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { PurchaseTransactionModal } from '../components/PurchaseTransactionModal'
 
 export const WishlistPage = () => {
-  const [items, setItems] = useState<WishlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterPriority, setFilterPriority] = useState<string>("all");
-  const [purchaseItem, setPurchaseItem] = useState<WishlistItem | null>(null);
+  const navigate = useNavigate()
+  const [items, setItems] = useState<WishlistItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterPriority, setFilterPriority] = useState<string>('all')
+  const [purchaseItem, setPurchaseItem] = useState<WishlistItem | null>(null)
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    currency: "BRL",
-    url: "",
-    imageUrl: "",
-    priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
-    tags: "",
-    notes: "",
-  });
+    name: '',
+    description: '',
+    price: 0,
+    currency: 'BRL',
+    url: '',
+    imageUrl: '',
+    priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
+    tags: '',
+    notes: '',
+  })
 
   const loadItems = useCallback(async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const data = await wishlistApi.list(
-        filterStatus !== "all" ? filterStatus : undefined,
-        filterPriority !== "all" ? filterPriority : undefined,
-      );
-      setItems(data);
+        filterStatus !== 'all' ? filterStatus : undefined,
+        filterPriority !== 'all' ? filterPriority : undefined,
+      )
+      setItems(data)
     } catch (error) {
-      console.error("Erro ao carregar wishlist:", error);
-      toast.error("Erro ao carregar lista de desejos");
+      console.error('Erro ao carregar wishlist:', error)
+      toast.error('Erro ao carregar lista de desejos')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [filterStatus, filterPriority]);
+  }, [filterStatus, filterPriority])
 
   useEffect(() => {
-    loadItems();
-  }, [loadItems]);
+    loadItems()
+  }, [loadItems])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       const tagsArray = formData.tags
-        .split(",")
+        .split(',')
         .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+        .filter((tag) => tag.length > 0)
 
       await wishlistApi.create({
         name: formData.name,
         description: formData.description || undefined,
-        price: formData.price ? parseFloat(formData.price) : undefined,
+        price: formData.price > 0 ? formData.price : undefined,
         currency: formData.currency,
         url: formData.url || undefined,
         imageUrl: formData.imageUrl || undefined,
         priority: formData.priority,
         tags: tagsArray.length > 0 ? tagsArray : undefined,
         notes: formData.notes || undefined,
-      });
+      })
 
-      toast.success("Item adicionado à lista de desejos!");
-      setIsDialogOpen(false);
+      toast.success('Item adicionado à lista de desejos!')
+      setIsDialogOpen(false)
       setFormData({
-        name: "",
-        description: "",
-        price: "",
-        currency: "BRL",
-        url: "",
-        imageUrl: "",
-        priority: "MEDIUM",
-        tags: "",
-        notes: "",
-      });
-      loadItems();
+        name: '',
+        description: '',
+        price: 0,
+        currency: 'BRL',
+        url: '',
+        imageUrl: '',
+        priority: 'MEDIUM',
+        tags: '',
+        notes: '',
+      })
+      loadItems()
     } catch (error) {
-      console.error("Erro ao criar item:", error);
-      toast.error("Erro ao adicionar item");
+      console.error('Erro ao criar item:', error)
+      toast.error('Erro ao adicionar item')
     }
-  };
+  }
 
   const handlePurchase = (item: WishlistItem) => {
-    setPurchaseItem(item);
-  };
+    setPurchaseItem(item)
+  }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja remover este item?")) return;
+    if (!confirm('Tem certeza que deseja remover este item?')) return
 
     try {
-      await wishlistApi.delete(id);
-      toast.success("Item removido!");
-      loadItems();
+      await wishlistApi.delete(id)
+      toast.success('Item removido!')
+      loadItems()
     } catch (error) {
-      console.error("Erro ao deletar item:", error);
-      toast.error("Erro ao remover item");
+      console.error('Erro ao deletar item:', error)
+      toast.error('Erro ao remover item')
     }
-  };
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "HIGH":
-        return "text-red-500";
-      case "MEDIUM":
-        return "text-yellow-500";
-      case "LOW":
-        return "text-green-500";
+      case 'HIGH':
+        return 'text-red-500'
+      case 'MEDIUM':
+        return 'text-yellow-500'
+      case 'LOW':
+        return 'text-green-500'
       default:
-        return "text-gray-500";
+        return 'text-gray-500'
     }
-  };
+  }
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case "HIGH":
-        return "Alta";
-      case "MEDIUM":
-        return "Média";
-      case "LOW":
-        return "Baixa";
+      case 'HIGH':
+        return 'Alta'
+      case 'MEDIUM':
+        return 'Média'
+      case 'LOW':
+        return 'Baixa'
       default:
-        return priority;
+        return priority
     }
-  };
+  }
 
-  const formatPrice = (price?: number, currency: string = "BRL") => {
-    if (!price) return "Preço não informado";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
+  const formatPrice = (price?: number, currency: string = 'BRL') => {
+    if (!price) return 'Preço não informado'
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
       currency,
-    }).format(price);
-  };
+    }).format(price)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -257,15 +260,13 @@ export const WishlistPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">Preço</Label>
-                    <Input
+                    <MoneyInput
                       id="price"
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
+                      defaultValue={formData.price}
+                      onChange={(value) =>
+                        setFormData({ ...formData, price: value })
                       }
-                      placeholder="0.00"
+                      placeholder="0,00"
                     />
                   </div>
 
@@ -319,7 +320,7 @@ export const WishlistPage = () => {
                   <Label htmlFor="priority">Prioridade</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") =>
+                    onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') =>
                       setFormData({ ...formData, priority: value })
                     }
                   >
@@ -393,11 +394,12 @@ export const WishlistPage = () => {
             {items.map((item) => (
               <Card
                 key={item.id}
-                className={
-                  item.status === "PURCHASED"
-                    ? "opacity-60 border-green-500"
-                    : ""
-                }
+                className={`cursor-pointer transition-shadow hover:shadow-md ${
+                  item.status === 'PURCHASED'
+                    ? 'opacity-60 border-green-500'
+                    : ''
+                }`}
+                onClick={() => navigate(`/wishlist/${item.id}`)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -405,7 +407,9 @@ export const WishlistPage = () => {
                       <CardTitle className="text-lg">{item.name}</CardTitle>
                       {item.description && (
                         <CardDescription className="mt-1">
-                          {item.description}
+                          {item.description.length > 100
+                            ? `${item.description.slice(0, 100)}…`
+                            : item.description}
                         </CardDescription>
                       )}
                     </div>
@@ -425,7 +429,7 @@ export const WishlistPage = () => {
                       alt={item.name}
                       className="w-full h-48 object-cover rounded-md"
                       onError={(e) => {
-                        e.currentTarget.style.display = "none";
+                        e.currentTarget.style.display = 'none'
                       }}
                     />
                   )}
@@ -467,20 +471,23 @@ export const WishlistPage = () => {
                     </p>
                   )}
 
-                  {item.status === "PURCHASED" && item.purchasedAt && (
+                  {item.status === 'PURCHASED' && item.purchasedAt && (
                     <div className="text-sm text-green-600 flex items-center gap-1">
                       <Check className="h-4 w-4" />
-                      Comprado em{" "}
-                      {new Date(item.purchasedAt).toLocaleDateString("pt-BR")}
+                      Comprado em{' '}
+                      {new Date(item.purchasedAt).toLocaleDateString('pt-BR')}
                     </div>
                   )}
 
                   <div className="flex gap-2 pt-2 border-t">
-                    {item.status !== "PURCHASED" && (
+                    {item.status !== 'PURCHASED' && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePurchase(item)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handlePurchase(item)
+                        }}
                         className="flex-1"
                       >
                         <ShoppingCart className="h-4 w-4 mr-1" />
@@ -490,7 +497,10 @@ export const WishlistPage = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(item.id)
+                      }}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -506,14 +516,14 @@ export const WishlistPage = () => {
       <PurchaseTransactionModal
         open={!!purchaseItem}
         onOpenChange={(open) => {
-          if (!open) setPurchaseItem(null);
+          if (!open) setPurchaseItem(null)
         }}
         item={purchaseItem}
         onSuccess={() => {
-          setPurchaseItem(null);
-          loadItems();
+          setPurchaseItem(null)
+          loadItems()
         }}
       />
     </div>
-  );
-};
+  )
+}

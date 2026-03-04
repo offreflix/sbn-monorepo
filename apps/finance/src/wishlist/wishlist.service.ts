@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWishlistItemDto } from './dto/create-wishlist-item.dto';
 import { UpdateWishlistItemDto } from './dto/update-wishlist-item.dto';
+import { CreatePriceEntryDto } from './dto/create-price-entry.dto';
 
 @Injectable()
 export class WishlistService {
@@ -110,5 +115,62 @@ export class WishlistService {
         purchasedAt: new Date(),
       },
     });
+  }
+
+  // ── Price Entries ──────────────────────────────────────────────────────────
+
+  async createPriceEntry(
+    userId: string,
+    itemId: string,
+    dto: CreatePriceEntryDto,
+  ) {
+    await this.findOne(itemId, userId); // Verifica propriedade
+
+    return this.prisma.wishlistPriceEntry.create({
+      data: {
+        wishlistItemId: itemId,
+        price: dto.price,
+        currency: dto.currency || 'BRL',
+        store: dto.store,
+        storeUrl: dto.storeUrl,
+        date: new Date(dto.date),
+        notes: dto.notes,
+      },
+    });
+  }
+
+  async findPriceEntries(userId: string, itemId: string) {
+    await this.findOne(itemId, userId); // Verifica propriedade
+
+    return this.prisma.wishlistPriceEntry.findMany({
+      where: { wishlistItemId: itemId },
+      orderBy: { date: 'asc' },
+    });
+  }
+
+  async removePriceEntry(
+    userId: string,
+    itemId: string,
+    entryId: string,
+  ) {
+    // Verifica propriedade do item pai
+    const item = await this.prisma.wishlistItem.findFirst({
+      where: { id: itemId, deletedAt: null },
+    });
+    if (!item) {
+      throw new NotFoundException('Wishlist item not found');
+    }
+    if (item.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const entry = await this.prisma.wishlistPriceEntry.findFirst({
+      where: { id: entryId, wishlistItemId: itemId },
+    });
+    if (!entry) {
+      throw new NotFoundException('Price entry not found');
+    }
+
+    return this.prisma.wishlistPriceEntry.delete({ where: { id: entryId } });
   }
 }
