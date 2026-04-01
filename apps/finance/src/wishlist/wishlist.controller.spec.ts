@@ -10,6 +10,9 @@ const mockWishlistService = {
   update: jest.fn(),
   markAsPurchased: jest.fn(),
   remove: jest.fn(),
+  createPriceEntry: jest.fn(),
+  findPriceEntries: jest.fn(),
+  removePriceEntry: jest.fn(),
 };
 
 describe('WishlistController', () => {
@@ -99,6 +102,37 @@ describe('WishlistController', () => {
 
     it('should throw BadRequestException when userId is missing', () => {
       expect(() => controller.markAsPurchased('wi1', '')).toThrow(BadRequestException);
+    });
+  });
+
+  describe('createPriceEntry', () => {
+    it('should call service createPriceEntry with installment fields', () => {
+      const body: any = {
+        price: 3097.91,
+        cashPrice: 3097.91,
+        installmentCount: 12,
+        installmentValue: 271.75,
+        store: 'Loja Daikin',
+        date: '2026-04-01',
+      };
+      mockWishlistService.createPriceEntry.mockResolvedValue({ id: 'pe1', ...body });
+
+      controller.createPriceEntry('wi1', body, 'u1');
+
+      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith('u1', 'wi1', body);
+    });
+
+    it('should call service createPriceEntry without installment fields', () => {
+      const body: any = { price: 500, store: 'Shopee', date: '2026-04-01' };
+      mockWishlistService.createPriceEntry.mockResolvedValue({ id: 'pe2', ...body });
+
+      controller.createPriceEntry('wi1', body, 'u1');
+
+      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith('u1', 'wi1', body);
+    });
+
+    it('should throw BadRequestException when userId is missing', () => {
+      expect(() => controller.createPriceEntry('wi1', {} as any, '')).toThrow(BadRequestException);
     });
   });
 

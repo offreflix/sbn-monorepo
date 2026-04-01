@@ -57,6 +57,8 @@ export interface WishlistItem {
   name: string;
   description?: string;
   price?: number;
+  installmentCount?: number;
+  installmentValue?: number;
   currency: string;
   url?: string;
   imageUrl?: string;
@@ -74,6 +76,9 @@ export interface WishlistPriceEntry {
   id: string;
   wishlistItemId: string;
   price: number;
+  cashPrice?: number;
+  installmentCount?: number;
+  installmentValue?: number;
   currency: string;
   store: string;
   storeUrl?: string;
@@ -86,6 +91,8 @@ export interface CreateWishlistItemRequest {
   name: string;
   description?: string;
   price?: number;
+  installmentCount?: number;
+  installmentValue?: number;
   currency?: string;
   url?: string;
   imageUrl?: string;
@@ -97,6 +104,9 @@ export interface CreateWishlistItemRequest {
 
 export interface CreatePriceEntryRequest {
   price: number;
+  cashPrice?: number;
+  installmentCount?: number;
+  installmentValue?: number;
   store: string;
   currency?: string;
   storeUrl?: string;

@@ -18,6 +18,8 @@ export class WishlistService {
     name: string;
     description?: string;
     price?: number;
+    installmentCount?: number;
+    installmentValue?: number;
     currency?: string;
     url?: string;
     imageUrl?: string;
@@ -32,6 +34,8 @@ export class WishlistService {
         name: data.name,
         description: data.description,
         price: data.price,
+        installmentCount: data.installmentCount ?? null,
+        installmentValue: data.installmentValue ?? null,
         currency: data.currency || 'BRL',
         url: data.url,
         imageUrl: data.imageUrl,
@@ -127,10 +131,15 @@ export class WishlistService {
   ) {
     await this.findOne(itemId, userId); // Verifica propriedade
 
+    const cashPrice = dto.cashPrice ?? dto.price;
+
     return this.prisma.wishlistPriceEntry.create({
       data: {
         wishlistItemId: itemId,
-        price: dto.price,
+        price: cashPrice,
+        cashPrice,
+        installmentCount: dto.installmentCount ?? null,
+        installmentValue: dto.installmentValue ?? null,
         currency: dto.currency || 'BRL',
         store: dto.store,
         storeUrl: dto.storeUrl,

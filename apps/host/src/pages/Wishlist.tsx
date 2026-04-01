@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/ui'
+import { Switch } from '@repo/ui'
 import { Textarea } from '@repo/ui'
 import {
   Plus,
@@ -61,7 +62,10 @@ export const WishlistPage = () => {
     priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
     tags: '',
     notes: '',
+    installmentCount: 2,
+    installmentValue: 0,
   })
+  const [sameInstallment, setSameInstallment] = useState(true)
 
   const loadItems = useCallback(async () => {
     try {
@@ -101,6 +105,10 @@ export const WishlistPage = () => {
         priority: formData.priority,
         tags: tagsArray.length > 0 ? tagsArray : undefined,
         notes: formData.notes || undefined,
+        ...(!sameInstallment && formData.installmentCount >= 2 && formData.installmentValue > 0 && {
+          installmentCount: formData.installmentCount,
+          installmentValue: formData.installmentValue,
+        }),
       })
 
       toast.success('Item adicionado à lista de desejos!')
@@ -115,7 +123,10 @@ export const WishlistPage = () => {
         priority: 'MEDIUM',
         tags: '',
         notes: '',
+        installmentCount: 2,
+        installmentValue: 0,
       })
+      setSameInstallment(true)
       loadItems()
     } catch (error) {
       console.error('Erro ao criar item:', error)
@@ -259,7 +270,7 @@ export const WishlistPage = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Preço</Label>
+                    <Label htmlFor="price">Preço à vista</Label>
                     <MoneyInput
                       id="price"
                       defaultValue={formData.price}
@@ -289,6 +300,89 @@ export const WishlistPage = () => {
                     </Select>
                   </div>
                 </div>
+
+                {/* Switch: Mesmo valor parcelado */}
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="same-installment-add"
+                      className="cursor-pointer"
+                    >
+                      Mesmo valor parcelado
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Desative para informar parcelamento diferente
+                    </p>
+                  </div>
+                  <Switch
+                    id="same-installment-add"
+                    checked={sameInstallment}
+                    onCheckedChange={setSameInstallment}
+                  />
+                </div>
+
+                {/* Campos de parcelamento */}
+                {!sameInstallment && (
+                  <div className="space-y-3 rounded-lg p-3 border">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label>Nº de parcelas</Label>
+                        <Input
+                          type="number"
+                          min={2}
+                          value={formData.installmentCount}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              installmentCount: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Valor da parcela</Label>
+                        <MoneyInput
+                          defaultValue={formData.installmentValue}
+                          onChange={(v) =>
+                            setFormData((f) => ({ ...f, installmentValue: v }))
+                          }
+                          placeholder="0,00"
+                        />
+                      </div>
+                    </div>
+                    {formData.installmentCount >= 2 &&
+                      formData.installmentValue > 0 &&
+                      (() => {
+                        const total =
+                          formData.installmentCount * formData.installmentValue
+                        const diff = total - formData.price
+                        const fmt = (v: number) =>
+                          new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          }).format(v)
+                        return (
+                          <div className="text-sm space-y-0.5">
+                            <p className="text-muted-foreground">
+                              Total parcelado:{' '}
+                              <span className="font-semibold text-foreground">
+                                {fmt(total)}
+                              </span>
+                            </p>
+                            {diff > 0 ? (
+                              <p className="text-orange-600 font-medium">
+                                + {fmt(diff)} mais caro parcelando
+                              </p>
+                            ) : (
+                              <p className="text-green-600 font-medium">
+                                Sem acréscimo
+                              </p>
+                            )}
+                          </div>
+                        )
+                      })()}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="url">URL do Produto</Label>

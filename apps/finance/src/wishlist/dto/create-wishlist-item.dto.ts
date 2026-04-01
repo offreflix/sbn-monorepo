@@ -3,9 +3,11 @@ import {
   IsNotEmpty,
   IsOptional,
   IsNumber,
+  IsInt,
   IsUrl,
   IsEnum,
   IsArray,
+  Min,
 } from 'class-validator';
 
 export enum Priority {
@@ -32,6 +34,16 @@ export class CreateWishlistItemDto {
   @IsNumber()
   @IsOptional()
   price?: number;
+
+  @IsInt()
+  @Min(2)
+  @IsOptional()
+  installmentCount?: number;
+
+  @IsNumber()
+  @Min(0.01)
+  @IsOptional()
+  installmentValue?: number;
 
   @IsString()
   @IsOptional()

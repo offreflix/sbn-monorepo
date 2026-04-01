@@ -11,6 +11,12 @@ const mockPrismaService = {
     findFirst: jest.fn(),
     update: jest.fn(),
   },
+  wishlistPriceEntry: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findFirst: jest.fn(),
+    delete: jest.fn(),
+  },
 };
 
 describe('WishlistService', () => {
@@ -161,6 +167,75 @@ describe('WishlistService', () => {
       expect(mockPrismaService.wishlistItem.update).toHaveBeenCalledWith({
         where: { id: 'wi1' },
         data: { deletedAt: expect.any(Date) },
+      });
+    });
+  });
+
+  describe('createPriceEntry', () => {
+    const itemId = 'wi1';
+    const userId = 'u1';
+    const mockItem = { id: itemId, userId, deletedAt: null };
+
+    it('should persist cash_price and populate price from cashPrice', async () => {
+      mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe1' });
+
+      await service.createPriceEntry(userId, itemId, {
+        price: 300,
+        cashPrice: 300,
+        store: 'Amazon',
+        date: '2026-04-01',
+      });
+
+      expect(mockPrismaService.wishlistPriceEntry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          price: 300,
+          cashPrice: 300,
+          installmentCount: null,
+          installmentValue: null,
+        }),
+      });
+    });
+
+    it('should persist installment fields when provided', async () => {
+      mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe2' });
+
+      await service.createPriceEntry(userId, itemId, {
+        price: 3097.91,
+        cashPrice: 3097.91,
+        installmentCount: 12,
+        installmentValue: 271.75,
+        store: 'Loja Daikin',
+        date: '2026-04-01',
+      });
+
+      expect(mockPrismaService.wishlistPriceEntry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          cashPrice: 3097.91,
+          installmentCount: 12,
+          installmentValue: 271.75,
+        }),
+      });
+    });
+
+    it('should use price as cashPrice when cashPrice is not provided', async () => {
+      mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe3' });
+
+      await service.createPriceEntry(userId, itemId, {
+        price: 500,
+        store: 'Shopee',
+        date: '2026-04-01',
+      });
+
+      expect(mockPrismaService.wishlistPriceEntry.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          price: 500,
+          cashPrice: 500,
+          installmentCount: null,
+          installmentValue: null,
+        }),
       });
     });
   });
