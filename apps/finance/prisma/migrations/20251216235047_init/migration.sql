@@ -5,16 +5,16 @@
 
 */
 -- DropForeignKey
-ALTER TABLE "categories" DROP CONSTRAINT "categories_user_id_fkey";
+ALTER TABLE "finance"."categories" DROP CONSTRAINT "categories_user_id_fkey";
 
 -- DropForeignKey
-ALTER TABLE "recurrences" DROP CONSTRAINT "recurrences_user_id_fkey";
+ALTER TABLE "finance"."recurrences" DROP CONSTRAINT "recurrences_user_id_fkey";
 
 -- DropForeignKey
-ALTER TABLE "transactions" DROP CONSTRAINT "transactions_user_id_fkey";
+ALTER TABLE "finance"."transactions" DROP CONSTRAINT "transactions_user_id_fkey";
 
 -- DropForeignKey
-ALTER TABLE "wallets" DROP CONSTRAINT "wallets_user_id_fkey";
+ALTER TABLE "finance"."wallets" DROP CONSTRAINT "wallets_user_id_fkey";
 
 -- DropTable
-DROP TABLE "users";
+DROP TABLE "finance"."users";

@@ -9,6 +9,7 @@
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "prisma:generate": "turbo run prisma:generate",
+    "prisma:migrate": "turbo run prisma:migrate",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

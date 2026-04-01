@@ -3,5 +3,11 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "sql.linter.driver": "PostgreSQL",
+  "files.associations": {
+    "**/prisma/migrations/**/*.sql": "sql"
+  },
+  "sqltools.useNodeRuntime": true,
+  "sqltools.dialect": "PostgreSQL"
 }
