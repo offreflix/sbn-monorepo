@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
@@ -8,6 +9,10 @@ import { WishlistPage } from "./pages/Wishlist";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 import { SettingsPage } from "./pages/Settings";
+
+const WishlistDetailPage = lazy(() =>
+  import("./pages/WishlistDetail").then((m) => ({ default: m.WishlistDetailPage }))
+);
 
 const Protected = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -58,6 +63,24 @@ function App() {
               element={
                 <Protected>
                   <WishlistPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/wishlist/:id"
+              element={
+                <Protected>
+                  <Suspense
+                    fallback={
+                      <div className="flex min-h-screen items-center justify-center">
+                        <div className="text-sm text-muted-foreground">
+                          Carregando...
+                        </div>
+                      </div>
+                    }
+                  >
+                    <WishlistDetailPage />
+                  </Suspense>
                 </Protected>
               }
             />

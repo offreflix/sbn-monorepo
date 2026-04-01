@@ -125,6 +125,40 @@ model WishlistItem {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
+  priceEntries    WishlistPriceEntry[]
+  priorityEntries WishlistPriorityEntry[]
+
   @@map("wishlist_items")
+  @@schema("finance")
+}
+
+model WishlistPriceEntry {
+  id             String      @id @default(uuid())
+  wishlistItemId String      @map("wishlist_item_id")
+  price          Decimal     @db.Decimal(19, 4)
+  currency       String      @default("BRL")
+  store          String
+  storeUrl       String?     @map("store_url")
+  date           DateTime
+  notes          String?
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  wishlistItem WishlistItem @relation(fields: [wishlistItemId], references: [id])
+
+  @@map("wishlist_price_entries")
+  @@schema("finance")
+}
+
+model WishlistPriorityEntry {
+  id             String   @id @default(uuid())
+  wishlistItemId String   @map("wishlist_item_id")
+  priority       String
+  date           DateTime
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  wishlistItem WishlistItem @relation(fields: [wishlistItemId], references: [id])
+
+  @@map("wishlist_priority_entries")
   @@schema("finance")
 }

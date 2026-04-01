@@ -70,6 +70,18 @@ export interface WishlistItem {
   deletedAt?: string;
 }
 
+export interface WishlistPriceEntry {
+  id: string;
+  wishlistItemId: string;
+  price: number;
+  currency: string;
+  store: string;
+  storeUrl?: string;
+  date: string;
+  notes?: string;
+  createdAt: string;
+}
+
 export interface CreateWishlistItemRequest {
   name: string;
   description?: string;
@@ -80,6 +92,30 @@ export interface CreateWishlistItemRequest {
   priority?: "LOW" | "MEDIUM" | "HIGH";
   status?: "WISHED" | "PURCHASED" | "REMOVED";
   tags?: string[];
+  notes?: string;
+}
+
+export interface CreatePriceEntryRequest {
+  price: number;
+  store: string;
+  currency?: string;
+  storeUrl?: string;
+  date: string;
+  notes?: string;
+}
+
+export interface WishlistPriorityEntry {
+  id: string;
+  wishlistItemId: string;
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  date: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface CreatePriorityEntryRequest {
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  date: string;
   notes?: string;
 }
 
@@ -111,6 +147,36 @@ export const wishlistApi = {
     }),
   delete: (id: string) =>
     request<void>(`/api/finance/wishlist/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Price entries
+  getPrices: (id: string) =>
+    request<WishlistPriceEntry[]>(`/api/finance/wishlist/${id}/prices`, {
+      method: "GET",
+    }),
+  addPrice: (id: string, payload: CreatePriceEntryRequest) =>
+    request<WishlistPriceEntry>(`/api/finance/wishlist/${id}/prices`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  removePrice: (id: string, entryId: string) =>
+    request<void>(`/api/finance/wishlist/${id}/prices/${entryId}`, {
+      method: "DELETE",
+    }),
+
+  // Priority entries
+  getPriorities: (id: string) =>
+    request<WishlistPriorityEntry[]>(`/api/finance/wishlist/${id}/priorities`, {
+      method: "GET",
+    }),
+  addPriority: (id: string, payload: CreatePriorityEntryRequest) =>
+    request<WishlistPriorityEntry>(`/api/finance/wishlist/${id}/priorities`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  removePriority: (id: string, entryId: string) =>
+    request<void>(`/api/finance/wishlist/${id}/priorities/${entryId}`, {
       method: "DELETE",
     }),
 };

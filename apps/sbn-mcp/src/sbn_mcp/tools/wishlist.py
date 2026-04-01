@@ -136,3 +136,66 @@ def register(mcp: FastMCP):
         """
         result = await api_request("PATCH", f"/api/finance/wishlist/{id}/purchase")
         return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def add_price_entry(
+        wishlist_item_id: str,
+        price: float,
+        store: str,
+        date: str,
+        store_url: str | None = None,
+        notes: str | None = None,
+        currency: str | None = None,
+    ) -> str:
+        """Add a price entry to track the price history of a wishlist item.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+            price: The observed price (positive number).
+            store: Name of the store where the price was found.
+            date: ISO date string of the observation (e.g. "2026-03-03").
+            store_url: Optional URL of the product in that store.
+            notes: Optional notes about this price observation.
+            currency: Currency code (e.g. "BRL"). Defaults to "BRL".
+        """
+        body = convert_keys_to_camel({
+            "price": price,
+            "store": store,
+            "date": date,
+            "store_url": store_url,
+            "notes": notes,
+            "currency": currency,
+        })
+        result = await api_request(
+            "POST",
+            f"/api/finance/wishlist/{wishlist_item_id}/prices",
+            json=body,
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def list_price_entries(wishlist_item_id: str) -> str:
+        """List all price entries for a wishlist item, ordered by date ascending.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+        """
+        result = await api_request(
+            "GET",
+            f"/api/finance/wishlist/{wishlist_item_id}/prices",
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def remove_price_entry(wishlist_item_id: str, entry_id: str) -> str:
+        """Remove a price entry from a wishlist item's price history.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+            entry_id: The price entry UUID to remove.
+        """
+        result = await api_request(
+            "DELETE",
+            f"/api/finance/wishlist/{wishlist_item_id}/prices/{entry_id}",
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)

@@ -10,7 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*"
+    "@repo/ui": "workspace:*",
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "2.1.9"
