@@ -7,29 +7,13 @@ import {
   DollarSign,
   Calendar,
 } from "lucide-react";
-import { formatCurrency } from "../lib/utils";
-import type {
-  DashboardSummary,
-  DashboardCategories,
-  Wallet as WalletType,
-  Category,
-  Transaction,
-} from "../types/finance";
-import { WalletCards } from "./WalletCards";
-import { CategoryGrid } from "./CategoryGrid";
-import { TransactionList } from "./TransactionList";
+import { formatCurrency } from "../../lib/utils";
+import { WalletCards } from "../../components/WalletCards";
+import { CategoryGrid } from "../../components/CategoryGrid";
+import { TransactionList } from "../../components/TransactionList";
+import type { DashboardModelOutput } from "./dashboard.model";
 
-interface DashboardProps {
-  summary: DashboardSummary;
-  categories: DashboardCategories;
-  wallets: WalletType[];
-  allCategories: Category[];
-  transactions: Transaction[];
-  loading: boolean;
-  onRefresh: () => void;
-}
-
-export function Dashboard({
+export function DashboardView({
   summary,
   categories,
   wallets,
@@ -37,7 +21,7 @@ export function Dashboard({
   transactions,
   loading,
   onRefresh,
-}: DashboardProps) {
+}: DashboardModelOutput) {
   // Helper for Skeleton or value
   const Val = ({
     val,

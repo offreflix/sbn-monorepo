@@ -1,0 +1,85 @@
+﻿{
+  "changeName": "refactor-dashboard-mvvm",
+  "changeDir": "C:\\dev\\Pessoal\\sbn\\sbn-monorepo\\openspec\\changes\\refactor-dashboard-mvvm",
+  "schemaName": "spec-driven",
+  "contextFiles": {
+    "proposal": "C:\\dev\\Pessoal\\sbn\\sbn-monorepo\\openspec\\changes\\refactor-dashboard-mvvm\\proposal.md",
+    "specs": "C:\\dev\\Pessoal\\sbn\\sbn-monorepo\\openspec\\changes\\refactor-dashboard-mvvm\\specs\\**\\*.md",
+    "design": "C:\\dev\\Pessoal\\sbn\\sbn-monorepo\\openspec\\changes\\refactor-dashboard-mvvm\\design.md",
+    "tasks": "C:\\dev\\Pessoal\\sbn\\sbn-monorepo\\openspec\\changes\\refactor-dashboard-mvvm\\tasks.md"
+  },
+  "progress": {
+    "total": 13,
+    "complete": 0,
+    "remaining": 13
+  },
+  "tasks": [
+    {
+      "id": "1",
+      "description": "1.1 Create `dashboard.model.ts` file in the dashboard directory",
+      "done": false
+    },
+    {
+      "id": "2",
+      "description": "1.2 Create `dashboard.view.tsx` file in the dashboard directory",
+      "done": false
+    },
+    {
+      "id": "3",
+      "description": "1.3 Create `dashboard.schema.ts` file in the dashboard directory",
+      "done": false
+    },
+    {
+      "id": "4",
+      "description": "1.4 Create `dashboard.type.ts` file in the dashboard directory",
+      "done": false
+    },
+    {
+      "id": "5",
+      "description": "2.1 Migrate existing validation logic and schemas (e.g., Zod) into `dashboard.schema.ts`",
+      "done": false
+    },
+    {
+      "id": "6",
+      "description": "2.2 Define types and interfaces, including View Props and API abstractions, in `dashboard.type.ts`",
+      "done": false
+    },
+    {
+      "id": "7",
+      "description": "3.1 Extract all state variables (`useState`, `useReducer`) from the current dashboard page into a `useDashboardModel` hook in `dashboard.model.ts`",
+      "done": false
+    },
+    {
+      "id": "8",
+      "description": "3.2 Move data fetching, API calls, and side effects to `useDashboardModel`",
+      "done": false
+    },
+    {
+      "id": "9",
+      "description": "3.3 Expose necessary values and action handlers from the hook, ensuring strict typing matching `dashboard.type.ts`",
+      "done": false
+    },
+    {
+      "id": "10",
+      "description": "4.1 Migrate all JSX rendering out of `page.tsx` into a stateless `DashboardView` component in `dashboard.view.tsx`",
+      "done": false
+    },
+    {
+      "id": "11",
+      "description": "4.2 Update the view component to consume state and dispatch actions purely via its props",
+      "done": false
+    },
+    {
+      "id": "12",
+      "description": "5.1 Refactor `page.tsx` to exclusively act as a connector, invoking `useDashboardModel` and passing its return down to `<DashboardView />`",
+      "done": false
+    },
+    {
+      "id": "13",
+      "description": "5.2 Validate that the Dashboard functions equivalently to its pre-refactored state with the new MVVM architecture",
+      "done": false
+    }
+  ],
+  "state": "ready",
+  "instruction": "Read context files, work through pending tasks, mark complete as you go.\nPause if you hit blockers or need clarification."
+}

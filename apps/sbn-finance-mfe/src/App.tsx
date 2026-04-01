@@ -12,11 +12,9 @@ import type {
   Transaction,
   Wallet,
   Category,
-  DashboardSummary,
-  DashboardCategories,
 } from "./types/finance";
 import { TransactionList } from "./components/TransactionList";
-import { Dashboard } from "./components/Dashboard";
+import { Dashboard } from "./pages/dashboard/page";
 import { CategoryGrid } from "./components/CategoryGrid";
 import { CalendarView } from "./components/CalendarView";
 import { Button } from "@repo/ui";
@@ -39,17 +37,6 @@ const App = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Dashboard Data
-  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary>({
-    cards: { balance: 0, currentInvoice: 0, nextInvoice: 0, totalInvoices: 0 },
-    overview: { income: 0, expense: 0, balance: 0 },
-  });
-  const [dashboardCategories, setDashboardCategories] =
-    useState<DashboardCategories>({
-      income: [],
-      expense: [],
-    });
-
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -58,19 +45,15 @@ const App = () => {
       setLoading(true);
 
       // Parallel Fetch
-      const [txs, wls, cats, dashSum, dashCats] = await Promise.all([
+      const [txs, wls, cats] = await Promise.all([
         financeApi.transactions.list(selectedMonth, selectedYear),
         financeApi.wallets.list(),
         financeApi.categories.list(),
-        financeApi.dashboard.summary(selectedMonth, selectedYear),
-        financeApi.dashboard.categories(selectedMonth, selectedYear),
       ]);
 
       setTransactions(txs);
       setWallets(wls);
       setCategories(cats);
-      setDashboardSummary(dashSum);
-      setDashboardCategories(dashCats);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast.error("Erro ao carregar dados. Tente novamente.");
@@ -212,13 +195,13 @@ const App = () => {
                 index
                 element={
                   <Dashboard
-                    summary={dashboardSummary}
-                    categories={dashboardCategories}
                     wallets={wallets}
                     allCategories={categories}
                     transactions={transactions}
-                    loading={loading}
+                    globalLoading={loading}
                     onRefresh={handleTransactionSuccess}
+                    selectedMonth={selectedMonth}
+                    selectedYear={selectedYear}
                   />
                 }
               />
