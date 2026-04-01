@@ -104,6 +104,21 @@ export interface CreatePriceEntryRequest {
   notes?: string;
 }
 
+export interface WishlistPriorityEntry {
+  id: string;
+  wishlistItemId: string;
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  date: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface CreatePriorityEntryRequest {
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  date: string;
+  notes?: string;
+}
+
 export const wishlistApi = {
   list: (status?: string, priority?: string) => {
     const params = new URLSearchParams();
@@ -147,6 +162,21 @@ export const wishlistApi = {
     }),
   removePrice: (id: string, entryId: string) =>
     request<void>(`/api/finance/wishlist/${id}/prices/${entryId}`, {
+      method: "DELETE",
+    }),
+
+  // Priority entries
+  getPriorities: (id: string) =>
+    request<WishlistPriorityEntry[]>(`/api/finance/wishlist/${id}/priorities`, {
+      method: "GET",
+    }),
+  addPriority: (id: string, payload: CreatePriorityEntryRequest) =>
+    request<WishlistPriorityEntry>(`/api/finance/wishlist/${id}/priorities`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  removePriority: (id: string, entryId: string) =>
+    request<void>(`/api/finance/wishlist/${id}/priorities/${entryId}`, {
       method: "DELETE",
     }),
 };

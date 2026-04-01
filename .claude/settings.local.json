@@ -18,7 +18,9 @@
       "Bash(pnpm prisma:generate)",
       "Bash(pnpm --filter host add recharts)",
       "Bash(pnpm --filter host exec tsc --noEmit)",
-      "Bash(pnpm --filter @sbn/finance exec tsc --noEmit)"
+      "Bash(pnpm --filter @sbn/finance exec tsc --noEmit)",
+      "Bash(npx prisma generate)",
+      "Bash(openspec list --json)"
     ]
   }
 }

@@ -68,8 +68,8 @@
 
 ## 11. Validação
 
-- [ ] 11.1 Testar fluxo completo: criar item → adicionar preços → verificar gráfico na página de detalhe
-- [ ] 11.2 Testar truncamento de descrição longa na lista
-- [ ] 11.3 Testar MoneyInput: digitação progressiva, backspace, defaultValue, disabled
-- [ ] 11.4 Testar remoção de entrada de preço via UI
-- [ ] 11.5 Testar atualização de prioridade inline na página de detalhe
+- [x] 11.1 Testar fluxo completo: criar item → adicionar preços → verificar gráfico na página de detalhe
+- [x] 11.2 Testar truncamento de descrição longa na lista
+- [x] 11.3 Testar MoneyInput: digitação progressiva, backspace, defaultValue, disabled
+- [x] 11.4 Testar remoção de entrada de preço via UI
+- [x] 11.5 Testar atualização de prioridade inline na página de detalhe

@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateWishlistItemDto } from './dto/create-wishlist-item.dto';
 import { UpdateWishlistItemDto } from './dto/update-wishlist-item.dto';
 import { CreatePriceEntryDto } from './dto/create-price-entry.dto';
+import { CreatePriorityEntryDto } from './dto/create-priority-entry.dto';
 
 @Injectable()
 export class WishlistService {
@@ -172,5 +173,58 @@ export class WishlistService {
     }
 
     return this.prisma.wishlistPriceEntry.delete({ where: { id: entryId } });
+  }
+
+  // ── Priority Entries ───────────────────────────────────────────────────────
+
+  async createPriorityEntry(
+    userId: string,
+    itemId: string,
+    dto: CreatePriorityEntryDto,
+  ) {
+    await this.findOne(itemId, userId); // Verifica propriedade
+
+    return this.prisma.wishlistPriorityEntry.create({
+      data: {
+        wishlistItemId: itemId,
+        priority: dto.priority,
+        date: new Date(dto.date),
+        notes: dto.notes,
+      },
+    });
+  }
+
+  async findPriorityEntries(userId: string, itemId: string) {
+    await this.findOne(itemId, userId); // Verifica propriedade
+
+    return this.prisma.wishlistPriorityEntry.findMany({
+      where: { wishlistItemId: itemId },
+      orderBy: { date: 'asc' },
+    });
+  }
+
+  async removePriorityEntry(
+    userId: string,
+    itemId: string,
+    entryId: string,
+  ) {
+    const item = await this.prisma.wishlistItem.findFirst({
+      where: { id: itemId, deletedAt: null },
+    });
+    if (!item) {
+      throw new NotFoundException('Wishlist item not found');
+    }
+    if (item.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const entry = await this.prisma.wishlistPriorityEntry.findFirst({
+      where: { id: entryId, wishlistItemId: itemId },
+    });
+    if (!entry) {
+      throw new NotFoundException('Priority entry not found');
+    }
+
+    return this.prisma.wishlistPriorityEntry.delete({ where: { id: entryId } });
   }
 }
