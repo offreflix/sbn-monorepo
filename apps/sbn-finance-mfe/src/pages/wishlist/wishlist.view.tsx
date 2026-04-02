@@ -36,25 +36,10 @@ import {
 import type { WishlistModelOutput } from './wishlist.model'
 
 export function WishlistView({
-  items,
-  loading,
-  isDialogOpen,
-  filterStatus,
-  filterPriority,
-  purchaseItem,
-  formData,
-  sameInstallment,
-  setIsDialogOpen,
-  setFilterStatus,
-  setFilterPriority,
-  setPurchaseItem,
-  setFormData,
-  setSameInstallment,
-  loadItems,
-  handleSubmit,
-  handleDelete,
-  handlePurchase,
-  handleNavigateToDetail,
+  data: { items },
+  state: { loading, isDialogOpen, filterStatus, filterPriority, purchaseItem, formData, sameInstallment },
+  setters: { setIsDialogOpen, setFilterStatus, setFilterPriority, setPurchaseItem, setFormData, setSameInstallment },
+  actions: { loadItems, handleSubmit, handleDelete, handlePurchase, handleNavigateToDetail },
 }: WishlistModelOutput) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {

@@ -144,9 +144,11 @@ export function useWishlistDetailModel() {
   const { stores, series, config: priceConfig, data: priceChartData } = useMemo(() => {
     return buildPriceChart(priceEntries)
   }, [priceEntries])
+
   const { config: priorityConfig, data: priorityChartData } = useMemo(() => {
     return buildPriorityChart(priorityEntries)
   }, [priorityEntries])
+
   const bestEntry = useMemo(() => {
     if (priceEntries.length === 0) return null
     return priceEntries.reduce((a, b) => (Number(a.price) <= Number(b.price) ? a : b))
@@ -270,50 +272,58 @@ export function useWishlistDetailModel() {
   }
 
   return {
-    item,
-    priceEntries,
-    priorityEntries,
-    bestEntry,
-    charts: {
-      price: { stores, series, config: priceConfig, data: priceChartData },
-      priority: { config: priorityConfig, data: priorityChartData },
+    data: {
+      item,
+      priceEntries,
+      priorityEntries,
+      bestEntry,
+      charts: {
+        price: { stores, series, config: priceConfig, data: priceChartData },
+        priority: { config: priorityConfig, data: priorityChartData },
+      },
+      ui: {
+        statusBadgeClassByStatus: STATUS_BADGE_CLASS,
+        statusLabelByStatus: STATUS_LABEL,
+        priorityLabelByNumeric: PRIORITY_LABELS,
+        priorityColorByPriority: PRIORITY_COLOR,
+        priorityLabelByPriority: PRIORITY_LABEL_BY_PRIORITY,
+      },
     },
-    ui: {
-      statusBadgeClassByStatus: STATUS_BADGE_CLASS,
-      statusLabelByStatus: STATUS_LABEL,
-      priorityLabelByNumeric: PRIORITY_LABELS,
-      priorityColorByPriority: PRIORITY_COLOR,
-      priorityLabelByPriority: PRIORITY_LABEL_BY_PRIORITY,
+    state: {
+      loading,
+      notFound,
+      purchaseItem,
+      addPriceOpen,
+      addPriorityOpen,
+      editOpen,
+      sameInstallment,
+      savingPrice,
+      savingPriority,
+      savingEdit,
+      priceForm,
+      priorityForm,
+      editForm,
     },
-    loading,
-    notFound,
-    purchaseItem,
-    addPriceOpen,
-    addPriorityOpen,
-    editOpen,
-    sameInstallment,
-    savingPrice,
-    savingPriority,
-    savingEdit,
-    priceForm,
-    priorityForm,
-    editForm,
-    setPurchaseItem,
-    setAddPriceOpen,
-    setAddPriorityOpen,
-    setEditOpen,
-    setSameInstallment,
-    setPriceForm,
-    setPriorityForm,
-    setEditForm,
-    loadData,
-    handleGoBack,
-    handlePriorityChange,
-    handleAddPrice,
-    handleRemovePrice,
-    handleAddPriority,
-    handleRemovePriority,
-    handleEditSave,
+    setters: {
+      setPurchaseItem,
+      setAddPriceOpen,
+      setAddPriorityOpen,
+      setEditOpen,
+      setSameInstallment,
+      setPriceForm,
+      setPriorityForm,
+      setEditForm,
+    },
+    actions: {
+      loadData,
+      handleGoBack,
+      handlePriorityChange,
+      handleAddPrice,
+      handleRemovePrice,
+      handleAddPriority,
+      handleRemovePriority,
+      handleEditSave,
+    },
   }
 }
 

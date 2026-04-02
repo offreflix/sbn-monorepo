@@ -22,7 +22,6 @@ export function useAppModel() {
     try {
       setLoading(true)
 
-      // Parallel Fetch
       const [txs, wls, cats] = await Promise.all([
         financeApi.transactions.list(selectedMonth, selectedYear),
         financeApi.wallets.list(),
@@ -87,18 +86,26 @@ export function useAppModel() {
   }
 
   return {
-    transactions,
-    wallets,
-    categories,
-    loading,
-    selectedMonth,
-    selectedYear,
-    setSelectedMonth,
-    setSelectedYear,
-    loadData,
-    handleTransactionSuccess,
-    isTabActive,
-    handleNavigate,
+    data: {
+      transactions,
+      wallets,
+      categories,
+    },
+    state: {
+      loading,
+      selectedMonth,
+      selectedYear,
+    },
+    setters: {
+      setSelectedMonth,
+      setSelectedYear,
+    },
+    actions: {
+      loadData,
+      handleTransactionSuccess,
+      isTabActive,
+      handleNavigate,
+    },
   }
 }
 

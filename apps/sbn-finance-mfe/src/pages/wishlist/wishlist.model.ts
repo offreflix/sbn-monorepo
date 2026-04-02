@@ -27,9 +27,7 @@ export function useWishlistModel() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterPriority, setFilterPriority] = useState<string>('all')
   const [purchaseItem, setPurchaseItem] = useState<WishlistItem | null>(null)
-
-  const [formData, setFormData] =
-    useState<WishlistCreateFormData>(initialFormData)
+  const [formData, setFormData] = useState<WishlistCreateFormData>(initialFormData)
   const [sameInstallment, setSameInstallment] = useState(true)
 
   const loadItems = useCallback(async () => {
@@ -110,25 +108,33 @@ export function useWishlistModel() {
   }
 
   return {
-    items,
-    loading,
-    isDialogOpen,
-    filterStatus,
-    filterPriority,
-    purchaseItem,
-    formData,
-    sameInstallment,
-    setIsDialogOpen,
-    setFilterStatus,
-    setFilterPriority,
-    setPurchaseItem,
-    setFormData,
-    setSameInstallment,
-    loadItems,
-    handleSubmit,
-    handleDelete,
-    handlePurchase,
-    handleNavigateToDetail,
+    data: {
+      items,
+    },
+    state: {
+      loading,
+      isDialogOpen,
+      filterStatus,
+      filterPriority,
+      purchaseItem,
+      formData,
+      sameInstallment,
+    },
+    setters: {
+      setIsDialogOpen,
+      setFilterStatus,
+      setFilterPriority,
+      setPurchaseItem,
+      setFormData,
+      setSameInstallment,
+    },
+    actions: {
+      loadItems,
+      handleSubmit,
+      handleDelete,
+      handlePurchase,
+      handleNavigateToDetail,
+    },
   }
 }
 

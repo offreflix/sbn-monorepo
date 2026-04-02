@@ -42,13 +42,19 @@ export function useDashboardModel(props: DashboardProps) {
   };
 
   return {
-    summary,
-    categories,
-    wallets: props.wallets,
-    allCategories: props.allCategories,
-    transactions: props.transactions,
-    loading: props.globalLoading || dashboardLoading,
-    onRefresh: handleRefresh,
+    data: {
+      summary,
+      categories,
+      wallets: props.wallets,
+      allCategories: props.allCategories,
+      transactions: props.transactions,
+    },
+    state: {
+      loading: props.globalLoading || dashboardLoading,
+    },
+    actions: {
+      onRefresh: handleRefresh,
+    },
   };
 }
 

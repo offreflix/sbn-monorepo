@@ -19,31 +19,21 @@ import { WishlistDetailPage } from './pages/wishlist-detail/page'
 import type { AppModelOutput } from './app.model'
 
 export function AppView({
-  transactions,
-  wallets,
-  categories,
-  loading,
-  selectedMonth,
-  selectedYear,
-  setSelectedMonth,
-  setSelectedYear,
-  loadData,
-  handleTransactionSuccess,
-  isTabActive,
-  handleNavigate,
+  data: { transactions, wallets, categories },
+  state: { loading, selectedMonth, selectedYear },
+  setters: { setSelectedMonth, setSelectedYear },
+  actions: { loadData, handleTransactionSuccess, isTabActive, handleNavigate },
 }: AppModelOutput) {
   return (
     <>
       <Toaster position="top-right" />
       <div className="w-full min-h-screen bg-background text-foreground">
-        {/* Header Section */}
         <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-bold tracking-tight">Finanças</h1>
               <div className="h-6 w-px bg-border hidden sm:block" />
 
-              {/* View Switcher - Simple Buttons */}
               <div className="flex items-center gap-2">
                 <Button
                   variant={isTabActive('') ? 'secondary' : 'ghost'}
@@ -174,7 +164,6 @@ export function AppView({
               />
               <Route path="wishlist" element={<WishlistPage />} />
               <Route path="wishlist/:id" element={<WishlistDetailPage />} />
-              {/* Fallback to dashboard */}
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </div>
