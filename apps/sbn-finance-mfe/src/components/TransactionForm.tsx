@@ -2,11 +2,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type {
-  Wallet,
-  Category,
-  CreateTransactionRequest,
-} from "../types/finance";
+import type { Wallet } from "../types/wallet.type";
+import type { Category } from "../pages/categories/categories.type";
+import type { CreateTransactionRequest } from "../pages/transactions/transactions.type";
 import { Button } from "@repo/ui";
 import {
   Input,

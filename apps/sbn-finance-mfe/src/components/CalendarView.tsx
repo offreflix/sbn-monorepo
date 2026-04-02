@@ -23,8 +23,8 @@ import {
   SelectValue,
 } from "@repo/ui";
 import { formatCurrency } from "../lib/utils";
-import type { Transaction } from "../types/finance";
-import type { DashboardYearOverview } from "../types/finance";
+import type { Transaction } from "../pages/transactions/transactions.type";
+import type { DashboardYearOverview } from "../pages/dashboard/dashboard.type";
 import { financeApi } from "../api/finance";
 import { YearOverviewChart } from "./YearOverviewChart";
 import { AnnualCalendar } from "./AnnualCalendar";

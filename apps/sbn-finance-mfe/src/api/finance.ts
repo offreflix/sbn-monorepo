@@ -1,18 +1,9 @@
-import type {
-  Wallet,
-  Category,
-  Transaction,
-  Recurrence,
-  Projection,
-  CreateWalletRequest,
-  UpdateWalletRequest,
-  CreateTransactionRequest,
-  CreateCategoryRequest,
-  UpdateCategoryRequest,
-  CreateRecurrenceRequest,
-  DashboardSummary,
-  DashboardCategories,
-} from "../types/finance";
+import type { Wallet, CreateWalletRequest, UpdateWalletRequest } from "../types/wallet.type";
+import type { Category, CreateCategoryRequest, UpdateCategoryRequest } from "../pages/categories/categories.type";
+import type { Transaction, CreateTransactionRequest } from "../pages/transactions/transactions.type";
+import type { Recurrence, CreateRecurrenceRequest } from "../types/recurrence.type";
+import type { Projection } from "../types/projection.type";
+import type { DashboardSummary, DashboardCategories, DashboardYearOverview } from "../pages/dashboard/dashboard.type";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:56080";
 
@@ -317,7 +308,7 @@ export const financeApi = {
       const params = new URLSearchParams();
       if (year) params.append("year", year.toString());
       const queryString = params.toString() ? `?${params.toString()}` : "";
-      return request<import("../types/finance").DashboardYearOverview>(
+      return request<DashboardYearOverview>(
         `/api/finance/dashboard/year${queryString}`,
         { method: "GET" },
       );

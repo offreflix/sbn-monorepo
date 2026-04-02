@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { financeApi } from "../../api/finance";
 import type { TransactionsProps } from "./transactions.type";
-import type { Transaction } from "../../types/finance";
+import type { Transaction } from "./transactions.type";
 
 export function useTransactionsModel({
   transactions,

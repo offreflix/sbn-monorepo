@@ -14,7 +14,7 @@ import {
   CartesianGrid,
 } from "@repo/ui";
 import type { ChartConfig } from "@repo/ui";
-import type { Transaction } from "../types/finance";
+import type { Transaction } from "../pages/transactions/transactions.type";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface IncomeExpenseChartProps {

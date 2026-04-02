@@ -9,7 +9,7 @@ import {
 } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import { formatCurrency } from "../lib/utils";
-import type { DashboardYearOverview } from "../types/finance";
+import type { DashboardYearOverview } from "../pages/dashboard/dashboard.type";
 
 export function AnnualCalendar({
   year,

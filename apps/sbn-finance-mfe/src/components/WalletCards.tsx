@@ -23,7 +23,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import type { Wallet as WalletType } from "../types/finance";
+import type { Wallet as WalletType } from "../types/wallet.type";
 import { CreateWalletModal } from "./CreateWalletModal";
 import { financeApi } from "../api/finance";
 import { toast } from "sonner";

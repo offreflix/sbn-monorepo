@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { financeApi } from "../../api/finance";
-import type { Category } from "../../types/finance";
+import type { Category } from "./categories.type";
 import type { CategoriesProps } from "./categories.type";
 
 export function useCategoriesModel({ categories, onRefresh }: CategoriesProps) {

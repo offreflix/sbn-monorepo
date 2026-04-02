@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type { CreateCategoryRequest, Category } from "../types/finance";
+import type { CreateCategoryRequest, Category } from "../pages/categories/categories.type";
 import { toast } from "sonner";
 
 const EMOJI_OPTIONS = [

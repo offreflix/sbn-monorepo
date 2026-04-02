@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type { CreateCategoryRequest } from "../types/finance";
+import type { CreateCategoryRequest } from "../pages/categories/categories.type";
 import {
   Button,
   Card,

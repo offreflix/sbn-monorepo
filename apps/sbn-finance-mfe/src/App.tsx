@@ -8,11 +8,9 @@ import {
 } from "react-router-dom";
 import "./index.css";
 import { financeApi } from "./api/finance";
-import type {
-  Transaction,
-  Wallet,
-  Category,
-} from "./types/finance";
+import type { Transaction } from "./pages/transactions/transactions.type";
+import type { Wallet } from "./types/wallet.type";
+import type { Category } from "./pages/categories/categories.type";
 import { TransactionList } from "./pages/transactions/page";
 import { Dashboard } from "./pages/dashboard/page";
 import { CategoryGrid } from "./pages/categories/page";

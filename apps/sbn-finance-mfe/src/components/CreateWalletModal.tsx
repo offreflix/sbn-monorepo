@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { financeApi } from "../api/finance";
-import type { CreateWalletRequest, Wallet } from "../types/finance";
+import type { CreateWalletRequest, Wallet } from "../types/wallet.type";
 import { toast } from "sonner";
 
 const walletSchema = z.object({

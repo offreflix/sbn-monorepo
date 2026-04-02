@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardProps } from "./dashboard.type";
 import { financeApi } from "../../api/finance";
-import type { DashboardSummary, DashboardCategories } from "../../types/finance";
+import type { DashboardSummary, DashboardCategories } from "./dashboard.type";
 import { toast } from "sonner";
 
 export function useDashboardModel(props: DashboardProps) {
