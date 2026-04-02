@@ -33,34 +33,28 @@ import {
   ShoppingCart,
   Trash2,
 } from 'lucide-react'
-import type { WishlistModelOutput } from './wishlist.type'
+import type { WishlistModelOutput } from './wishlist.model'
 
 export function WishlistView({
-  data: { items },
-  state: {
-    loading,
-    isDialogOpen,
-    filterStatus,
-    filterPriority,
-    purchaseItem,
-    formData,
-    sameInstallment,
-  },
-  setters: {
-    setIsDialogOpen,
-    setFilterStatus,
-    setFilterPriority,
-    setPurchaseItem,
-    setFormData,
-    setSameInstallment,
-  },
-  actions: {
-    loadItems,
-    handleSubmit,
-    handleDelete,
-    handlePurchase,
-    handleNavigateToDetail,
-  },
+  items,
+  loading,
+  isDialogOpen,
+  filterStatus,
+  filterPriority,
+  purchaseItem,
+  formData,
+  sameInstallment,
+  setIsDialogOpen,
+  setFilterStatus,
+  setFilterPriority,
+  setPurchaseItem,
+  setFormData,
+  setSameInstallment,
+  loadItems,
+  handleSubmit,
+  handleDelete,
+  handlePurchase,
+  handleNavigateToDetail,
 }: WishlistModelOutput) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {

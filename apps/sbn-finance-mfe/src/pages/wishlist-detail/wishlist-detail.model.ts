@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { wishlistApi, type WishlistPriceEntry } from '../../api/wishlist'
+import {
+  wishlistApi,
+  type WishlistItem,
+  type WishlistPriceEntry,
+  type WishlistPriorityEntry,
+} from '../../api/wishlist'
 import type {
   WishlistDetailEditForm,
-  WishlistDetailModelOutput,
   WishlistDetailPriceForm,
   WishlistDetailPriorityForm,
 } from './wishlist-detail.type'
@@ -77,17 +81,16 @@ function buildPriorityChart(entries: Array<{ date: string; priority: string }>) 
   return { config, data }
 }
 
-export function useWishlistDetailModel(): WishlistDetailModelOutput {
+export function useWishlistDetailModel() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const [item, setItem] = useState<WishlistDetailModelOutput['data']['item']>(null)
-  const [priceEntries, setPriceEntries] = useState<WishlistDetailModelOutput['data']['priceEntries']>([])
-  const [priorityEntries, setPriorityEntries] =
-    useState<WishlistDetailModelOutput['data']['priorityEntries']>([])
+  const [item, setItem] = useState<WishlistItem | null>(null)
+  const [priceEntries, setPriceEntries] = useState<WishlistPriceEntry[]>([])
+  const [priorityEntries, setPriorityEntries] = useState<WishlistPriorityEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
-  const [purchaseItem, setPurchaseItem] = useState<WishlistDetailModelOutput['state']['purchaseItem']>(null)
+  const [purchaseItem, setPurchaseItem] = useState<WishlistItem | null>(null)
 
   const [addPriceOpen, setAddPriceOpen] = useState(false)
   const [priceForm, setPriceForm] = useState<WishlistDetailPriceForm>(initialPriceForm)
@@ -267,58 +270,51 @@ export function useWishlistDetailModel(): WishlistDetailModelOutput {
   }
 
   return {
-    data: {
-      item,
-      priceEntries,
-      priorityEntries,
-      bestEntry,
-      charts: {
-        price: { stores, series, config: priceConfig, data: priceChartData },
-        priority: { config: priorityConfig, data: priorityChartData },
-      },
-      ui: {
-        statusBadgeClassByStatus: STATUS_BADGE_CLASS,
-        statusLabelByStatus: STATUS_LABEL,
-        priorityLabelByNumeric: PRIORITY_LABELS,
-        priorityColorByPriority: PRIORITY_COLOR,
-        priorityLabelByPriority: PRIORITY_LABEL_BY_PRIORITY,
-      },
+    item,
+    priceEntries,
+    priorityEntries,
+    bestEntry,
+    charts: {
+      price: { stores, series, config: priceConfig, data: priceChartData },
+      priority: { config: priorityConfig, data: priorityChartData },
     },
-    state: {
-      loading,
-      notFound,
-      purchaseItem,
-      addPriceOpen,
-      addPriorityOpen,
-      editOpen,
-      sameInstallment,
-      savingPrice,
-      savingPriority,
-      savingEdit,
-      priceForm,
-      priorityForm,
-      editForm,
+    ui: {
+      statusBadgeClassByStatus: STATUS_BADGE_CLASS,
+      statusLabelByStatus: STATUS_LABEL,
+      priorityLabelByNumeric: PRIORITY_LABELS,
+      priorityColorByPriority: PRIORITY_COLOR,
+      priorityLabelByPriority: PRIORITY_LABEL_BY_PRIORITY,
     },
-    setters: {
-      setPurchaseItem,
-      setAddPriceOpen,
-      setAddPriorityOpen,
-      setEditOpen,
-      setSameInstallment,
-      setPriceForm,
-      setPriorityForm,
-      setEditForm,
-    },
-    actions: {
-      loadData,
-      handleGoBack,
-      handlePriorityChange,
-      handleAddPrice,
-      handleRemovePrice,
-      handleAddPriority,
-      handleRemovePriority,
-      handleEditSave,
-    },
+    loading,
+    notFound,
+    purchaseItem,
+    addPriceOpen,
+    addPriorityOpen,
+    editOpen,
+    sameInstallment,
+    savingPrice,
+    savingPriority,
+    savingEdit,
+    priceForm,
+    priorityForm,
+    editForm,
+    setPurchaseItem,
+    setAddPriceOpen,
+    setAddPriorityOpen,
+    setEditOpen,
+    setSameInstallment,
+    setPriceForm,
+    setPriorityForm,
+    setEditForm,
+    loadData,
+    handleGoBack,
+    handlePriorityChange,
+    handleAddPrice,
+    handleRemovePrice,
+    handleAddPriority,
+    handleRemovePriority,
+    handleEditSave,
   }
 }
 
+export type WishlistDetailModelOutput = ReturnType<typeof useWishlistDetailModel>

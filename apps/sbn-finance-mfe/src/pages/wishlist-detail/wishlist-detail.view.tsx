@@ -40,7 +40,7 @@ import {
 } from 'lucide-react'
 import { MoneyInput } from '../../components/MoneyInput'
 import { PurchaseTransactionModal } from '../../components/PurchaseTransactionModal'
-import type { WishlistDetailModelOutput } from './wishlist-detail.type'
+import type { WishlistDetailModelOutput } from './wishlist-detail.model'
 
 function formatPrice(price?: number, currency = 'BRL') {
   if (!price) return 'Preço não informado'
@@ -62,42 +62,41 @@ function formatDate(iso: string) {
 }
 
 export function WishlistDetailView({
-  data: { item, priceEntries, priorityEntries, bestEntry, charts, ui },
-  state: {
-    loading,
-    notFound,
-    purchaseItem,
-    addPriceOpen,
-    addPriorityOpen,
-    editOpen,
-    sameInstallment,
-    savingPrice,
-    savingPriority,
-    savingEdit,
-    priceForm,
-    priorityForm,
-    editForm,
-  },
-  setters: {
-    setPurchaseItem,
-    setAddPriceOpen,
-    setAddPriorityOpen,
-    setEditOpen,
-    setSameInstallment,
-    setPriceForm,
-    setPriorityForm,
-    setEditForm,
-  },
-  actions: {
-    loadData,
-    handleGoBack,
-    handlePriorityChange,
-    handleAddPrice,
-    handleRemovePrice,
-    handleAddPriority,
-    handleRemovePriority,
-    handleEditSave,
-  },
+  item,
+  priceEntries,
+  priorityEntries,
+  bestEntry,
+  charts,
+  ui,
+  loading,
+  notFound,
+  purchaseItem,
+  addPriceOpen,
+  addPriorityOpen,
+  editOpen,
+  sameInstallment,
+  savingPrice,
+  savingPriority,
+  savingEdit,
+  priceForm,
+  priorityForm,
+  editForm,
+  setPurchaseItem,
+  setAddPriceOpen,
+  setAddPriorityOpen,
+  setEditOpen,
+  setSameInstallment,
+  setPriceForm,
+  setPriorityForm,
+  setEditForm,
+  loadData,
+  handleGoBack,
+  handlePriorityChange,
+  handleAddPrice,
+  handleRemovePrice,
+  handleAddPriority,
+  handleRemovePriority,
+  handleEditSave,
 }: WishlistDetailModelOutput) {
   if (loading) {
     return (

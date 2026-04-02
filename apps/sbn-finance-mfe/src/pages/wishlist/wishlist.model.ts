@@ -2,10 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { wishlistApi, type WishlistItem } from '../../api/wishlist'
-import type {
-  WishlistCreateFormData,
-  WishlistModelOutput,
-} from './wishlist.type'
+import type { WishlistCreateFormData } from './wishlist.type'
 
 const initialFormData: WishlistCreateFormData = {
   name: '',
@@ -21,7 +18,7 @@ const initialFormData: WishlistCreateFormData = {
   installmentValue: 0,
 }
 
-export function useWishlistModel(): WishlistModelOutput {
+export function useWishlistModel() {
   const navigate = useNavigate()
 
   const [items, setItems] = useState<WishlistItem[]>([])
@@ -113,30 +110,26 @@ export function useWishlistModel(): WishlistModelOutput {
   }
 
   return {
-    data: { items },
-    state: {
-      loading,
-      isDialogOpen,
-      filterStatus,
-      filterPriority,
-      purchaseItem,
-      formData,
-      sameInstallment,
-    },
-    setters: {
-      setIsDialogOpen,
-      setFilterStatus,
-      setFilterPriority,
-      setPurchaseItem,
-      setFormData,
-      setSameInstallment,
-    },
-    actions: {
-      loadItems,
-      handleSubmit,
-      handleDelete,
-      handlePurchase,
-      handleNavigateToDetail,
-    },
+    items,
+    loading,
+    isDialogOpen,
+    filterStatus,
+    filterPriority,
+    purchaseItem,
+    formData,
+    sameInstallment,
+    setIsDialogOpen,
+    setFilterStatus,
+    setFilterPriority,
+    setPurchaseItem,
+    setFormData,
+    setSameInstallment,
+    loadItems,
+    handleSubmit,
+    handleDelete,
+    handlePurchase,
+    handleNavigateToDetail,
   }
 }
+
+export type WishlistModelOutput = ReturnType<typeof useWishlistModel>
