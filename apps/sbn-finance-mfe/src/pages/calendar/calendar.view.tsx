@@ -1,15 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  format,
-  isSameMonth,
-  isSameDay,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-} from "date-fns";
+import { format, isSameMonth, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Card,
@@ -22,127 +11,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui";
-import { formatCurrency } from "../lib/utils";
-import type { Transaction } from "../pages/transactions/transactions.type";
-import type { DashboardYearOverview } from "../pages/dashboard/dashboard.type";
-import { financeApi } from "../api/finance";
-import { YearOverviewChart } from "./YearOverviewChart";
-import { AnnualCalendar } from "./AnnualCalendar";
+import { formatCurrency } from "../../lib/utils";
+import { YearOverviewChart } from "../../components/YearOverviewChart";
+import { AnnualCalendar } from "../../components/AnnualCalendar";
+import type { CalendarModelOutput } from "./calendar.model";
 
-interface CalendarViewProps {
-  transactions: Transaction[];
-  currentMonth: number; // 1-12
-  currentYear: number;
-}
+const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export function CalendarView({
-  transactions,
-  currentMonth,
-  currentYear,
-}: CalendarViewProps) {
-  const [view, setView] = useState<
-    "day" | "week" | "month" | "agenda" | "4days" | "year"
-  >(() => {
-    const saved = localStorage.getItem("calendar-view");
-    const valid = ["day", "week", "month", "agenda", "4days", "year"];
-    return (valid.includes(saved ?? "") ? saved : "month") as
-      | "day"
-      | "week"
-      | "month"
-      | "agenda"
-      | "4days"
-      | "year";
-  });
-
-  const monthDate = useMemo(
-    () => new Date(currentYear, currentMonth - 1, 1),
-    [currentMonth, currentYear],
-  );
-
-  const daysInMonth = useMemo(() => {
-    const start = startOfWeek(startOfMonth(monthDate));
-    const end = endOfWeek(endOfMonth(monthDate));
-    return eachDayOfInterval({ start, end });
-  }, [monthDate]);
-
-  const dailyData = useMemo(() => {
-    const data = new Map<
-      string,
-      {
-        income: number;
-        expense: number;
-        balance: number;
-        transactions: Transaction[];
-      }
-    >();
-
-    transactions.forEach((tx) => {
-      const dateKey = format(new Date(tx.date), "yyyy-MM-dd");
-      const current = data.get(dateKey) || {
-        income: 0,
-        expense: 0,
-        balance: 0,
-        transactions: [],
-      };
-
-      const amount = Number(tx.amount);
-      if (tx.type === "Receita") {
-        current.income += amount;
-        current.balance += amount;
-      } else {
-        current.expense += amount;
-        current.balance -= amount;
-      }
-      current.transactions.push(tx);
-
-      data.set(dateKey, current);
-    });
-
-    return data;
-  }, [transactions]);
-
-  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-  const selectedDay = useMemo(() => {
-    const today = new Date();
-    if (
-      today.getFullYear() === currentYear &&
-      today.getMonth() + 1 === currentMonth
-    ) {
-      return today;
-    }
-    return new Date(currentYear, currentMonth - 1, 1);
-  }, [currentYear, currentMonth]);
-
-  const weekRange = useMemo(() => {
-    const start = startOfWeek(selectedDay);
-    const end = addDays(start, 6);
-    return eachDayOfInterval({ start, end });
-  }, [selectedDay]);
-
-  const fourDays = useMemo(
-    () =>
-      eachDayOfInterval({ start: selectedDay, end: addDays(selectedDay, 3) }),
-    [selectedDay],
-  );
-
-  // Year overview state and fetch
-  const [yearData, setYearData] = useState<DashboardYearOverview | null>(null);
-  const [yearLoading, setYearLoading] = useState(false);
-
-  useEffect(() => {
-    if (view === "year") {
-      setYearLoading(true);
-      financeApi.dashboard
-        .year(currentYear)
-        .then((res) => setYearData(res))
-        .finally(() => setYearLoading(false));
-    } else {
-      setYearData(null);
-      setYearLoading(false);
-    }
-  }, [view, currentYear]);
-
+  data: {
+    transactions,
+    currentYear,
+    monthDate,
+    daysInMonth,
+    dailyData,
+    selectedDay,
+    weekRange,
+    fourDays,
+    yearData,
+  },
+  state: { view, yearLoading },
+  setters: { handleSetView },
+}: CalendarModelOutput) {
   return (
     <Card variant="glass" className="h-full flex flex-col">
       <CardHeader>
@@ -151,13 +41,7 @@ export function CalendarView({
             Calendário Financeiro
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Select
-              value={view}
-              onValueChange={(v: any) => {
-                setView(v);
-                localStorage.setItem("calendar-view", v);
-              }}
-            >
+            <Select value={view} onValueChange={handleSetView}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Visão" />
               </SelectTrigger>
@@ -240,7 +124,7 @@ export function CalendarView({
                 const rowIndex = Math.floor(index / 7);
                 const totalRows = Math.ceil(daysInMonth.length / 7);
                 const isRightSide = colIndex > 3;
-                const isBottomHalf = rowIndex >= totalRows - 2; // Flip for last 2 rows
+                const isBottomHalf = rowIndex >= totalRows - 2;
 
                 return (
                   <div

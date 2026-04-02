@@ -14,7 +14,7 @@ import type { Category } from "./pages/categories/categories.type";
 import { TransactionList } from "./pages/transactions/page";
 import { Dashboard } from "./pages/dashboard/page";
 import { CategoryGrid } from "./pages/categories/page";
-import { CalendarView } from "./components/CalendarView";
+import { CalendarView } from "./pages/calendar/page";
 import { Button } from "@repo/ui";
 import {
   LayoutDashboard,
