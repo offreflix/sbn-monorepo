@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Button,
   AlertDialog,
@@ -11,48 +10,26 @@ import {
   AlertDialogTitle,
 } from "@repo/ui";
 import { Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from "lucide-react";
-import { CreateCategoryModal } from "./CreateCategoryModal";
-import { financeApi } from "../api/finance";
-import { toast } from "sonner";
-import type { Category } from "../types/finance";
+import { CreateCategoryModal } from "../../components/CreateCategoryModal";
+import type { CategoriesModelOutput } from "./categories.model";
 
-interface CategoryGridProps {
-  categories: Category[];
-  onRefresh: () => void;
-}
-
-export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
-    null,
-  );
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [filter, setFilter] = useState<"all" | "Receita" | "Despesa">("all");
-
-  const filteredCategories =
-    filter === "all" ? categories : categories.filter((c) => c.type === filter);
-
-  const incomeCount = categories.filter((c) => c.type === "Receita").length;
-  const expenseCount = categories.filter((c) => c.type === "Despesa").length;
-
-  const handleDelete = async () => {
-    if (!deletingCategory) return;
-    try {
-      setIsDeleting(true);
-      await financeApi.categories.delete(deletingCategory.id);
-      toast.success("Categoria excluída com sucesso!");
-      setDeletingCategory(null);
-      onRefresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Erro ao excluir categoria",
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
+export function CategoriesView({
+  data: { categories, totalCount, incomeCount, expenseCount },
+  state: {
+    isCreateModalOpen,
+    editingCategory,
+    deletingCategory,
+    isDeleting,
+    filter,
+  },
+  setters: {
+    setIsCreateModalOpen,
+    setEditingCategory,
+    setDeletingCategory,
+    setFilter,
+  },
+  actions: { handleDelete, onRefresh },
+}: CategoriesModelOutput) {
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -63,7 +40,7 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
             size="sm"
             onClick={() => setFilter("all")}
           >
-            Todas ({categories.length})
+            Todas ({totalCount})
           </Button>
           <Button
             variant={filter === "Receita" ? "secondary" : "ghost"}
@@ -96,7 +73,7 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
 
       {/* Category Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {filteredCategories.length === 0 ? (
+        {categories.length === 0 ? (
           <div className="col-span-full glass-dark rounded-xl p-8 text-center">
             <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mx-auto mb-4">
               <Plus className="h-6 w-6" />
@@ -118,7 +95,7 @@ export function CategoryGrid({ categories, onRefresh }: CategoryGridProps) {
             </Button>
           </div>
         ) : (
-          filteredCategories.map((category) => (
+          categories.map((category) => (
             <div
               key={category.id}
               className="glass-dark rounded-xl p-4 hover:border-white/15 transition-all duration-300 group relative"

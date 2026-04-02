@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "../../lib/utils";
 import { WalletCards } from "../../components/WalletCards";
-import { CategoryGrid } from "../../components/CategoryGrid";
+import { CategoryGrid } from "../../pages/categories/page";
 import { TransactionList } from "../../pages/transactions/page";
 import type { DashboardModelOutput } from "./dashboard.model";
 

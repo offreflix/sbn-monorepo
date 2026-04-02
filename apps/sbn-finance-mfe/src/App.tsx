@@ -15,7 +15,7 @@ import type {
 } from "./types/finance";
 import { TransactionList } from "./pages/transactions/page";
 import { Dashboard } from "./pages/dashboard/page";
-import { CategoryGrid } from "./components/CategoryGrid";
+import { CategoryGrid } from "./pages/categories/page";
 import { CalendarView } from "./components/CalendarView";
 import { Button } from "@repo/ui";
 import {
