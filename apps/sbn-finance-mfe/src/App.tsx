@@ -13,7 +13,7 @@ import type {
   Wallet,
   Category,
 } from "./types/finance";
-import { TransactionList } from "./components/TransactionList";
+import { TransactionList } from "./pages/transactions/page";
 import { Dashboard } from "./pages/dashboard/page";
 import { CategoryGrid } from "./components/CategoryGrid";
 import { CalendarView } from "./components/CalendarView";

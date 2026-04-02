@@ -10,7 +10,7 @@ import {
 import { formatCurrency } from "../../lib/utils";
 import { WalletCards } from "../../components/WalletCards";
 import { CategoryGrid } from "../../components/CategoryGrid";
-import { TransactionList } from "../../components/TransactionList";
+import { TransactionList } from "../../pages/transactions/page";
 import type { DashboardModelOutput } from "./dashboard.model";
 
 export function DashboardView({

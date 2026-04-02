@@ -32,6 +32,7 @@ export default defineConfig({
   },
   server: {
     port: 9001,
+    open: false,
   },
   dev: {
     assetPrefix: "http://localhost:9001",
