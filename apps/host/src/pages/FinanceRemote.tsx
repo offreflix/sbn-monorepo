@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Header } from "../components/Header";
 
 const RemoteFinance = lazy(() => import("sbn_finance_mfe/App"));

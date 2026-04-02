@@ -1,21 +1,15 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "sonner";
-import { AuthProvider, useAuth } from "./auth/AuthProvider";
-import { ThemeProvider } from "./theme/ThemeProvider";
-import { DashboardPage } from "./pages/Dashboard";
-import { FinanceRemotePage } from "./pages/FinanceRemote";
-import { WishlistPage } from "./pages/Wishlist";
-import { LoginPage } from "./pages/Login";
-import { RegisterPage } from "./pages/Register";
-import { SettingsPage } from "./pages/Settings";
-
-const WishlistDetailPage = lazy(() =>
-  import("./pages/WishlistDetail").then((m) => ({ default: m.WishlistDetailPage }))
-);
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { Toaster } from 'sonner'
+import { AuthProvider, useAuth } from './auth/AuthProvider'
+import { ThemeProvider } from './theme/ThemeProvider'
+import { DashboardPage } from './pages/Dashboard'
+import { FinanceRemotePage } from './pages/FinanceRemote'
+import { LoginPage } from './pages/Login'
+import { RegisterPage } from './pages/Register'
+import { SettingsPage } from './pages/Settings'
 
 const Protected = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -24,15 +18,15 @@ const Protected = ({ children }: { children: React.ReactNode }) => {
           Carregando sessão...
         </div>
       </div>
-    );
+    )
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}
 
 function App() {
   return (
@@ -59,32 +53,6 @@ function App() {
               }
             />
             <Route
-              path="/wishlist"
-              element={
-                <Protected>
-                  <WishlistPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/wishlist/:id"
-              element={
-                <Protected>
-                  <Suspense
-                    fallback={
-                      <div className="flex min-h-screen items-center justify-center">
-                        <div className="text-sm text-muted-foreground">
-                          Carregando...
-                        </div>
-                      </div>
-                    }
-                  >
-                    <WishlistDetailPage />
-                  </Suspense>
-                </Protected>
-              }
-            />
-            <Route
               path="/settings"
               element={
                 <Protected>
@@ -99,7 +67,7 @@ function App() {
         <Toaster richColors closeButton />
       </AuthProvider>
     </ThemeProvider>
-  );
+  )
 }
 
-export default App;
+export default App

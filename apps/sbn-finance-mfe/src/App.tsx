@@ -1,116 +1,123 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react'
 import {
   Routes,
   Route,
   useLocation,
   useNavigate,
   Navigate,
-} from "react-router-dom";
-import "./index.css";
-import { financeApi } from "./api/finance";
-import type { Transaction } from "./pages/transactions/transactions.type";
-import type { Wallet } from "./types/wallet.type";
-import type { Category } from "./pages/categories/categories.type";
-import { TransactionList } from "./pages/transactions/page";
-import { Dashboard } from "./pages/dashboard/page";
-import { CategoryGrid } from "./pages/categories/page";
-import { CalendarView } from "./pages/calendar/page";
-import { Button } from "@repo/ui";
+} from 'react-router-dom'
+import './index.css'
+import { financeApi } from './api/finance'
+import type { Transaction } from './pages/transactions/transactions.type'
+import type { Wallet } from './types/wallet.type'
+import type { Category } from './pages/categories/categories.type'
+import { TransactionList } from './pages/transactions/page'
+import { Dashboard } from './pages/dashboard/page'
+import { CategoryGrid } from './pages/categories/page'
+import { CalendarView } from './pages/calendar/page'
+import { Button } from '@repo/ui'
 import {
   LayoutDashboard,
   RefreshCcw,
   Receipt,
   Tags,
   Calendar,
-} from "lucide-react";
-import { toast, Toaster } from "sonner";
-import { MonthYearSelector } from "./components/MonthYearSelector";
+  Heart,
+} from 'lucide-react'
+import { toast, Toaster } from 'sonner'
+import { MonthYearSelector } from './components/MonthYearSelector'
+import { WishlistPage } from './pages/wishlist/page'
+import { WishlistDetailPage } from './pages/wishlist-detail/page'
 
 const App = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location = useLocation()
+  const navigate = useNavigate()
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
+      setLoading(true)
 
       // Parallel Fetch
       const [txs, wls, cats] = await Promise.all([
         financeApi.transactions.list(selectedMonth, selectedYear),
         financeApi.wallets.list(),
         financeApi.categories.list(),
-      ]);
+      ])
 
-      setTransactions(txs);
-      setWallets(wls);
-      setCategories(cats);
+      setTransactions(txs)
+      setWallets(wls)
+      setCategories(cats)
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-      toast.error("Erro ao carregar dados. Tente novamente.");
+      console.error('Erro ao carregar dados:', error)
+      toast.error('Erro ao carregar dados. Tente novamente.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear])
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData()
+  }, [loadData])
 
   const handleTransactionSuccess = () => {
-    loadData();
-  };
+    loadData()
+  }
 
   const isTabActive = (path: string) => {
     // If path is empty (Dashboard), check if we are at root or just /finance
-    if (path === "") {
+    if (path === '') {
       const isSubRoute =
-        location.pathname.endsWith("/transactions") ||
-        location.pathname.endsWith("/categories") ||
-        location.pathname.endsWith("/calendar");
-      return !isSubRoute;
+        location.pathname.endsWith('/transactions') ||
+        location.pathname.endsWith('/categories') ||
+        location.pathname.endsWith('/calendar') ||
+        location.pathname.includes('/wishlist')
+      return !isSubRoute
     }
-    return location.pathname.endsWith(path);
-  };
+    if (path === 'wishlist') {
+      return location.pathname.includes('/wishlist')
+    }
+    return location.pathname.endsWith(path)
+  }
 
   const handleNavigate = (path: string) => {
     // If we are navigating to the same path, do nothing
-    const currentPath = location.pathname;
-    const segments = currentPath.split("/").filter(Boolean);
-    const lastSegment = segments[segments.length - 1];
+    const currentPath = location.pathname
+    const segments = currentPath.split('/').filter(Boolean)
+    const lastSegment = segments[segments.length - 1]
 
     // Define known routes (excluding root)
-    const knownRoutes = ["transactions", "categories", "calendar"];
+    const knownRoutes = ['transactions', 'categories', 'calendar', 'wishlist']
 
     // Determine if we are currently in a sub-route
-    const isCurrentlyInSubRoute = knownRoutes.includes(lastSegment);
+    const isCurrentlyInSubRoute = knownRoutes.includes(lastSegment)
 
-    if (path === ".") {
+    if (path === '.') {
       // Target: Root (Dashboard)
       if (isCurrentlyInSubRoute) {
         // Go up one level to root
-        navigate("..", { relative: "path", replace: true });
+        navigate('..', { relative: 'path', replace: true })
       }
     } else {
       // Target: Sub-route (e.g., 'calendar')
       if (isCurrentlyInSubRoute) {
         if (lastSegment !== path) {
           // Replace sibling: go up and then to new path
-          navigate(`../${path}`, { relative: "path", replace: true });
+          navigate(`../${path}`, { relative: 'path', replace: true })
         }
       } else {
         // From root, append path
-        navigate(path, { replace: true });
+        navigate(path, { replace: true })
       }
     }
-  };
+  }
 
   return (
     <>
@@ -126,40 +133,49 @@ const App = () => {
               {/* View Switcher - Simple Buttons */}
               <div className="flex items-center gap-2">
                 <Button
-                  variant={isTabActive("") ? "secondary" : "ghost"}
+                  variant={isTabActive('') ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => handleNavigate(".")}
+                  onClick={() => handleNavigate('.')}
                   className="gap-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
                 <Button
-                  variant={isTabActive("transactions") ? "secondary" : "ghost"}
+                  variant={isTabActive('transactions') ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => handleNavigate("transactions")}
+                  onClick={() => handleNavigate('transactions')}
                   className="gap-2"
                 >
                   <Receipt className="h-4 w-4" />
                   Transações
                 </Button>
                 <Button
-                  variant={isTabActive("categories") ? "secondary" : "ghost"}
+                  variant={isTabActive('categories') ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => handleNavigate("categories")}
+                  onClick={() => handleNavigate('categories')}
                   className="gap-2"
                 >
                   <Tags className="h-4 w-4" />
                   Categorias
                 </Button>
                 <Button
-                  variant={isTabActive("calendar") ? "secondary" : "ghost"}
+                  variant={isTabActive('calendar') ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => handleNavigate("calendar")}
+                  onClick={() => handleNavigate('calendar')}
                   className="gap-2"
                 >
                   <Calendar className="h-4 w-4" />
                   Calendário
+                </Button>
+                <Button
+                  variant={isTabActive('wishlist') ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => handleNavigate('wishlist')}
+                  className="gap-2"
+                >
+                  <Heart className="h-4 w-4" />
+                  Wishlist
                 </Button>
               </div>
             </div>
@@ -169,8 +185,8 @@ const App = () => {
                 month={selectedMonth}
                 year={selectedYear}
                 onChange={(m, y) => {
-                  setSelectedMonth(m);
-                  setSelectedYear(y);
+                  setSelectedMonth(m)
+                  setSelectedYear(y)
                 }}
               />
 
@@ -243,6 +259,8 @@ const App = () => {
                   />
                 }
               />
+              <Route path="wishlist" element={<WishlistPage />} />
+              <Route path="wishlist/:id" element={<WishlistDetailPage />} />
               {/* Fallback to dashboard */}
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
@@ -252,10 +270,10 @@ const App = () => {
 
       <div
         className="hidden md:flex lg:flex xl:flex"
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
       />
     </>
-  );
-};
+  )
+}
 
-export default App;
+export default App

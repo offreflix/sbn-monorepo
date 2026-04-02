@@ -142,7 +142,6 @@ export function IncomeExpenseChart({
               radius={[0, 6, 6, 0]}
               background={{
                 fill: "var(--muted)",
-                radius: [0, 6, 6, 0],
                 opacity: 0.2,
               }}
             />

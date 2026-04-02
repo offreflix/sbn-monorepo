@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -14,16 +14,18 @@ import {
   Input,
   Label,
   Switch,
-} from "@repo/ui";
-import { financeApi, type Wallet, type Category } from "../api/finance";
-import { wishlistApi, type WishlistItem } from "../api/wishlist";
-import { toast } from "sonner";
+} from '@repo/ui'
+import { financeApi } from '../api/finance'
+import type { Wallet } from '../types/wallet.type'
+import type { Category } from '../pages/categories/categories.type'
+import { wishlistApi, type WishlistItem } from '../api/wishlist'
+import { toast } from 'sonner'
 
 interface PurchaseTransactionModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  item: WishlistItem | null;
-  onSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  item: WishlistItem | null
+  onSuccess: () => void
 }
 
 export function PurchaseTransactionModal({
@@ -32,109 +34,98 @@ export function PurchaseTransactionModal({
   item,
   onSuccess,
 }: PurchaseTransactionModalProps) {
-  const [submitting, setSubmitting] = useState(false);
-  const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingData, setLoadingData] = useState(false);
+  const [submitting, setSubmitting] = useState(false)
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loadingData, setLoadingData] = useState(false)
 
-  // Form state
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [walletId, setWalletId] = useState("");
-  const [date, setDate] = useState("");
-  const [isPaid, setIsPaid] = useState(true);
-  const [hasInstallments, setHasInstallments] = useState(false);
-  const [totalInstallments, setTotalInstallments] = useState("");
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [categoryId, setCategoryId] = useState('')
+  const [walletId, setWalletId] = useState('')
+  const [date, setDate] = useState('')
+  const [isPaid, setIsPaid] = useState(true)
+  const [hasInstallments, setHasInstallments] = useState(false)
+  const [totalInstallments, setTotalInstallments] = useState('')
 
-  const expenseCategories = categories.filter((c) => c.type === "Despesa");
+  const expenseCategories = categories.filter((c) => c.type === 'Despesa')
 
-  // Load wallets and categories when modal opens
   useEffect(() => {
-    if (!open) return;
-
+    if (!open) return
     const loadData = async () => {
-      setLoadingData(true);
+      setLoadingData(true)
       try {
         const [wls, cats] = await Promise.all([
           financeApi.wallets.list(),
           financeApi.categories.list(),
-        ]);
-        setWallets(wls);
-        setCategories(cats);
+        ])
+        setWallets(wls)
+        setCategories(cats)
       } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        toast.error("Erro ao carregar carteiras e categorias");
+        console.error('Erro ao carregar dados:', error)
+        toast.error('Erro ao carregar carteiras e categorias')
       } finally {
-        setLoadingData(false);
+        setLoadingData(false)
       }
-    };
+    }
+    loadData()
+  }, [open])
 
-    loadData();
-  }, [open]);
-
-  // Pre-fill form when item changes
   useEffect(() => {
     if (open && item) {
-      setDescription(item.name);
-      setAmount(item.price?.toString() || "");
-      setCategoryId("");
-      setWalletId("");
-      setDate(new Date().toISOString().split("T")[0]);
-      setIsPaid(true);
-      setHasInstallments(false);
-      setTotalInstallments("");
+      setDescription(item.name)
+      setAmount(item.price?.toString() || '')
+      setCategoryId('')
+      setWalletId('')
+      setDate(new Date().toISOString().split('T')[0])
+      setIsPaid(true)
+      setHasInstallments(false)
+      setTotalInstallments('')
     }
-  }, [open, item]);
+  }, [open, item])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+    e.preventDefault()
     if (!walletId || !categoryId || !amount) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
+      toast.error('Preencha todos os campos obrigatórios')
+      return
     }
-
-    if (!item) return;
-
+    if (!item) return
     try {
-      setSubmitting(true);
-
+      setSubmitting(true)
       await financeApi.transactions.create({
         walletId,
         categoryId,
         amount: parseFloat(amount).toString(),
         date: new Date(date).toISOString(),
         description,
-        type: "Despesa",
-        status: isPaid ? "Pago" : "Pendente",
+        type: 'Despesa',
+        status: isPaid ? 'Pago' : 'Pendente',
         isPaid,
-        currency: item.currency || "BRL",
+        currency: item.currency || 'BRL',
         installmentNumber: hasInstallments ? 1 : undefined,
         totalInstallments: hasInstallments
           ? parseInt(totalInstallments)
           : undefined,
         installments: hasInstallments ? parseInt(totalInstallments) : undefined,
-      });
-
-      await wishlistApi.markAsPurchased(item.id);
-
-      toast.success("Compra registrada e transação criada!");
-      onOpenChange(false);
-      onSuccess();
+      })
+      await wishlistApi.markAsPurchased(item.id)
+      toast.success('Compra registrada e transação criada!')
+      onOpenChange(false)
+      onSuccess()
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Erro ao registrar compra",
-      );
+        error instanceof Error ? error.message : 'Erro ao registrar compra',
+      )
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const installmentValue =
     hasInstallments && amount && totalInstallments
-      ? (parseFloat(amount) / parseInt(totalInstallments || "1")).toFixed(2)
-      : null;
+      ? (parseFloat(amount) / parseInt(totalInstallments || '1')).toFixed(2)
+      : null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -201,7 +192,7 @@ export function PurchaseTransactionModal({
                     {expenseCategories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         <div className="flex items-center gap-2">
-                          <span>{cat.icon || "💰"}</span>
+                          <span>{cat.icon || '💰'}</span>
                           <span>{cat.name}</span>
                         </div>
                       </SelectItem>
@@ -234,8 +225,8 @@ export function PurchaseTransactionModal({
                   id="purchase-installments"
                   checked={hasInstallments}
                   onCheckedChange={(checked) => {
-                    setHasInstallments(checked);
-                    if (!checked) setTotalInstallments("");
+                    setHasInstallments(checked)
+                    if (!checked) setTotalInstallments('')
                   }}
                 />
               </div>
@@ -258,39 +249,27 @@ export function PurchaseTransactionModal({
             </div>
 
             <div className="p-4 border rounded-lg bg-muted/50">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="purchase-isPaid" className="text-base">
-                    Já foi paga?
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Marque se o pagamento já foi efetivado
-                  </p>
-                </div>
-                <Switch
-                  id="purchase-isPaid"
-                  checked={isPaid}
-                  onCheckedChange={setIsPaid}
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                A transação será lançada como despesa e o item da wishlist será
+                marcado como comprado.
+              </p>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={submitting}
               >
                 Cancelar
               </Button>
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Registrando..." : "Confirmar Compra"}
+                {submitting ? 'Salvando...' : 'Registrar'}
               </Button>
             </div>
           </form>
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

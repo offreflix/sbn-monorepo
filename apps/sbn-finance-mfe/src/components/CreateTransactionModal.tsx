@@ -85,7 +85,9 @@ export function CreateTransactionModal({
         const isGrouped =
           initialData.totalInstallments && initialData.totalInstallments > 1;
         const displayAmount = isGrouped
-          ? (initialData.amount * initialData.totalInstallments!).toString()
+          ? (
+              Number(initialData.amount) * initialData.totalInstallments!
+            ).toString()
           : initialData.amount.toString();
         const displayDescription = isGrouped
           ? (initialData.description ?? "").replace(/\s*\(\d+\/\d+\)$/, "")
