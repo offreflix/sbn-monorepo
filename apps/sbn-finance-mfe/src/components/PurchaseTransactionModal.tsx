@@ -20,7 +20,8 @@ import {
 import { financeApi } from '../api/finance'
 import type { Wallet } from '../types/wallet.type'
 import type { Category } from '../pages/categories/categories.type'
-import { wishlistApi, type WishlistItem } from '../api/wishlist'
+import { wishlistApi } from '../api/wishlist'
+import type { WishlistItem } from '../pages/wishlist/wishlist.type'
 import { toast } from 'sonner'
 import {
   purchaseTransactionSchema,

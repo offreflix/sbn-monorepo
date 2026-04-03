@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { wishlistApi, type WishlistItem } from '../../api/wishlist'
-import type { WishlistCreateFormData } from './wishlist.type'
+import { wishlistApi } from '../../api/wishlist'
+import type { WishlistItem, WishlistCreateFormData } from './wishlist.type'
 
 const initialFormData: WishlistCreateFormData = {
   name: '',

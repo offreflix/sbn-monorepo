@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import {
-  wishlistApi,
-  type WishlistItem,
-  type WishlistPriceEntry,
-  type WishlistPriorityEntry,
-} from '../../api/wishlist'
+import { wishlistApi } from '../../api/wishlist'
+import type {
+  WishlistItem,
+  WishlistPriceEntry,
+  WishlistPriorityEntry,
+} from '../wishlist/wishlist.type'
 import type {
   WishlistDetailEditForm,
   WishlistDetailPriceForm,
