@@ -199,3 +199,59 @@ def register(mcp: FastMCP):
             f"/api/finance/wishlist/{wishlist_item_id}/prices/{entry_id}",
         )
         return json.dumps(result, ensure_ascii=False, indent=2)
+
+    # ── Priority Entries ───────────────────────────────────────────────────────
+
+    @mcp.tool()
+    async def add_priority_entry(
+        wishlist_item_id: str,
+        priority: str,
+        date: str,
+        notes: str | None = None,
+    ) -> str:
+        """Add a priority entry to track the priority history of a wishlist item.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+            priority: Priority level — "LOW", "MEDIUM", or "HIGH".
+            date: ISO date string of the observation (e.g. "2026-03-03").
+            notes: Optional notes about this priority change.
+        """
+        body = convert_keys_to_camel({
+            "priority": priority,
+            "date": date,
+            "notes": notes,
+        })
+        result = await api_request(
+            "POST",
+            f"/api/finance/wishlist/{wishlist_item_id}/priorities",
+            json=body,
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def list_priority_entries(wishlist_item_id: str) -> str:
+        """List all priority entries for a wishlist item, ordered by date ascending.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+        """
+        result = await api_request(
+            "GET",
+            f"/api/finance/wishlist/{wishlist_item_id}/priorities",
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @mcp.tool()
+    async def remove_priority_entry(wishlist_item_id: str, entry_id: str) -> str:
+        """Remove a priority entry from a wishlist item's priority history.
+
+        Args:
+            wishlist_item_id: The wishlist item UUID.
+            entry_id: The priority entry UUID to remove.
+        """
+        result = await api_request(
+            "DELETE",
+            f"/api/finance/wishlist/{wishlist_item_id}/priorities/{entry_id}",
+        )
+        return json.dumps(result, ensure_ascii=False, indent=2)
