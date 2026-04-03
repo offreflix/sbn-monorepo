@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Dialog,
   DialogContent,
@@ -20,6 +22,10 @@ import type { Wallet } from '../types/wallet.type'
 import type { Category } from '../pages/categories/categories.type'
 import { wishlistApi, type WishlistItem } from '../api/wishlist'
 import { toast } from 'sonner'
+import {
+  purchaseTransactionSchema,
+  type PurchaseTransactionFormData,
+} from '../pages/wishlist/wishlist.schema'
 
 interface PurchaseTransactionModalProps {
   open: boolean
@@ -34,21 +40,34 @@ export function PurchaseTransactionModal({
   item,
   onSuccess,
 }: PurchaseTransactionModalProps) {
-  const [submitting, setSubmitting] = useState(false)
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingData, setLoadingData] = useState(false)
 
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [walletId, setWalletId] = useState('')
-  const [date, setDate] = useState('')
-  const [isPaid, setIsPaid] = useState(true)
-  const [hasInstallments, setHasInstallments] = useState(false)
-  const [totalInstallments, setTotalInstallments] = useState('')
+  const form = useForm<PurchaseTransactionFormData>({
+    resolver: zodResolver(purchaseTransactionSchema),
+    defaultValues: {
+      description: '',
+      amount: '',
+      date: '',
+      categoryId: '',
+      walletId: '',
+      isPaid: true,
+      hasInstallments: false,
+      totalInstallments: '',
+    },
+  })
+
+  const hasInstallments = form.watch('hasInstallments')
+  const amount = form.watch('amount')
+  const totalInstallments = form.watch('totalInstallments')
 
   const expenseCategories = categories.filter((c) => c.type === 'Despesa')
+
+  const installmentValue =
+    hasInstallments && amount && totalInstallments
+      ? (parseFloat(amount) / parseInt(totalInstallments || '1')).toFixed(2)
+      : null
 
   useEffect(() => {
     if (!open) return
@@ -73,41 +92,39 @@ export function PurchaseTransactionModal({
 
   useEffect(() => {
     if (open && item) {
-      setDescription(item.name)
-      setAmount(item.price?.toString() || '')
-      setCategoryId('')
-      setWalletId('')
-      setDate(new Date().toISOString().split('T')[0])
-      setIsPaid(true)
-      setHasInstallments(false)
-      setTotalInstallments('')
+      form.reset({
+        description: item.name,
+        amount: item.price?.toString() ?? '',
+        date: new Date().toISOString().split('T')[0],
+        categoryId: '',
+        walletId: '',
+        isPaid: true,
+        hasInstallments: false,
+        totalInstallments: '',
+      })
     }
-  }, [open, item])
+  }, [open, item, form])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!walletId || !categoryId || !amount) {
-      toast.error('Preencha todos os campos obrigatórios')
-      return
-    }
+  const onSubmit = async (data: PurchaseTransactionFormData) => {
     if (!item) return
     try {
-      setSubmitting(true)
       await financeApi.transactions.create({
-        walletId,
-        categoryId,
-        amount: parseFloat(amount).toString(),
-        date: new Date(date).toISOString(),
-        description,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
+        amount: parseFloat(data.amount).toString(),
+        date: new Date(data.date).toISOString(),
+        description: data.description,
         type: 'Despesa',
-        status: isPaid ? 'Pago' : 'Pendente',
-        isPaid,
+        status: data.isPaid ? 'Pago' : 'Pendente',
+        isPaid: data.isPaid,
         currency: item.currency || 'BRL',
-        installmentNumber: hasInstallments ? 1 : undefined,
-        totalInstallments: hasInstallments
-          ? parseInt(totalInstallments)
+        installmentNumber: data.hasInstallments ? 1 : undefined,
+        totalInstallments: data.hasInstallments
+          ? parseInt(data.totalInstallments ?? '1')
           : undefined,
-        installments: hasInstallments ? parseInt(totalInstallments) : undefined,
+        installments: data.hasInstallments
+          ? parseInt(data.totalInstallments ?? '1')
+          : undefined,
       })
       await wishlistApi.markAsPurchased(item.id)
       toast.success('Compra registrada e transação criada!')
@@ -117,15 +134,8 @@ export function PurchaseTransactionModal({
       toast.error(
         error instanceof Error ? error.message : 'Erro ao registrar compra',
       )
-    } finally {
-      setSubmitting(false)
     }
   }
-
-  const installmentValue =
-    hasInstallments && amount && totalInstallments
-      ? (parseFloat(amount) / parseInt(totalInstallments || '1')).toFixed(2)
-      : null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,13 +154,15 @@ export function PurchaseTransactionModal({
             <p className="text-sm text-muted-foreground">Carregando dados...</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 mt-4"
+          >
             <div className="space-y-2">
               <Label htmlFor="purchase-description">Descrição</Label>
               <Input
                 id="purchase-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...form.register('description')}
                 placeholder="Descrição da compra"
               />
             </div>
@@ -162,11 +174,14 @@ export function PurchaseTransactionModal({
                   id="purchase-amount"
                   type="number"
                   step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  required
+                  {...form.register('amount')}
                 />
+                {form.formState.errors.amount && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.amount.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -174,17 +189,25 @@ export function PurchaseTransactionModal({
                 <Input
                   id="purchase-date"
                   type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
+                  {...form.register('date')}
                 />
+                {form.formState.errors.date && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.date.message}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Categoria *</Label>
-                <Select value={categoryId} onValueChange={setCategoryId}>
+                <Select
+                  value={form.watch('categoryId')}
+                  onValueChange={(value) =>
+                    form.setValue('categoryId', value, { shouldValidate: true })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -199,11 +222,21 @@ export function PurchaseTransactionModal({
                     ))}
                   </SelectContent>
                 </Select>
+                {form.formState.errors.categoryId && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.categoryId.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label>Carteira *</Label>
-                <Select value={walletId} onValueChange={setWalletId}>
+                <Select
+                  value={form.watch('walletId')}
+                  onValueChange={(value) =>
+                    form.setValue('walletId', value, { shouldValidate: true })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
@@ -215,6 +248,11 @@ export function PurchaseTransactionModal({
                     ))}
                   </SelectContent>
                 </Select>
+                {form.formState.errors.walletId && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.walletId.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -225,8 +263,8 @@ export function PurchaseTransactionModal({
                   id="purchase-installments"
                   checked={hasInstallments}
                   onCheckedChange={(checked) => {
-                    setHasInstallments(checked)
-                    if (!checked) setTotalInstallments('')
+                    form.setValue('hasInstallments', checked)
+                    if (!checked) form.setValue('totalInstallments', '')
                   }}
                 />
               </div>
@@ -236,8 +274,7 @@ export function PurchaseTransactionModal({
                     placeholder="Qtd parcelas (ex: 12)"
                     type="number"
                     min="2"
-                    value={totalInstallments}
-                    onChange={(e) => setTotalInstallments(e.target.value)}
+                    {...form.register('totalInstallments')}
                   />
                   <div className="flex items-center text-sm text-muted-foreground">
                     {installmentValue
@@ -263,8 +300,8 @@ export function PurchaseTransactionModal({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Salvando...' : 'Registrar'}
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Salvando...' : 'Registrar'}
               </Button>
             </div>
           </form>
