@@ -15,8 +15,8 @@ import {
 import { Input, Label } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { financeApi } from "../api/finance";
+import { categorySchema, type CategoryFormData } from "../pages/categories/categories.schema";
 import type { CreateCategoryRequest, Category } from "../pages/categories/categories.type";
 import { toast } from "sonner";
 
@@ -45,14 +45,6 @@ const COLOR_OPTIONS = [
   { name: "Cinza", value: "#6b7280" },
 ];
 
-const categorySchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  type: z.enum(["Receita", "Despesa"]),
-  icon: z.string().optional(),
-  color: z.string().optional(),
-});
-
-type CategoryFormData = z.infer<typeof categorySchema>;
 
 interface CreateCategoryModalProps {
   open: boolean;

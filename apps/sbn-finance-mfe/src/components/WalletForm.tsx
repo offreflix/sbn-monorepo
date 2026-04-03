@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { financeApi } from '../api/finance'
+import { walletSchema, type WalletFormData } from '../pages/dashboard/dashboard.schema'
 import type { CreateWalletRequest } from '../types/wallet.type'
 import {
   Button,
@@ -27,16 +27,6 @@ import {
 import { toast } from 'sonner'
 import { useState } from 'react'
 
-const walletSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  type: z.string().min(1, 'Tipo é obrigatório'),
-  currency: z.string().optional(),
-  invoiceClosingDay: z.string().optional(),
-  invoiceDueDay: z.string().optional(),
-  limit: z.number().optional(),
-})
-
-type WalletFormData = z.infer<typeof walletSchema>
 
 interface WalletFormProps {
   onSuccess: () => void
@@ -66,7 +56,7 @@ export function WalletForm({ onSuccess, onCancel }: WalletFormProps) {
         invoiceDueDay: data.invoiceDueDay
           ? parseInt(data.invoiceDueDay)
           : undefined,
-        limit: data.limit || undefined,
+        limit: data.limit ? parseFloat(data.limit) : undefined,
       }
 
       await financeApi.wallets.create(payload)

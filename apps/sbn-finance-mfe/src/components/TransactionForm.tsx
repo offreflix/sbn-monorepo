@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { financeApi } from "../api/finance";
+import { transactionFormSchema, type TransactionFormData } from "../pages/transactions/transactions.schema";
 import type { Wallet } from "../types/wallet.type";
 import type { Category } from "../pages/categories/categories.type";
 import type { CreateTransactionRequest } from "../pages/transactions/transactions.type";
@@ -22,31 +22,6 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 
-const transactionSchema = z.object({
-  walletId: z.string().min(1, "Selecione uma carteira"),
-  categoryId: z.string().min(1, "Selecione uma categoria"),
-  amount: z
-    .string()
-    .min(1, "Valor é obrigatório")
-    .refine((val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num > 0;
-    }, "Valor deve ser um número positivo"),
-  date: z.string().min(1, "Data é obrigatória"),
-  description: z.string().optional(),
-  type: z.enum(["Receita", "Despesa"]),
-  status: z.enum(["Pendente", "Pago", "Cancelado"]).optional(),
-  isPaid: z.boolean().optional(),
-  installments: z
-    .string()
-    .default("1")
-    .refine((val) => {
-      const n = parseInt(val);
-      return !isNaN(n) && n >= 1;
-    }, "Mínimo 1 parcela"),
-});
-
-type TransactionFormData = z.infer<typeof transactionSchema>;
 
 interface TransactionFormProps {
   wallets: Wallet[];
@@ -63,7 +38,7 @@ export function TransactionForm({
 }: TransactionFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema),
+    resolver: zodResolver(transactionFormSchema),
     defaultValues: {
       type: "Despesa",
       status: "Pendente",

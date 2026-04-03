@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { financeApi } from "../api/finance";
+import { categorySchema, type CategoryFormData } from "../pages/categories/categories.schema";
 import type { CreateCategoryRequest } from "../pages/categories/categories.type";
 import {
   Button,
@@ -27,15 +27,6 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 
-const categorySchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  type: z.enum(["Receita", "Despesa"]),
-  icon: z.string().optional(),
-  color: z.string().optional(),
-  isDefault: z.boolean().optional(),
-});
-
-type CategoryFormData = z.infer<typeof categorySchema>;
 
 interface CategoryFormProps {
   onSuccess: () => void;

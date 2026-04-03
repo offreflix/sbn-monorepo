@@ -15,21 +15,11 @@ import {
 import { Input, Label } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { financeApi } from "../api/finance";
+import { walletSchema, type WalletFormData } from "../pages/dashboard/dashboard.schema";
 import type { CreateWalletRequest, Wallet } from "../types/wallet.type";
 import { toast } from "sonner";
 
-const walletSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  type: z.string().min(1, "Tipo é obrigatório"),
-  currency: z.string().optional(),
-  invoiceClosingDay: z.string().optional(),
-  invoiceDueDay: z.string().optional(),
-  limit: z.string().optional(),
-});
-
-type WalletFormData = z.infer<typeof walletSchema>;
 
 interface CreateWalletModalProps {
   open: boolean;

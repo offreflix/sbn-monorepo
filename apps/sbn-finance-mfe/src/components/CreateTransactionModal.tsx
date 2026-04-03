@@ -15,35 +15,13 @@ import {
 import { Input, Label, Switch } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { financeApi } from "../api/finance";
+import { createTransactionSchema, type CreateTransactionFormData } from "../pages/transactions/transactions.schema";
 import type { Wallet } from "../types/wallet.type";
 import type { Category } from "../pages/categories/categories.type";
 import type { Transaction, CreateTransactionRequest } from "../pages/transactions/transactions.type";
 import { toast } from "sonner";
 
-const transactionSchema = z.object({
-  walletId: z.string().min(1, "Selecione uma carteira"),
-  categoryId: z.string().min(1, "Selecione uma categoria"),
-  amount: z
-    .string()
-    .min(1, "Valor é obrigatório")
-    .refine((val) => {
-      const num = parseFloat(val);
-      return !isNaN(num) && num > 0;
-    }, "Valor deve ser um número positivo"),
-  date: z.string().min(1, "Data é obrigatória"),
-  description: z.string().optional(),
-  type: z.enum(["Receita", "Despesa"]),
-  status: z.enum(["Pendente", "Pago", "Cancelado"]).optional(),
-  isPaid: z.boolean().optional(),
-  installmentNumber: z.string().optional(),
-  totalInstallments: z.string().optional(),
-  isRecurring: z.boolean().default(false),
-  frequency: z.enum(["MONTHLY", "WEEKLY"]).default("MONTHLY"),
-});
-
-type TransactionFormData = z.infer<typeof transactionSchema>;
 
 interface CreateTransactionModalProps {
   open: boolean;
@@ -63,8 +41,8 @@ export function CreateTransactionModal({
   initialData,
 }: CreateTransactionModalProps) {
   const [submitting, setSubmitting] = useState(false);
-  const form = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema),
+  const form = useForm<CreateTransactionFormData>({
+    resolver: zodResolver(createTransactionSchema),
     defaultValues: {
       type: "Despesa",
       status: "Pendente",
@@ -131,7 +109,7 @@ export function CreateTransactionModal({
     form.watch("installmentNumber") && form.watch("totalInstallments");
   const isRecurring = form.watch("isRecurring");
 
-  const onSubmit = async (data: TransactionFormData) => {
+  const onSubmit = async (data: CreateTransactionFormData) => {
     try {
       setSubmitting(true);
       const isEditingGroup =
