@@ -8,8 +8,7 @@ import {
   CheckCircle2,
   CalendarDays,
 } from "lucide-react";
-import { format, isToday, isYesterday } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { DateTime } from "luxon";
 import { CreateTransactionModal } from "../../components/CreateTransactionModal";
 import {
   AlertDialog,
@@ -78,10 +77,12 @@ export function TransactionsView({
   };
 
   const getDateLabel = (dateStr: string) => {
-    const date = new Date(dateStr);
-    if (isToday(date)) return "Hoje";
-    if (isYesterday(date)) return "Ontem";
-    return format(date, "dd 'de' MMMM", { locale: ptBR });
+    const date = DateTime.fromISO(dateStr.slice(0, 10));
+    const today = DateTime.now().startOf("day");
+    const diff = today.diff(date.startOf("day"), "days").days;
+    if (diff === 0) return "Hoje";
+    if (diff === 1) return "Ontem";
+    return date.setLocale("pt-BR").toFormat("dd 'de' MMMM");
   };
 
   return (

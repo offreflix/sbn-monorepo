@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
+import { DateTime } from "luxon";
 import { toast } from "sonner";
 import { financeApi } from "../../api/finance";
 import type { TransactionsProps } from "./transactions.type";
@@ -45,11 +45,11 @@ export function useTransactionsModel({
     const groups: Record<string, Transaction[]> = {};
 
     const sorted = [...filteredTransactions].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      (a, b) => DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis(),
     );
 
     sorted.forEach((t) => {
-      const dateKey = format(new Date(t.date), "yyyy-MM-dd");
+      const dateKey = DateTime.fromISO(t.date.slice(0, 10)).toISODate()!;
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(t);
     });

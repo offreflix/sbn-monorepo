@@ -16,6 +16,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.454.0",
+    "luxon": "^3.7.2",
     "react-hook-form": "^7.53.2",
     "recharts": "^3.6.0",
     "sonner": "^1.7.4",
@@ -23,6 +24,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/luxon": "^3.7.1",
     "eslint": "^9.39.1"
   }
 }
