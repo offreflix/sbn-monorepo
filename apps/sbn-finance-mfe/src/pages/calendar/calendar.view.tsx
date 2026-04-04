@@ -12,8 +12,8 @@ import {
   SelectValue,
 } from "@repo/ui";
 import { formatCurrency } from "../../lib/utils";
-import { YearOverviewChart } from "../../components/YearOverviewChart";
-import { AnnualCalendar } from "../../components/AnnualCalendar";
+import { YearOverviewChart } from "../../components/year-overview-chart";
+import { AnnualCalendar } from "../../components/annual-calendar";
 import type { CalendarModelOutput } from "./calendar.model";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];

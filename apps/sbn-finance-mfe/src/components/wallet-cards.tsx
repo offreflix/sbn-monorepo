@@ -24,7 +24,7 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Wallet as WalletType } from "../types/wallet.type";
-import { CreateWalletModal } from "./CreateWalletModal";
+import { CreateWalletModal } from "./create-wallet-modal";
 import { financeApi } from "../api/finance";
 import { toast } from "sonner";
 

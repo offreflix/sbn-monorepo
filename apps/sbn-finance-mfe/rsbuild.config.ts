@@ -61,7 +61,7 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: "sbn_finance_mfe",
           exposes: {
-            "./App": "./src/App.tsx",
+            "./App": "./src/app.tsx",
           },
           shared: {
             react: {

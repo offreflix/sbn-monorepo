@@ -9,7 +9,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { DateTime } from "luxon";
-import { CreateTransactionModal } from "../../components/CreateTransactionModal";
+import { CreateTransactionModal } from "../../components/create-transaction-modal";
 import {
   AlertDialog,
   AlertDialogAction,

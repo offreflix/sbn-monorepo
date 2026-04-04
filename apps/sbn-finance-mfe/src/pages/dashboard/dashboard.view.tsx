@@ -8,7 +8,7 @@ import {
   Calendar,
 } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
-import { WalletCards } from '../../components/WalletCards'
+import { WalletCards } from '../../components/wallet-cards'
 import { CategoryGrid } from '../../pages/categories/page'
 import { TransactionList } from '../../pages/transactions/page'
 import type { DashboardModelOutput } from './dashboard.model'

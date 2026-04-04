@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "@repo/ui";
 import { Plus, TrendingUp, TrendingDown, Pencil, Trash2 } from "lucide-react";
-import { CreateCategoryModal } from "../../components/CreateCategoryModal";
+import { CreateCategoryModal } from "../../components/create-category-modal";
 import type { CategoriesModelOutput } from "./categories.model";
 
 export function CategoriesView({

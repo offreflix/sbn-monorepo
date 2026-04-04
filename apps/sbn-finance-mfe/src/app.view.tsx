@@ -9,7 +9,7 @@ import {
   Heart,
 } from 'lucide-react'
 import { Toaster } from 'sonner'
-import { MonthYearSelector } from './components/MonthYearSelector'
+import { MonthYearSelector } from './components/month-year-selector'
 import { Dashboard } from './pages/dashboard/page'
 import { TransactionList } from './pages/transactions/page'
 import { CategoryGrid } from './pages/categories/page'

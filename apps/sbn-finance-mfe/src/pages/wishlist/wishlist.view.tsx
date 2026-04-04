@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { MoneyInput } from '../../components/MoneyInput'
-import { PurchaseTransactionModal } from '../../components/PurchaseTransactionModal'
+import { MoneyInput } from '../../components/money-input'
+import { PurchaseTransactionModal } from '../../components/purchase-transaction-modal'
 import {
   Button,
   Card,

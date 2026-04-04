@@ -38,8 +38,8 @@ import {
   Trash2,
   TrendingDown,
 } from 'lucide-react'
-import { MoneyInput } from '../../components/MoneyInput'
-import { PurchaseTransactionModal } from '../../components/PurchaseTransactionModal'
+import { MoneyInput } from '../../components/money-input'
+import { PurchaseTransactionModal } from '../../components/purchase-transaction-modal'
 import type { WishlistDetailModelOutput } from './wishlist-detail.model'
 
 function formatPrice(price?: number, currency = 'BRL') {
