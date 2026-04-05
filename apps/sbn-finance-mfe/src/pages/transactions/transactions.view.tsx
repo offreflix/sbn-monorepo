@@ -7,9 +7,9 @@ import {
   Trash2,
   CheckCircle2,
   CalendarDays,
-} from "lucide-react";
-import { DateTime } from "luxon";
-import { CreateTransactionModal } from "../../components/create-transaction-modal";
+} from 'lucide-react'
+import { DateTime } from 'luxon'
+import { CreateTransactionModal } from '../../components/create-transaction-modal'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
   Button,
-} from "@repo/ui";
-import type { TransactionsModelOutput } from "./transactions.model";
+} from '@repo/ui'
+import type { TransactionsModelOutput } from './transactions.model'
 
 export function TransactionsView({
   data: { wallets, categories, groupedTransactions },
@@ -70,20 +70,20 @@ export function TransactionsView({
   },
 }: TransactionsModelOutput) {
   const formatCurrency = (value: string | number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(typeof value === "string" ? parseFloat(value) : value);
-  };
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(typeof value === 'string' ? parseFloat(value) : value)
+  }
 
   const getDateLabel = (dateStr: string) => {
-    const date = DateTime.fromISO(dateStr.slice(0, 10));
-    const today = DateTime.now().startOf("day");
-    const diff = today.diff(date.startOf("day"), "days").days;
-    if (diff === 0) return "Hoje";
-    if (diff === 1) return "Ontem";
-    return date.setLocale("pt-BR").toFormat("dd 'de' MMMM");
-  };
+    const date = DateTime.fromISO(dateStr.slice(0, 10))
+    const today = DateTime.now().startOf('day')
+    const diff = today.diff(date.startOf('day'), 'days').days
+    if (diff === 0) return 'Hoje'
+    if (diff === 1) return 'Ontem'
+    return date.setLocale('pt-BR').toFormat("dd 'de' MMMM")
+  }
 
   return (
     <div className="space-y-4">
@@ -98,11 +98,7 @@ export function TransactionsView({
             />
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={handleNewTransaction}
-              size="sm"
-              className="gap-2"
-            >
+            <Button onClick={handleNewTransaction} size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
               Nova Transação
             </Button>
@@ -162,10 +158,10 @@ export function TransactionsView({
       <Dialog
         open={isImportModalOpen}
         onOpenChange={(open) => {
-          setIsImportModalOpen(open);
+          setIsImportModalOpen(open)
           if (!open) {
-            setImportWalletId("");
-            setImportFile(null);
+            setImportWalletId('')
+            setImportFile(null)
           }
         }}
       >
@@ -202,8 +198,8 @@ export function TransactionsView({
                 type="file"
                 accept=".csv,.ofx,.pdf"
                 onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setImportFile(file);
+                  const file = e.target.files?.[0] || null
+                  setImportFile(file)
                 }}
               />
             </div>
@@ -222,7 +218,7 @@ export function TransactionsView({
                 onClick={handleImportNubank}
                 disabled={isImporting}
               >
-                {isImporting ? "Importando..." : "Importar"}
+                {isImporting ? 'Importando...' : 'Importar'}
               </Button>
             </div>
           </div>
@@ -250,11 +246,11 @@ export function TransactionsView({
                 {txs.map((transaction) => {
                   const category = categories.find(
                     (c) => c.id === transaction.categoryId,
-                  );
+                  )
                   const wallet = wallets.find(
                     (w) => w.id === transaction.walletId,
-                  );
-                  const isIncome = transaction.type === "Receita";
+                  )
+                  const isIncome = transaction.type === 'Receita'
 
                   return (
                     <div
@@ -268,8 +264,8 @@ export function TransactionsView({
                           style={{
                             backgroundColor: category?.color
                               ? `${category.color}20`
-                              : "#f3f4f6",
-                            color: category?.color || "#6b7280",
+                              : '#f3f4f6',
+                            color: category?.color || '#6b7280',
                           }}
                         >
                           {category?.icon ||
@@ -284,7 +280,7 @@ export function TransactionsView({
                           <p className="font-medium text-sm text-foreground">
                             {transaction.description ||
                               category?.name ||
-                              "Sem descrição"}
+                              'Sem descrição'}
                           </p>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
                             {wallet?.name}
@@ -297,9 +293,9 @@ export function TransactionsView({
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p
-                            className={`font-semibold tabular-nums text-sm ${isIncome ? "text-emerald-600" : "text-foreground"}`}
+                            className={`font-semibold tabular-nums text-sm ${isIncome ? 'text-emerald-600' : 'text-foreground'}`}
                           >
-                            {isIncome ? "+" : "-"}{" "}
+                            {isIncome ? '+' : '-'}{' '}
                             {formatCurrency(transaction.amount)}
                           </p>
                           <div className="flex justify-end mt-0.5">
@@ -332,7 +328,7 @@ export function TransactionsView({
                         </div>
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -343,16 +339,16 @@ export function TransactionsView({
       <CreateTransactionModal
         open={isCreateModalOpen}
         onOpenChange={(open) => {
-          setIsCreateModalOpen(open);
-          if (!open) setEditingTransaction(null);
+          setIsCreateModalOpen(open)
+          if (!open) setEditingTransaction(null)
         }}
         wallets={wallets}
         categories={categories}
         initialData={editingTransaction}
         onSuccess={() => {
-          setIsCreateModalOpen(false);
-          setEditingTransaction(null);
-          onRefresh();
+          setIsCreateModalOpen(false)
+          setEditingTransaction(null)
+          onRefresh()
         }}
       />
 
@@ -364,8 +360,16 @@ export function TransactionsView({
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Transação</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir esta transação? Esta ação não pode
-              ser desfeita.
+              {transactionToDelete?.purchaseGroupId ? (
+                <>
+                  Esta transação faz parte de uma compra parcelada (
+                  {transactionToDelete.totalInstallments} parcelas).{' '}
+                  <strong>Todas as parcelas serão excluídas.</strong> Esta ação
+                  não pode ser desfeita.
+                </>
+              ) : (
+                'Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.'
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -374,11 +378,13 @@ export function TransactionsView({
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Excluir
+              {transactionToDelete?.purchaseGroupId
+                ? 'Excluir todas as parcelas'
+                : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  );
+  )
 }

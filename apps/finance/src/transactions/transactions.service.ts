@@ -752,6 +752,31 @@ export class TransactionsService {
 
     const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
 
+    // If the transaction belongs to an installment group, delete the entire group.
+    if (transaction.purchaseGroupId) {
+      const allInGroup = await this.prisma.transaction.findMany({
+        where: { purchaseGroupId: transaction.purchaseGroupId, userId },
+      });
+
+      // Revert balance for every installment that was affecting it.
+      for (const tx of allInGroup) {
+        if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
+          const increment =
+            tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
+          await this.prisma.wallet.update({
+            where: { id: tx.walletId },
+            data: { balance: { increment } },
+          });
+        }
+      }
+
+      await this.prisma.transaction.deleteMany({
+        where: { purchaseGroupId: transaction.purchaseGroupId, userId },
+      });
+
+      return { deleted: allInGroup.length };
+    }
+
     // Revert balance on delete only if this transaction was affecting the balance.
     if (
       this.shouldAffectBalance(
