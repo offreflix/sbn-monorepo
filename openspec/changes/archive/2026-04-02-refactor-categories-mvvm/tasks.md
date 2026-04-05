@@ -13,7 +13,7 @@
 
 ## 3. ViewModel Implementation
 
-- [x] 3.1 Unpack all `useState` logic handling filtering, editing, and deletion modals from `CategoryGrid` into `categories.model.ts`. 
+- [x] 3.1 Unpack all `useState` logic handling filtering, editing, and deletion modals from `CategoryGrid` into `categories.model.ts`.
 - [x] 3.2 Ensure `filteredCategories`, `incomeCount`, and `expenseCount` memoized computations run successfully within the ViewModel.
 - [x] 3.3 Return highly grouped payload objects mapping directly to `TransactionsModelOutput` conventions.
 

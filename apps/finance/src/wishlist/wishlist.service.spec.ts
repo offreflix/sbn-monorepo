@@ -40,7 +40,13 @@ describe('WishlistService', () => {
 
   describe('create', () => {
     it('should create with default currency, priority and status', async () => {
-      const mockItem = { id: 'wi1', name: 'Teclado', currency: 'BRL', priority: 'MEDIUM', status: 'WISHED' };
+      const mockItem = {
+        id: 'wi1',
+        name: 'Teclado',
+        currency: 'BRL',
+        priority: 'MEDIUM',
+        status: 'WISHED',
+      };
       mockPrismaService.wishlistItem.create.mockResolvedValue(mockItem);
 
       const result = await service.create({ userId: 'u1', name: 'Teclado' });
@@ -57,10 +63,22 @@ describe('WishlistService', () => {
     });
 
     it('should use provided currency, priority and status', async () => {
-      const mockItem = { id: 'wi1', name: 'Monitor', currency: 'USD', priority: 'HIGH', status: 'SAVED' };
+      const mockItem = {
+        id: 'wi1',
+        name: 'Monitor',
+        currency: 'USD',
+        priority: 'HIGH',
+        status: 'SAVED',
+      };
       mockPrismaService.wishlistItem.create.mockResolvedValue(mockItem);
 
-      await service.create({ userId: 'u1', name: 'Monitor', currency: 'USD', priority: 'HIGH', status: 'SAVED' });
+      await service.create({
+        userId: 'u1',
+        name: 'Monitor',
+        currency: 'USD',
+        priority: 'HIGH',
+        status: 'SAVED',
+      });
 
       expect(mockPrismaService.wishlistItem.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -74,7 +92,10 @@ describe('WishlistService', () => {
 
   describe('findAll', () => {
     it('should return all items without filters', async () => {
-      mockPrismaService.wishlistItem.findMany.mockResolvedValue([{ id: 'wi1' }, { id: 'wi2' }]);
+      mockPrismaService.wishlistItem.findMany.mockResolvedValue([
+        { id: 'wi1' },
+        { id: 'wi2' },
+      ]);
 
       const result = await service.findAll('u1');
 
@@ -87,7 +108,9 @@ describe('WishlistService', () => {
     });
 
     it('should filter by status when provided', async () => {
-      mockPrismaService.wishlistItem.findMany.mockResolvedValue([{ id: 'wi1', status: 'WISHED' }]);
+      mockPrismaService.wishlistItem.findMany.mockResolvedValue([
+        { id: 'wi1', status: 'WISHED' },
+      ]);
 
       await service.findAll('u1', { status: 'WISHED' });
 
@@ -99,7 +122,9 @@ describe('WishlistService', () => {
     });
 
     it('should filter by priority when provided', async () => {
-      mockPrismaService.wishlistItem.findMany.mockResolvedValue([{ id: 'wi1', priority: 'HIGH' }]);
+      mockPrismaService.wishlistItem.findMany.mockResolvedValue([
+        { id: 'wi1', priority: 'HIGH' },
+      ]);
 
       await service.findAll('u1', { priority: 'HIGH' });
 
@@ -124,18 +149,27 @@ describe('WishlistService', () => {
     it('should throw NotFoundException when not found', async () => {
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('wi1', 'u1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('wi1', 'u1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('should verify ownership and update item', async () => {
-      const mockItem = { id: 'wi1', userId: 'u1', name: 'Teclado', status: 'WISHED' };
+      const mockItem = {
+        id: 'wi1',
+        userId: 'u1',
+        name: 'Teclado',
+        status: 'WISHED',
+      };
       const updatedItem = { ...mockItem, name: 'Teclado Mecânico' };
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
       mockPrismaService.wishlistItem.update.mockResolvedValue(updatedItem);
 
-      const result = await service.update('wi1', 'u1', { name: 'Teclado Mecânico' });
+      const result = await service.update('wi1', 'u1', {
+        name: 'Teclado Mecânico',
+      });
 
       expect(mockPrismaService.wishlistItem.update).toHaveBeenCalledWith({
         where: { id: 'wi1' },
@@ -147,7 +181,10 @@ describe('WishlistService', () => {
     it('should auto-set purchasedAt when status is PURCHASED', async () => {
       const mockItem = { id: 'wi1', userId: 'u1', status: 'WISHED' };
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistItem.update.mockResolvedValue({ ...mockItem, status: 'PURCHASED' });
+      mockPrismaService.wishlistItem.update.mockResolvedValue({
+        ...mockItem,
+        status: 'PURCHASED',
+      });
 
       await service.update('wi1', 'u1', { status: Status.PURCHASED });
 
@@ -160,7 +197,10 @@ describe('WishlistService', () => {
     it('should soft delete the item by setting deletedAt', async () => {
       const mockItem = { id: 'wi1', userId: 'u1' };
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistItem.update.mockResolvedValue({ ...mockItem, deletedAt: new Date() });
+      mockPrismaService.wishlistItem.update.mockResolvedValue({
+        ...mockItem,
+        deletedAt: new Date(),
+      });
 
       await service.remove('wi1', 'u1');
 
@@ -178,7 +218,9 @@ describe('WishlistService', () => {
 
     it('should persist cash_price and populate price from cashPrice', async () => {
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe1' });
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({
+        id: 'pe1',
+      });
 
       await service.createPriceEntry(userId, itemId, {
         price: 300,
@@ -199,7 +241,9 @@ describe('WishlistService', () => {
 
     it('should persist installment fields when provided', async () => {
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe2' });
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({
+        id: 'pe2',
+      });
 
       await service.createPriceEntry(userId, itemId, {
         price: 3097.91,
@@ -221,7 +265,9 @@ describe('WishlistService', () => {
 
     it('should use price as cashPrice when cashPrice is not provided', async () => {
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({ id: 'pe3' });
+      mockPrismaService.wishlistPriceEntry.create.mockResolvedValue({
+        id: 'pe3',
+      });
 
       await service.createPriceEntry(userId, itemId, {
         price: 500,
@@ -244,7 +290,11 @@ describe('WishlistService', () => {
     it('should set status to PURCHASED and set purchasedAt', async () => {
       const mockItem = { id: 'wi1', userId: 'u1' };
       mockPrismaService.wishlistItem.findFirst.mockResolvedValue(mockItem);
-      mockPrismaService.wishlistItem.update.mockResolvedValue({ ...mockItem, status: 'PURCHASED', purchasedAt: new Date() });
+      mockPrismaService.wishlistItem.update.mockResolvedValue({
+        ...mockItem,
+        status: 'PURCHASED',
+        purchasedAt: new Date(),
+      });
 
       await service.markAsPurchased('wi1', 'u1');
 

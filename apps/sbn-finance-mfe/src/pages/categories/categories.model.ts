@@ -7,7 +7,9 @@ import type { CategoriesProps } from "./categories.type";
 export function useCategoriesModel({ categories, onRefresh }: CategoriesProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [filter, setFilter] = useState<"all" | "Receita" | "Despesa">("all");
 

@@ -12,8 +12,10 @@ export function useTransactionsModel({
   onRefresh,
 }: TransactionsProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
+  const [transactionToDelete, setTransactionToDelete] =
+    useState<Transaction | null>(null);
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importWalletId, setImportWalletId] = useState("");
@@ -45,7 +47,9 @@ export function useTransactionsModel({
     const groups: Record<string, Transaction[]> = {};
 
     const sorted = [...filteredTransactions].sort(
-      (a, b) => DateTime.fromISO(b.date).toMillis() - DateTime.fromISO(a.date).toMillis(),
+      (a, b) =>
+        DateTime.fromISO(b.date).toMillis() -
+        DateTime.fromISO(a.date).toMillis(),
     );
 
     sorted.forEach((t) => {

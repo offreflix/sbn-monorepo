@@ -35,7 +35,9 @@ describe('ProjectionsService', () => {
 
   describe('getProjection', () => {
     it('should return empty timeline when no transactions or recurrences', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([{ id: 'w1', balance: 1000 }]);
+      mockPrismaService.wallet.findMany.mockResolvedValue([
+        { id: 'w1', balance: 1000 },
+      ]);
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
       mockPrismaService.recurrence.findMany.mockResolvedValue([]);
 
@@ -45,7 +47,9 @@ describe('ProjectionsService', () => {
     });
 
     it('should generate simulated events for MONTHLY recurrence', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([{ id: 'w1', balance: 5000 }]);
+      mockPrismaService.wallet.findMany.mockResolvedValue([
+        { id: 'w1', balance: 5000 },
+      ]);
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
 
       const startDate = new Date();
@@ -71,7 +75,9 @@ describe('ProjectionsService', () => {
     });
 
     it('should generate simulated events for WEEKLY recurrence', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([{ id: 'w1', balance: 2000 }]);
+      mockPrismaService.wallet.findMany.mockResolvedValue([
+        { id: 'w1', balance: 2000 },
+      ]);
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
 
       const startDate = new Date();
@@ -95,7 +101,9 @@ describe('ProjectionsService', () => {
     });
 
     it('should respect endDate of recurrence', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([{ id: 'w1', balance: 1000 }]);
+      mockPrismaService.wallet.findMany.mockResolvedValue([
+        { id: 'w1', balance: 1000 },
+      ]);
       mockPrismaService.transaction.findMany.mockResolvedValue([]);
 
       const startDate = new Date();
@@ -122,7 +130,9 @@ describe('ProjectionsService', () => {
     });
 
     it('should map credit card transactions to due date', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([{ id: 'w1', balance: 1000 }]);
+      mockPrismaService.wallet.findMany.mockResolvedValue([
+        { id: 'w1', balance: 1000 },
+      ]);
       mockPrismaService.recurrence.findMany.mockResolvedValue([]);
 
       const txDate = new Date();
@@ -166,7 +176,12 @@ describe('ProjectionsService', () => {
           type: 'EXPENSE',
           description: 'CC txn',
           date: txDate,
-          wallet: { id: 'cc1', type: 'CREDIT_CARD', invoiceDueDay: 10, invoiceClosingDay: 20 },
+          wallet: {
+            id: 'cc1',
+            type: 'CREDIT_CARD',
+            invoiceDueDay: 10,
+            invoiceClosingDay: 20,
+          },
         },
       ]);
 
@@ -190,7 +205,12 @@ describe('ProjectionsService', () => {
           type: 'EXPENSE',
           description: 'CC txn next invoice',
           date: txDate,
-          wallet: { id: 'cc1', type: 'CREDIT_CARD', invoiceDueDay: 10, invoiceClosingDay: 20 },
+          wallet: {
+            id: 'cc1',
+            type: 'CREDIT_CARD',
+            invoiceDueDay: 10,
+            invoiceClosingDay: 20,
+          },
         },
       ]);
 
@@ -213,7 +233,12 @@ describe('ProjectionsService', () => {
           type: 'EXPENSE',
           description: 'CC no closing',
           date: txDate,
-          wallet: { id: 'cc1', type: 'CREDIT_CARD', invoiceDueDay: 5, invoiceClosingDay: null },
+          wallet: {
+            id: 'cc1',
+            type: 'CREDIT_CARD',
+            invoiceDueDay: 5,
+            invoiceClosingDay: null,
+          },
         },
       ]);
 

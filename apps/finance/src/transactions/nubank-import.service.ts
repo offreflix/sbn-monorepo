@@ -196,7 +196,9 @@ export class NubankImportService {
     if (!categories.length) {
       const created = await this.catRepo.createDefault(
         userId,
-        type === TransactionType.Receita ? 'Outras receitas' : 'Outras despesas',
+        type === TransactionType.Receita
+          ? 'Outras receitas'
+          : 'Outras despesas',
         type,
       );
       return created.id;
@@ -221,9 +223,7 @@ export class NubankImportService {
     installmentNumber: number;
     totalInstallments: number;
   } | null {
-    const match = description.match(
-      /^(.*?)-\s*Parcela\s*(\d+)\s*\/\s*(\d+)/i,
-    );
+    const match = description.match(/^(.*?)-\s*Parcela\s*(\d+)\s*\/\s*(\d+)/i);
     if (!match) return null;
 
     const baseDescription = match[1].trim();

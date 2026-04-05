@@ -1,7 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { financeApi } from "../api/finance";
-import { categorySchema, type CategoryFormData } from "../pages/categories/categories.schema";
+import {
+  categorySchema,
+  type CategoryFormData,
+} from "../pages/categories/categories.schema";
 import type { CreateCategoryRequest } from "../pages/categories/categories.type";
 import {
   Button,
@@ -26,7 +29,6 @@ import {
 } from "@repo/ui";
 import { toast } from "sonner";
 import { useState } from "react";
-
 
 interface CategoryFormProps {
   onSuccess: () => void;

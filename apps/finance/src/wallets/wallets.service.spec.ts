@@ -69,7 +69,9 @@ describe('WalletsService', () => {
     it('should throw NotFoundException when wallet not found', async () => {
       mockPrismaService.wallet.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('w1', 'u1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('w1', 'u1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -80,7 +82,9 @@ describe('WalletsService', () => {
       mockPrismaService.wallet.findFirst.mockResolvedValue(mockWallet);
       mockPrismaService.wallet.update.mockResolvedValue(updated);
 
-      const result = await service.update('w1', 'u1', { name: 'Conta Corrente' });
+      const result = await service.update('w1', 'u1', {
+        name: 'Conta Corrente',
+      });
 
       expect(mockPrismaService.wallet.update).toHaveBeenCalledWith({
         where: { id: 'w1' },
@@ -94,7 +98,10 @@ describe('WalletsService', () => {
     it('should soft delete wallet by setting deletedAt', async () => {
       const mockWallet = { id: 'w1', userId: 'u1' };
       mockPrismaService.wallet.findFirst.mockResolvedValue(mockWallet);
-      mockPrismaService.wallet.update.mockResolvedValue({ ...mockWallet, deletedAt: new Date() });
+      mockPrismaService.wallet.update.mockResolvedValue({
+        ...mockWallet,
+        deletedAt: new Date(),
+      });
 
       await service.remove('w1', 'u1');
 

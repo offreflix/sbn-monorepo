@@ -57,7 +57,12 @@ describe('RecurrencesService', () => {
     });
 
     it('should create a recurrence with endDate', async () => {
-      const mockRec = { id: 'r1', userId: 'u1', frequency: 'MONTHLY', endDate: new Date('2024-12-31') };
+      const mockRec = {
+        id: 'r1',
+        userId: 'u1',
+        frequency: 'MONTHLY',
+        endDate: new Date('2024-12-31'),
+      };
       mockPrismaService.recurrence.create.mockResolvedValue(mockRec);
 
       await service.create({
@@ -108,7 +113,9 @@ describe('RecurrencesService', () => {
     it('should throw an Error when recurrence not found', async () => {
       mockPrismaService.recurrence.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('r1', 'u1')).rejects.toThrow('Recurrence not found');
+      await expect(service.findOne('r1', 'u1')).rejects.toThrow(
+        'Recurrence not found',
+      );
     });
   });
 
@@ -135,7 +142,10 @@ describe('RecurrencesService', () => {
     it('should soft delete by setting deletedAt', async () => {
       const mockRec = { id: 'r1', userId: 'u1' };
       mockPrismaService.recurrence.findFirst.mockResolvedValue(mockRec);
-      mockPrismaService.recurrence.update.mockResolvedValue({ ...mockRec, deletedAt: new Date() });
+      mockPrismaService.recurrence.update.mockResolvedValue({
+        ...mockRec,
+        deletedAt: new Date(),
+      });
 
       await service.remove('r1', 'u1');
 

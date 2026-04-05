@@ -16,12 +16,17 @@ import { Input, Label, Switch } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { financeApi } from "../api/finance";
-import { createTransactionSchema, type CreateTransactionFormData } from "../pages/transactions/transactions.schema";
+import {
+  createTransactionSchema,
+  type CreateTransactionFormData,
+} from "../pages/transactions/transactions.schema";
 import type { Wallet } from "../types/wallet.type";
 import type { Category } from "../pages/categories/categories.type";
-import type { Transaction, CreateTransactionRequest } from "../pages/transactions/transactions.type";
+import type {
+  Transaction,
+  CreateTransactionRequest,
+} from "../pages/transactions/transactions.type";
 import { toast } from "sonner";
-
 
 interface CreateTransactionModalProps {
   open: boolean;
@@ -138,7 +143,9 @@ export function CreateTransactionModal({
             ? parseInt(data.installmentNumber)
             : undefined,
         installments:
-          !isEditingGroup && data.installmentNumber === "1" && data.totalInstallments
+          !isEditingGroup &&
+          data.installmentNumber === "1" &&
+          data.totalInstallments
             ? parseInt(data.totalInstallments)
             : undefined,
         isRecurring: data.isRecurring,

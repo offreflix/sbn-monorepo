@@ -53,7 +53,12 @@ describe('DashboardService', () => {
       // Tx2 on Feb 20 → after Feb 15 → nextInvoice
 
       mockPrismaService.wallet.findMany.mockResolvedValue([
-        { id: 'cc1', type: 'Cartão de Crédito', balance: 0, invoiceClosingDay: 15 },
+        {
+          id: 'cc1',
+          type: 'Cartão de Crédito',
+          balance: 0,
+          invoiceClosingDay: 15,
+        },
       ]);
 
       const ccTx1Date = new Date(year, month - 1, 10);
@@ -62,8 +67,22 @@ describe('DashboardService', () => {
       mockPrismaService.transaction.findMany
         .mockResolvedValueOnce([
           // CC transactions
-          { id: 't1', walletId: 'cc1', amount: 200, type: 'Despesa', date: ccTx1Date, status: 'Pendente' },
-          { id: 't2', walletId: 'cc1', amount: 300, type: 'Despesa', date: ccTx2Date, status: 'Pendente' },
+          {
+            id: 't1',
+            walletId: 'cc1',
+            amount: 200,
+            type: 'Despesa',
+            date: ccTx1Date,
+            status: 'Pendente',
+          },
+          {
+            id: 't2',
+            walletId: 'cc1',
+            amount: 300,
+            type: 'Despesa',
+            date: ccTx2Date,
+            status: 'Pendente',
+          },
         ])
         .mockResolvedValueOnce([]); // month transactions
 
@@ -79,7 +98,12 @@ describe('DashboardService', () => {
       const month = 2;
 
       mockPrismaService.wallet.findMany.mockResolvedValue([
-        { id: 'cc1', type: 'Cartão de Crédito', balance: 0, invoiceClosingDay: null },
+        {
+          id: 'cc1',
+          type: 'Cartão de Crédito',
+          balance: 0,
+          invoiceClosingDay: null,
+        },
       ]);
 
       const inMonthDate = new Date(year, month - 1, 15);
@@ -87,8 +111,22 @@ describe('DashboardService', () => {
 
       mockPrismaService.transaction.findMany
         .mockResolvedValueOnce([
-          { id: 't1', walletId: 'cc1', amount: 150, type: 'Despesa', date: inMonthDate, status: 'Pendente' },
-          { id: 't2', walletId: 'cc1', amount: 250, type: 'Despesa', date: afterMonthDate, status: 'Pendente' },
+          {
+            id: 't1',
+            walletId: 'cc1',
+            amount: 150,
+            type: 'Despesa',
+            date: inMonthDate,
+            status: 'Pendente',
+          },
+          {
+            id: 't2',
+            walletId: 'cc1',
+            amount: 250,
+            type: 'Despesa',
+            date: afterMonthDate,
+            status: 'Pendente',
+          },
         ])
         .mockResolvedValueOnce([]);
 

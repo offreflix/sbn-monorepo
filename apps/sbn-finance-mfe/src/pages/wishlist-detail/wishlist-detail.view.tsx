@@ -28,7 +28,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   ArrowLeft,
   ExternalLink,
@@ -37,28 +37,28 @@ import {
   ShoppingCart,
   Trash2,
   TrendingDown,
-} from 'lucide-react'
-import { MoneyInput } from '../../components/money-input'
-import { PurchaseTransactionModal } from '../../components/purchase-transaction-modal'
-import type { WishlistDetailModelOutput } from './wishlist-detail.model'
+} from "lucide-react";
+import { MoneyInput } from "../../components/money-input";
+import { PurchaseTransactionModal } from "../../components/purchase-transaction-modal";
+import type { WishlistDetailModelOutput } from "./wishlist-detail.model";
 
-function formatPrice(price?: number, currency = 'BRL') {
-  if (!price) return 'Preço não informado'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency }).format(
+function formatPrice(price?: number, currency = "BRL") {
+  if (!price) return "Preço não informado";
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(
     price,
-  )
+  );
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(value);
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('pt-BR')
+  return new Date(iso).toLocaleDateString("pt-BR");
 }
 
 export function WishlistDetailView({
@@ -104,7 +104,7 @@ export function WishlistDetailView({
       <div className="py-10 text-center text-muted-foreground">
         Carregando...
       </div>
-    )
+    );
   }
 
   if (notFound || !item) {
@@ -115,7 +115,7 @@ export function WishlistDetailView({
           <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -238,7 +238,7 @@ export function WishlistDetailView({
                           Cancelar
                         </Button>
                         <Button type="submit" disabled={savingEdit}>
-                          {savingEdit ? 'Salvando...' : 'Salvar'}
+                          {savingEdit ? "Salvando..." : "Salvar"}
                         </Button>
                       </div>
                     </form>
@@ -249,7 +249,7 @@ export function WishlistDetailView({
               <div className="flex flex-wrap gap-2 items-center">
                 <span
                   className={`text-sm font-semibold px-2 py-0.5 rounded-full ${
-                    ui.statusBadgeClassByStatus[item.status] ?? ''
+                    ui.statusBadgeClassByStatus[item.status] ?? ""
                   }`}
                 >
                   {ui.statusLabelByStatus[item.status] ?? item.status}
@@ -306,7 +306,7 @@ export function WishlistDetailView({
               {item.installmentCount && item.installmentValue && (
                 <div className="space-y-1 border-l-2 border-primary/20 pl-3">
                   <p className="text-sm font-medium text-foreground">
-                    ou {item.installmentCount}x de{' '}
+                    ou {item.installmentCount}x de{" "}
                     <span className="font-bold">
                       {formatPrice(item.installmentValue, item.currency)}
                     </span>
@@ -314,7 +314,7 @@ export function WishlistDetailView({
 
                   <div className="text-xs text-muted-foreground">
                     <p>
-                      Total a prazo:{' '}
+                      Total a prazo:{" "}
                       {formatPrice(
                         item.installmentCount * item.installmentValue,
                         item.currency,
@@ -323,12 +323,12 @@ export function WishlistDetailView({
                     {item.installmentCount * item.installmentValue >
                       item.price && (
                       <p className="text-destructive/80">
-                        (+{' '}
+                        (+{" "}
                         {formatPrice(
                           item.installmentCount * item.installmentValue -
                             item.price,
                           item.currency,
-                        )}{' '}
+                        )}{" "}
                         de juros)
                       </p>
                     )}
@@ -344,7 +344,7 @@ export function WishlistDetailView({
               alt={item.name}
               className="w-full max-h-80 object-cover rounded-lg"
               onError={(e) => {
-                e.currentTarget.style.display = 'none'
+                e.currentTarget.style.display = "none";
               }}
             />
           )}
@@ -378,7 +378,7 @@ export function WishlistDetailView({
           <CardTitle className="text-lg">Status de Compra</CardTitle>
         </CardHeader>
         <CardContent>
-          {item.status === 'PURCHASED' ? (
+          {item.status === "PURCHASED" ? (
             <div className="space-y-1">
               <p className="text-green-600 font-semibold flex items-center gap-2">
                 ✓ Comprado
@@ -419,7 +419,7 @@ export function WishlistDetailView({
                 </p>
                 <p className="text-sm text-muted-foreground">
                   em <span className="font-semibold">{bestEntry.store}</span>
-                  {' · '}
+                  {" · "}
                   {formatDate(bestEntry.date)}
                 </p>
               </div>
@@ -522,17 +522,17 @@ export function WishlistDetailView({
                         (() => {
                           const total =
                             priceForm.installmentCount *
-                            priceForm.installmentValue
-                          const diff = total - priceForm.cashPrice
+                            priceForm.installmentValue;
+                          const diff = total - priceForm.cashPrice;
                           const fmt = (v: number) =>
-                            new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL',
-                            }).format(v)
+                            new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(v);
                           return (
                             <div className="text-sm space-y-0.5">
                               <p className="text-muted-foreground">
-                                Total parcelado:{' '}
+                                Total parcelado:{" "}
                                 <span className="font-semibold text-foreground">
                                   {fmt(total)}
                                 </span>
@@ -547,7 +547,7 @@ export function WishlistDetailView({
                                 </p>
                               )}
                             </div>
-                          )
+                          );
                         })()}
                     </div>
                   )}
@@ -629,7 +629,7 @@ export function WishlistDetailView({
                       type="submit"
                       disabled={savingPrice || priceForm.cashPrice === 0}
                     >
-                      {savingPrice ? 'Salvando...' : 'Registrar'}
+                      {savingPrice ? "Salvando..." : "Registrar"}
                     </Button>
                   </div>
                 </form>
@@ -658,9 +658,9 @@ export function WishlistDetailView({
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v: string) =>
-                    new Date(v + 'T00:00:00').toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
+                    new Date(v + "T00:00:00").toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
                     })
                   }
                   tick={{ fontSize: 12 }}
@@ -676,15 +676,15 @@ export function WishlistDetailView({
                   content={
                     <ChartTooltipContent
                       formatter={(value) =>
-                        new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
+                        new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
                         }).format(Number(value))
                       }
                       labelFormatter={(label) =>
                         new Date(
-                          String(label) + 'T00:00:00',
-                        ).toLocaleDateString('pt-BR')
+                          String(label) + "T00:00:00",
+                        ).toLocaleDateString("pt-BR")
                       }
                     />
                   }
@@ -728,12 +728,12 @@ export function WishlistDetailView({
                 </thead>
                 <tbody>
                   {priceEntries.map((entry) => {
-                    const cashPrice = entry.cashPrice ?? entry.price
+                    const cashPrice = entry.cashPrice ?? entry.price;
                     const hasInstallment =
-                      entry.installmentCount && entry.installmentValue
+                      entry.installmentCount && entry.installmentValue;
                     const installmentTotal = hasInstallment
                       ? entry.installmentCount! * entry.installmentValue!
-                      : null
+                      : null;
                     return (
                       <tr
                         key={entry.id}
@@ -766,7 +766,7 @@ export function WishlistDetailView({
                               <span className="font-medium">
                                 {entry.installmentCount}x
                               </span>
-                              {' de '}
+                              {" de "}
                               <span className="font-medium">
                                 {formatPrice(
                                   Number(entry.installmentValue),
@@ -788,11 +788,11 @@ export function WishlistDetailView({
                                 )}
                             </span>
                           ) : (
-                            '—'
+                            "—"
                           )}
                         </td>
                         <td className="py-2 pr-4 text-muted-foreground max-w-[200px] truncate">
-                          {entry.notes ?? '—'}
+                          {entry.notes ?? "—"}
                         </td>
                         <td className="py-2">
                           <Button
@@ -805,7 +805,7 @@ export function WishlistDetailView({
                           </Button>
                         </td>
                       </tr>
-                    )
+                    );
                   })}
                 </tbody>
               </table>
@@ -837,7 +837,7 @@ export function WishlistDetailView({
                       onValueChange={(v) =>
                         setPriorityForm((f) => ({
                           ...f,
-                          priority: v as 'LOW' | 'MEDIUM' | 'HIGH',
+                          priority: v as "LOW" | "MEDIUM" | "HIGH",
                         }))
                       }
                     >
@@ -897,7 +897,7 @@ export function WishlistDetailView({
                       Cancelar
                     </Button>
                     <Button type="submit" disabled={savingPriority}>
-                      {savingPriority ? 'Salvando...' : 'Registrar'}
+                      {savingPriority ? "Salvando..." : "Registrar"}
                     </Button>
                   </div>
                 </form>
@@ -927,9 +927,9 @@ export function WishlistDetailView({
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(v: string) =>
-                      new Date(v + 'T00:00:00').toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
+                      new Date(v + "T00:00:00").toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
                       })
                     }
                     tick={{ fontSize: 12 }}
@@ -940,7 +940,7 @@ export function WishlistDetailView({
                     domain={[0.5, 3.5]}
                     ticks={[1, 2, 3]}
                     tickFormatter={(v: number) =>
-                      ui.priorityLabelByNumeric[v] ?? ''
+                      ui.priorityLabelByNumeric[v] ?? ""
                     }
                     tick={{ fontSize: 12 }}
                     width={50}
@@ -954,8 +954,8 @@ export function WishlistDetailView({
                         }
                         labelFormatter={(label) =>
                           new Date(
-                            String(label) + 'T00:00:00',
-                          ).toLocaleDateString('pt-BR')
+                            String(label) + "T00:00:00",
+                          ).toLocaleDateString("pt-BR")
                         }
                       />
                     }
@@ -967,24 +967,24 @@ export function WishlistDetailView({
                     strokeWidth={2.5}
                     dot={(props) => {
                       const p = props as {
-                        cx?: number
-                        cy?: number
-                        payload?: unknown
-                      }
+                        cx?: number;
+                        cy?: number;
+                        payload?: unknown;
+                      };
                       const payloadObj =
-                        p.payload && typeof p.payload === 'object'
+                        p.payload && typeof p.payload === "object"
                           ? (p.payload as Record<string, unknown>)
-                          : null
-                      const payloadLabel = payloadObj?.label
+                          : null;
+                      const payloadLabel = payloadObj?.label;
                       const label =
-                        typeof payloadLabel === 'string'
+                        typeof payloadLabel === "string"
                           ? payloadLabel
-                          : undefined
+                          : undefined;
                       const color =
                         (label && ui.priorityColorByPriority[label]) ??
-                        '#6366f1'
-                      const cx = typeof p.cx === 'number' ? p.cx : 0
-                      const cy = typeof p.cy === 'number' ? p.cy : 0
+                        "#6366f1";
+                      const cx = typeof p.cx === "number" ? p.cx : 0;
+                      const cy = typeof p.cy === "number" ? p.cy : 0;
                       return (
                         <circle
                           key={`dot-${cx}-${cy}`}
@@ -995,7 +995,7 @@ export function WishlistDetailView({
                           stroke="white"
                           strokeWidth={2}
                         />
-                      )
+                      );
                     }}
                   />
                 </LineChart>
@@ -1032,7 +1032,7 @@ export function WishlistDetailView({
                           </span>
                         </td>
                         <td className="py-2 pr-4 text-muted-foreground max-w-[200px] truncate">
-                          {entry.notes ?? '—'}
+                          {entry.notes ?? "—"}
                         </td>
                         <td className="py-2">
                           <Button
@@ -1057,14 +1057,14 @@ export function WishlistDetailView({
       <PurchaseTransactionModal
         open={!!purchaseItem}
         onOpenChange={(open) => {
-          if (!open) setPurchaseItem(null)
+          if (!open) setPurchaseItem(null);
         }}
         item={purchaseItem}
         onSuccess={() => {
-          setPurchaseItem(null)
-          loadData()
+          setPurchaseItem(null);
+          loadData();
         }}
       />
     </div>
-  )
+  );
 }

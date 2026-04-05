@@ -16,8 +16,14 @@ import { Input, Label } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { financeApi } from "../api/finance";
-import { categorySchema, type CategoryFormData } from "../pages/categories/categories.schema";
-import type { CreateCategoryRequest, Category } from "../pages/categories/categories.type";
+import {
+  categorySchema,
+  type CategoryFormData,
+} from "../pages/categories/categories.schema";
+import type {
+  CreateCategoryRequest,
+  Category,
+} from "../pages/categories/categories.type";
 import { toast } from "sonner";
 
 const EMOJI_OPTIONS = [
@@ -44,7 +50,6 @@ const COLOR_OPTIONS = [
   { name: "Rosa", value: "#ec4899" },
   { name: "Cinza", value: "#6b7280" },
 ];
-
 
 interface CreateCategoryModalProps {
   open: boolean;

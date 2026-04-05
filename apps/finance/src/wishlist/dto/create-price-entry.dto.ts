@@ -22,13 +22,17 @@ export class CreatePriceEntryDto {
 
   @IsInt()
   @Min(2)
-  @ValidateIf((o) => o.installmentCount !== undefined || o.installmentValue !== undefined)
+  @ValidateIf(
+    (o) => o.installmentCount !== undefined || o.installmentValue !== undefined,
+  )
   @IsOptional()
   installmentCount?: number;
 
   @IsNumber()
   @Min(0.01)
-  @ValidateIf((o) => o.installmentCount !== undefined || o.installmentValue !== undefined)
+  @ValidateIf(
+    (o) => o.installmentCount !== undefined || o.installmentValue !== undefined,
+  )
   @IsOptional()
   installmentValue?: number;
 

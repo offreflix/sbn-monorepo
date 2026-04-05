@@ -15,11 +15,13 @@ A lista de desejos atual exibe descrições completas no card, tornando a UI ver
 ## Capabilities
 
 ### New Capabilities
+
 - `wishlist-item-detail-page`: Página dedicada `/wishlist/:id` com descrição completa, gráfico de evolução de preços, tabela de registros por loja, e seção de compra
 - `wishlist-price-tracking`: Modelo `WishlistPriceEntry` (preço, loja, data), endpoints REST para criar/listar entradas, e UI de adição de preço na página de detalhe
 - `money-input-component`: Componente React reutilizável com máscara monetária estilo Nubank (inserção da direita para a esquerda em centavos)
 
 ### Modified Capabilities
+
 - `wishlist-list-view`: Truncar `description` em 100 chars no card; card passa a ser clicável (navega para detalhe em vez de expandir)
 
 ## Impact

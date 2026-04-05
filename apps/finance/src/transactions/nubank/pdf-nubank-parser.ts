@@ -28,10 +28,7 @@ export class PdfNubankParser implements NubankFileParser {
 
       const dateStr = match[1];
       const description = match[2].trim();
-      const amountRawStr = match[3]
-        .replace(/\./g, '')
-        .replace(',', '.')
-        .trim();
+      const amountRawStr = match[3].replace(/\./g, '').replace(',', '.').trim();
 
       const rawAmount = parseFloat(amountRawStr);
       if (Number.isNaN(rawAmount)) continue;

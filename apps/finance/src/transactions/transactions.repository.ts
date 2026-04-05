@@ -65,9 +65,7 @@ export class TransactionsRepository {
   }
 
   createRecurrence(
-    data:
-      | Prisma.RecurrenceCreateInput
-      | Prisma.RecurrenceUncheckedCreateInput,
+    data: Prisma.RecurrenceCreateInput | Prisma.RecurrenceUncheckedCreateInput,
   ) {
     return this.prisma.recurrence.create({ data });
   }

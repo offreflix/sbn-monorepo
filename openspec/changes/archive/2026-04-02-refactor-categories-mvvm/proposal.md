@@ -15,9 +15,11 @@ Continuing our initiative to modernize the `sbn-finance-mfe` architectural codeb
 ## Capabilities
 
 ### New Capabilities
+
 - `categories-mvvm`: Structuring the Categories page using the standardized MVVM architecture.
 
 ### Modified Capabilities
+
 None.
 
 ## Impact

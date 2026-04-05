@@ -13,9 +13,11 @@ A Wishlist no `apps/host` ainda concentra estado, regras de negócio, efeitos (A
 ## Capabilities
 
 ### New Capabilities
+
 - `wishlist-mvvm`: Separação clara de View / ViewModel / types (e schemas quando aplicável) para as páginas de lista e detalhe da Wishlist no `apps/host`, alinhado ao padrão MVVM do projeto.
 
 ### Modified Capabilities
+
 - (nenhuma)
 
 ## Impact

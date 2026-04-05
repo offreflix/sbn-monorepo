@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
-import { Button } from '@repo/ui'
+import { Link } from "react-router-dom";
+import { Button } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   BarChart3,
   Calendar,
@@ -24,87 +24,87 @@ import {
   Layers,
   Database,
   ArrowRightLeft,
-} from 'lucide-react'
+} from "lucide-react";
 
 const features = [
   {
     icon: BarChart3,
-    title: 'Dashboard Analítico',
+    title: "Dashboard Analítico",
     description:
-      'Visão consolidada de receitas, despesas e saldo líquido com gráficos interativos de alta performance.',
+      "Visão consolidada de receitas, despesas e saldo líquido com gráficos interativos de alta performance.",
   },
   {
     icon: FileText,
-    title: 'Importação Inteligente',
+    title: "Importação Inteligente",
     description:
-      'Suporte nativo para arquivos Nubank em formatos CSV, OFX e PDF com categorização automática.',
+      "Suporte nativo para arquivos Nubank em formatos CSV, OFX e PDF com categorização automática.",
   },
   {
     icon: PiggyBank,
-    title: 'Projeções de Liquidez',
+    title: "Projeções de Liquidez",
     description:
-      'Simule seu saldo futuro considerando faturas de cartão, contas fixas e liquidez imediata.',
+      "Simule seu saldo futuro considerando faturas de cartão, contas fixas e liquidez imediata.",
   },
   {
     icon: CreditCard,
-    title: 'Gestão de Cartões',
+    title: "Gestão de Cartões",
     description:
-      'Controle inteligente de faturas, datas de fechamento e parcelamentos complexos.',
+      "Controle inteligente de faturas, datas de fechamento e parcelamentos complexos.",
   },
   {
     icon: Bot,
-    title: 'IA Ready (MCP)',
+    title: "IA Ready (MCP)",
     description:
-      'Servidor MCP integrado para consultar e gerenciar seus dados financeiros via assistentes de IA.',
+      "Servidor MCP integrado para consultar e gerenciar seus dados financeiros via assistentes de IA.",
   },
   {
     icon: Target,
-    title: 'Wishlist & Metas',
+    title: "Wishlist & Metas",
     description:
-      'Priorize seus desejos de consumo e acompanhe o progresso financeiro para cada conquista.',
+      "Priorize seus desejos de consumo e acompanhe o progresso financeiro para cada conquista.",
   },
   {
     icon: Calendar,
-    title: 'Recorrências Avançadas',
+    title: "Recorrências Avançadas",
     description:
-      'Gerencie assinaturas e contas fixas com regras de recorrência (mensal, semanal) automáticas.',
+      "Gerencie assinaturas e contas fixas com regras de recorrência (mensal, semanal) automáticas.",
   },
   {
     icon: Shield,
-    title: 'Arquitetura Robusta',
+    title: "Arquitetura Robusta",
     description:
-      'Autenticação JWT, sessões em Redis e microserviços isolados para máxima segurança.',
+      "Autenticação JWT, sessões em Redis e microserviços isolados para máxima segurança.",
   },
   {
     icon: Layers,
-    title: 'Micro-frontends',
+    title: "Micro-frontends",
     description:
-      'Interface modular construída com React 19, Rsbuild e Module Federation para agilidade.',
+      "Interface modular construída com React 19, Rsbuild e Module Federation para agilidade.",
   },
-]
+];
 
 const stats = [
   {
-    label: 'Multiconta',
+    label: "Multiconta",
     icon: Wallet,
-    description: 'Gestão de múltiplas carteiras e bancos',
+    description: "Gestão de múltiplas carteiras e bancos",
   },
   {
-    label: 'Orquestração',
+    label: "Orquestração",
     icon: ArrowRightLeft,
-    description: 'API Gateway unificado (Orchestrator)',
+    description: "API Gateway unificado (Orchestrator)",
   },
   {
-    label: 'Categorias',
+    label: "Categorias",
     icon: LayoutDashboard,
-    description: 'Classificação flexível por tipo',
+    description: "Classificação flexível por tipo",
   },
   {
-    label: 'Stack Moderna',
+    label: "Stack Moderna",
     icon: Database,
-    description: 'NestJS, Prisma e PostgreSQL',
+    description: "NestJS, Prisma e PostgreSQL",
   },
-]
+];
 
 export const LandingPage = () => {
   return (
@@ -164,7 +164,7 @@ export const LandingPage = () => {
             OPEN-SOURCE FINANCE ECOSYSTEM
           </div>
           <h1 className="mb-6 text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl lg:text-7xl">
-            Sua vida financeira,{' '}
+            Sua vida financeira,{" "}
             <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
               orquestrada.
             </span>
@@ -321,5 +321,5 @@ export const LandingPage = () => {
         </footer>
       </div>
     </div>
-  )
-}
+  );
+};

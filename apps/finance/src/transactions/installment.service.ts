@@ -223,7 +223,9 @@ export class InstallmentService {
     transaction,
     isPaid,
     status,
-  }: InstallmentUpdateParams): Promise<InstallmentTransaction | Transaction | null> {
+  }: InstallmentUpdateParams): Promise<
+    InstallmentTransaction | Transaction | null
+  > {
     const allInGroup = await this.txRepo.findByPurchaseGroup(
       transaction.purchaseGroupId!,
       userId,

@@ -1,10 +1,9 @@
-import { useWishlistModel } from './wishlist.model'
-import { WishlistView } from './wishlist.view'
+import { useWishlistModel } from "./wishlist.model";
+import { WishlistView } from "./wishlist.view";
 
 export function WishlistPage() {
-  const model = useWishlistModel()
-  return <WishlistView {...model} />
+  const model = useWishlistModel();
+  return <WishlistView {...model} />;
 }
 
-export default WishlistPage
-
+export default WishlistPage;

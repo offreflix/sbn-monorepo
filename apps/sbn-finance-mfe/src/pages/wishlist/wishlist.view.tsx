@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
-import { MoneyInput } from '../../components/money-input'
-import { PurchaseTransactionModal } from '../../components/purchase-transaction-modal'
+import { useMemo } from "react";
+import { MoneyInput } from "../../components/money-input";
+import { PurchaseTransactionModal } from "../../components/purchase-transaction-modal";
 import {
   Button,
   Card,
@@ -23,7 +23,7 @@ import {
   SelectValue,
   Switch,
   Textarea,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Check,
   ExternalLink,
@@ -32,67 +32,88 @@ import {
   Plus,
   ShoppingCart,
   Trash2,
-} from 'lucide-react'
-import type { WishlistModelOutput } from './wishlist.model'
+} from "lucide-react";
+import type { WishlistModelOutput } from "./wishlist.model";
 
 export function WishlistView({
   data: { items },
-  state: { loading, isDialogOpen, filterStatus, filterPriority, purchaseItem, formData, sameInstallment },
-  setters: { setIsDialogOpen, setFilterStatus, setFilterPriority, setPurchaseItem, setFormData, setSameInstallment },
-  actions: { loadItems, handleSubmit, handleDelete, handlePurchase, handleNavigateToDetail },
+  state: {
+    loading,
+    isDialogOpen,
+    filterStatus,
+    filterPriority,
+    purchaseItem,
+    formData,
+    sameInstallment,
+  },
+  setters: {
+    setIsDialogOpen,
+    setFilterStatus,
+    setFilterPriority,
+    setPurchaseItem,
+    setFormData,
+    setSameInstallment,
+  },
+  actions: {
+    loadItems,
+    handleSubmit,
+    handleDelete,
+    handlePurchase,
+    handleNavigateToDetail,
+  },
 }: WishlistModelOutput) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'text-red-500'
-      case 'MEDIUM':
-        return 'text-yellow-500'
-      case 'LOW':
-        return 'text-green-500'
+      case "HIGH":
+        return "text-red-500";
+      case "MEDIUM":
+        return "text-yellow-500";
+      case "LOW":
+        return "text-green-500";
       default:
-        return 'text-gray-500'
+        return "text-gray-500";
     }
-  }
+  };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'Alta'
-      case 'MEDIUM':
-        return 'Média'
-      case 'LOW':
-        return 'Baixa'
+      case "HIGH":
+        return "Alta";
+      case "MEDIUM":
+        return "Média";
+      case "LOW":
+        return "Baixa";
       default:
-        return priority
+        return priority;
     }
-  }
+  };
 
-  const formatPrice = (price?: number, currency: string = 'BRL') => {
-    if (!price) return 'Preço não informado'
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
+  const formatPrice = (price?: number, currency: string = "BRL") => {
+    if (!price) return "Preço não informado";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
       currency,
-    }).format(price)
-  }
+    }).format(price);
+  };
 
   const installmentPreview = useMemo(() => {
-    if (sameInstallment) return null
+    if (sameInstallment) return null;
     if (!(formData.installmentCount >= 2 && formData.installmentValue > 0))
-      return null
-    const total = formData.installmentCount * formData.installmentValue
-    const diff = total - formData.price
+      return null;
+    const total = formData.installmentCount * formData.installmentValue;
+    const diff = total - formData.price;
     const fmt = (v: number) =>
-      new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(v)
-    return { total, diff, fmt }
+      new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(v);
+    return { total, diff, fmt };
   }, [
     formData.installmentCount,
     formData.installmentValue,
     formData.price,
     sameInstallment,
-  ])
+  ]);
 
   return (
     <div className="space-y-6">
@@ -258,14 +279,14 @@ export function WishlistView({
                   {installmentPreview && (
                     <div className="text-sm space-y-0.5">
                       <p className="text-muted-foreground">
-                        Total parcelado:{' '}
+                        Total parcelado:{" "}
                         <span className="font-semibold text-foreground">
                           {installmentPreview.fmt(installmentPreview.total)}
                         </span>
                       </p>
                       {installmentPreview.diff > 0 ? (
                         <p className="text-orange-600 font-medium">
-                          + {installmentPreview.fmt(installmentPreview.diff)}{' '}
+                          + {installmentPreview.fmt(installmentPreview.diff)}{" "}
                           mais caro parcelando
                         </p>
                       ) : (
@@ -306,7 +327,7 @@ export function WishlistView({
                 <Label htmlFor="priority">Prioridade</Label>
                 <Select
                   value={formData.priority}
-                  onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') =>
+                  onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") =>
                     setFormData({ ...formData, priority: value })
                   }
                 >
@@ -377,7 +398,7 @@ export function WishlistView({
             <Card
               key={item.id}
               className={`cursor-pointer transition-shadow hover:shadow-md ${
-                item.status === 'PURCHASED' ? 'opacity-60 border-green-500' : ''
+                item.status === "PURCHASED" ? "opacity-60 border-green-500" : ""
               }`}
               onClick={() => handleNavigateToDetail(item.id)}
             >
@@ -407,8 +428,8 @@ export function WishlistView({
                     alt={item.name}
                     className="w-full h-48 object-cover rounded-md"
                     onError={(e) => {
-                      ;(e.currentTarget as HTMLImageElement).style.display =
-                        'none'
+                      (e.currentTarget as HTMLImageElement).style.display =
+                        "none";
                     }}
                   />
                 )}
@@ -444,21 +465,21 @@ export function WishlistView({
                 {item.notes && (
                   <p className="text-sm text-muted-foreground">{item.notes}</p>
                 )}
-                {item.status === 'PURCHASED' && item.purchasedAt && (
+                {item.status === "PURCHASED" && item.purchasedAt && (
                   <div className="text-sm text-green-600 flex items-center gap-1">
                     <Check className="h-4 w-4" />
-                    Comprado em{' '}
-                    {new Date(item.purchasedAt).toLocaleDateString('pt-BR')}
+                    Comprado em{" "}
+                    {new Date(item.purchasedAt).toLocaleDateString("pt-BR")}
                   </div>
                 )}
                 <div className="flex gap-2 pt-2 border-t">
-                  {item.status !== 'PURCHASED' && (
+                  {item.status !== "PURCHASED" && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        handlePurchase(item)
+                        e.stopPropagation();
+                        handlePurchase(item);
                       }}
                       className="flex-1"
                     >
@@ -470,8 +491,8 @@ export function WishlistView({
                     variant="outline"
                     size="sm"
                     onClick={async (e) => {
-                      e.stopPropagation()
-                      await handleDelete(item.id)
+                      e.stopPropagation();
+                      await handleDelete(item.id);
                     }}
                     className="text-destructive hover:text-destructive"
                   >
@@ -487,14 +508,14 @@ export function WishlistView({
       <PurchaseTransactionModal
         open={!!purchaseItem}
         onOpenChange={(open) => {
-          if (!open) setPurchaseItem(null)
+          if (!open) setPurchaseItem(null);
         }}
         item={purchaseItem}
         onSuccess={() => {
-          setPurchaseItem(null)
-          loadItems()
+          setPurchaseItem(null);
+          loadItems();
         }}
       />
     </div>
-  )
+  );
 }

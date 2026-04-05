@@ -15,7 +15,9 @@ describe('DashboardController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DashboardController],
-      providers: [{ provide: DashboardService, useValue: mockDashboardService }],
+      providers: [
+        { provide: DashboardService, useValue: mockDashboardService },
+      ],
     }).compile();
 
     controller = module.get<DashboardController>(DashboardController);
@@ -33,12 +35,18 @@ describe('DashboardController', () => {
 
       const result = await controller.getSummary('u1', '2', '2024');
 
-      expect(mockDashboardService.getSummary).toHaveBeenCalledWith('u1', 2, 2024);
+      expect(mockDashboardService.getSummary).toHaveBeenCalledWith(
+        'u1',
+        2,
+        2024,
+      );
       expect(result).toEqual(mockResult);
     });
 
     it('should throw BadRequestException when userId is missing', async () => {
-      await expect(controller.getSummary('', '1', '2024')).rejects.toThrow(BadRequestException);
+      await expect(controller.getSummary('', '1', '2024')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -49,12 +57,18 @@ describe('DashboardController', () => {
 
       const result = await controller.getCategories('u1', '3', '2024');
 
-      expect(mockDashboardService.getCategories).toHaveBeenCalledWith('u1', 3, 2024);
+      expect(mockDashboardService.getCategories).toHaveBeenCalledWith(
+        'u1',
+        3,
+        2024,
+      );
       expect(result).toEqual(mockResult);
     });
 
     it('should throw BadRequestException when userId is missing', async () => {
-      await expect(controller.getCategories('', '1', '2024')).rejects.toThrow(BadRequestException);
+      await expect(controller.getCategories('', '1', '2024')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -65,20 +79,32 @@ describe('DashboardController', () => {
 
       const result = await controller.getYearOverview('u1', '2024');
 
-      expect(mockDashboardService.getYearOverview).toHaveBeenCalledWith('u1', 2024);
+      expect(mockDashboardService.getYearOverview).toHaveBeenCalledWith(
+        'u1',
+        2024,
+      );
       expect(result).toEqual(mockResult);
     });
 
     it('should use current year when year query param is not provided', async () => {
-      mockDashboardService.getYearOverview.mockResolvedValue({ year: 2026, months: [], totals: {} });
+      mockDashboardService.getYearOverview.mockResolvedValue({
+        year: 2026,
+        months: [],
+        totals: {},
+      });
 
       await controller.getYearOverview('u1');
 
-      expect(mockDashboardService.getYearOverview).toHaveBeenCalledWith('u1', new Date().getFullYear());
+      expect(mockDashboardService.getYearOverview).toHaveBeenCalledWith(
+        'u1',
+        new Date().getFullYear(),
+      );
     });
 
     it('should throw BadRequestException when userId is missing', async () => {
-      await expect(controller.getYearOverview('')).rejects.toThrow(BadRequestException);
+      await expect(controller.getYearOverview('')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

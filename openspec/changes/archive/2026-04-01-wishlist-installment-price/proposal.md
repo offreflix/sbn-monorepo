@@ -13,9 +13,11 @@ O rastreamento de preço atual registra apenas um valor único por entrada, mas 
 ## Capabilities
 
 ### New Capabilities
+
 - `wishlist-installment-price`: Suporte a preço à vista e parcelado na entrada de preço da wishlist, com comparação de custo em tempo real na UI
 
 ### Modified Capabilities
+
 - `wishlist-price-tracking`: Os requisitos de criação de entrada de preço mudam — o modelo agora aceita `cash_price`, `installment_count` e `installment_value`; o formulário da UI ganha o switch e os campos de parcelamento; a tabela de exibição inclui coluna de condição de parcelamento
 
 ## Impact

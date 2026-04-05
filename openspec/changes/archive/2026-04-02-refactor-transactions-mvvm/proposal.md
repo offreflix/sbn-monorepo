@@ -15,9 +15,11 @@ Following the successful MVVM architectural migration of the Dashboard page, the
 ## Capabilities
 
 ### New Capabilities
+
 - `transactions-mvvm`: Structuring the Transactions feature using the MVVM architectural standard.
 
 ### Modified Capabilities
+
 None.
 
 ## Impact

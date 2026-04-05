@@ -16,10 +16,12 @@ import { Input, Label } from "@repo/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { financeApi } from "../api/finance";
-import { walletSchema, type WalletFormData } from "../pages/dashboard/dashboard.schema";
+import {
+  walletSchema,
+  type WalletFormData,
+} from "../pages/dashboard/dashboard.schema";
 import type { CreateWalletRequest, Wallet } from "../types/wallet.type";
 import { toast } from "sonner";
-
 
 interface CreateWalletModalProps {
   open: boolean;

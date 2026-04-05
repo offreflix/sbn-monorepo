@@ -33,13 +33,26 @@ describe('CategoriesService', () => {
 
   describe('create', () => {
     it('should create a category', async () => {
-      const mockCategory = { id: 'c1', userId: 'u1', name: 'Alimentação', type: 'Despesa' };
+      const mockCategory = {
+        id: 'c1',
+        userId: 'u1',
+        name: 'Alimentação',
+        type: 'Despesa',
+      };
       mockPrismaService.category.create.mockResolvedValue(mockCategory);
 
-      const result = await service.create({ userId: 'u1', name: 'Alimentação', type: 'Despesa' });
+      const result = await service.create({
+        userId: 'u1',
+        name: 'Alimentação',
+        type: 'Despesa',
+      });
 
       expect(mockPrismaService.category.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({ userId: 'u1', name: 'Alimentação', type: 'Despesa' }),
+        data: expect.objectContaining({
+          userId: 'u1',
+          name: 'Alimentação',
+          type: 'Despesa',
+        }),
       });
       expect(result).toEqual(mockCategory);
     });
@@ -47,7 +60,10 @@ describe('CategoriesService', () => {
 
   describe('findAll', () => {
     it('should return categories for a user excluding soft-deleted ones', async () => {
-      mockPrismaService.category.findMany.mockResolvedValue([{ id: 'c1' }, { id: 'c2' }]);
+      mockPrismaService.category.findMany.mockResolvedValue([
+        { id: 'c1' },
+        { id: 'c2' },
+      ]);
 
       const result = await service.findAll('u1');
 
@@ -71,7 +87,9 @@ describe('CategoriesService', () => {
     it('should throw NotFoundException when category not found', async () => {
       mockPrismaService.category.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOne('c1', 'u1')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('c1', 'u1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -96,7 +114,10 @@ describe('CategoriesService', () => {
     it('should soft delete by setting deletedAt', async () => {
       const mockCategory = { id: 'c1', userId: 'u1' };
       mockPrismaService.category.findFirst.mockResolvedValue(mockCategory);
-      mockPrismaService.category.update.mockResolvedValue({ ...mockCategory, deletedAt: new Date() });
+      mockPrismaService.category.update.mockResolvedValue({
+        ...mockCategory,
+        deletedAt: new Date(),
+      });
 
       await service.remove('c1', 'u1');
 

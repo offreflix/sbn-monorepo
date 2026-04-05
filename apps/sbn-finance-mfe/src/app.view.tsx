@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Button } from '@repo/ui'
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Button } from "@repo/ui";
 import {
   LayoutDashboard,
   RefreshCcw,
@@ -7,16 +7,16 @@ import {
   Tags,
   Calendar,
   Heart,
-} from 'lucide-react'
-import { Toaster } from 'sonner'
-import { MonthYearSelector } from './components/month-year-selector'
-import { Dashboard } from './pages/dashboard/page'
-import { TransactionList } from './pages/transactions/page'
-import { CategoryGrid } from './pages/categories/page'
-import { CalendarView } from './pages/calendar/page'
-import { WishlistPage } from './pages/wishlist/page'
-import { WishlistDetailPage } from './pages/wishlist-detail/page'
-import type { AppModelOutput } from './app.model'
+} from "lucide-react";
+import { Toaster } from "sonner";
+import { MonthYearSelector } from "./components/month-year-selector";
+import { Dashboard } from "./pages/dashboard/page";
+import { TransactionList } from "./pages/transactions/page";
+import { CategoryGrid } from "./pages/categories/page";
+import { CalendarView } from "./pages/calendar/page";
+import { WishlistPage } from "./pages/wishlist/page";
+import { WishlistDetailPage } from "./pages/wishlist-detail/page";
+import type { AppModelOutput } from "./app.model";
 
 export function AppView({
   data: { transactions, wallets, categories },
@@ -36,45 +36,45 @@ export function AppView({
 
               <div className="flex items-center gap-2">
                 <Button
-                  variant={isTabActive('') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('.')}
+                  onClick={() => handleNavigate(".")}
                   className="gap-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
                 <Button
-                  variant={isTabActive('transactions') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("transactions") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('transactions')}
+                  onClick={() => handleNavigate("transactions")}
                   className="gap-2"
                 >
                   <Receipt className="h-4 w-4" />
                   Transações
                 </Button>
                 <Button
-                  variant={isTabActive('categories') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("categories") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('categories')}
+                  onClick={() => handleNavigate("categories")}
                   className="gap-2"
                 >
                   <Tags className="h-4 w-4" />
                   Categorias
                 </Button>
                 <Button
-                  variant={isTabActive('calendar') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("calendar") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('calendar')}
+                  onClick={() => handleNavigate("calendar")}
                   className="gap-2"
                 >
                   <Calendar className="h-4 w-4" />
                   Calendário
                 </Button>
                 <Button
-                  variant={isTabActive('wishlist') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("wishlist") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('wishlist')}
+                  onClick={() => handleNavigate("wishlist")}
                   className="gap-2"
                 >
                   <Heart className="h-4 w-4" />
@@ -88,8 +88,8 @@ export function AppView({
                 month={selectedMonth}
                 year={selectedYear}
                 onChange={(m, y) => {
-                  setSelectedMonth(m)
-                  setSelectedYear(y)
+                  setSelectedMonth(m);
+                  setSelectedYear(y);
                 }}
               />
 
@@ -172,8 +172,8 @@ export function AppView({
 
       <div
         className="hidden md:flex lg:flex xl:flex"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </>
-  )
+  );
 }

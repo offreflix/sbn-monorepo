@@ -40,11 +40,16 @@ describe('WishlistController', () => {
 
       controller.create(dto, 'u1');
 
-      expect(mockWishlistService.create).toHaveBeenCalledWith({ ...dto, userId: 'u1' });
+      expect(mockWishlistService.create).toHaveBeenCalledWith({
+        ...dto,
+        userId: 'u1',
+      });
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.create({} as any, '')).toThrow(BadRequestException);
+      expect(() => controller.create({} as any, '')).toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -54,7 +59,10 @@ describe('WishlistController', () => {
 
       controller.findAll('u1', 'WISHED', 'HIGH');
 
-      expect(mockWishlistService.findAll).toHaveBeenCalledWith('u1', { status: 'WISHED', priority: 'HIGH' });
+      expect(mockWishlistService.findAll).toHaveBeenCalledWith('u1', {
+        status: 'WISHED',
+        priority: 'HIGH',
+      });
     });
 
     it('should throw BadRequestException when userId is missing', () => {
@@ -79,29 +87,46 @@ describe('WishlistController', () => {
   describe('update', () => {
     it('should call service update with id, userId and body', () => {
       const body: any = { name: 'Updated' };
-      mockWishlistService.update.mockResolvedValue({ id: 'wi1', name: 'Updated' });
+      mockWishlistService.update.mockResolvedValue({
+        id: 'wi1',
+        name: 'Updated',
+      });
 
       controller.update('wi1', body, 'u1');
 
-      expect(mockWishlistService.update).toHaveBeenCalledWith('wi1', 'u1', body);
+      expect(mockWishlistService.update).toHaveBeenCalledWith(
+        'wi1',
+        'u1',
+        body,
+      );
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.update('wi1', {} as any, '')).toThrow(BadRequestException);
+      expect(() => controller.update('wi1', {} as any, '')).toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('markAsPurchased', () => {
     it('should call service markAsPurchased with id and userId', () => {
-      mockWishlistService.markAsPurchased.mockResolvedValue({ id: 'wi1', status: 'PURCHASED' });
+      mockWishlistService.markAsPurchased.mockResolvedValue({
+        id: 'wi1',
+        status: 'PURCHASED',
+      });
 
       controller.markAsPurchased('wi1', 'u1');
 
-      expect(mockWishlistService.markAsPurchased).toHaveBeenCalledWith('wi1', 'u1');
+      expect(mockWishlistService.markAsPurchased).toHaveBeenCalledWith(
+        'wi1',
+        'u1',
+      );
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.markAsPurchased('wi1', '')).toThrow(BadRequestException);
+      expect(() => controller.markAsPurchased('wi1', '')).toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -115,30 +140,49 @@ describe('WishlistController', () => {
         store: 'Loja Daikin',
         date: '2026-04-01',
       };
-      mockWishlistService.createPriceEntry.mockResolvedValue({ id: 'pe1', ...body });
+      mockWishlistService.createPriceEntry.mockResolvedValue({
+        id: 'pe1',
+        ...body,
+      });
 
       controller.createPriceEntry('wi1', body, 'u1');
 
-      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith('u1', 'wi1', body);
+      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith(
+        'u1',
+        'wi1',
+        body,
+      );
     });
 
     it('should call service createPriceEntry without installment fields', () => {
       const body: any = { price: 500, store: 'Shopee', date: '2026-04-01' };
-      mockWishlistService.createPriceEntry.mockResolvedValue({ id: 'pe2', ...body });
+      mockWishlistService.createPriceEntry.mockResolvedValue({
+        id: 'pe2',
+        ...body,
+      });
 
       controller.createPriceEntry('wi1', body, 'u1');
 
-      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith('u1', 'wi1', body);
+      expect(mockWishlistService.createPriceEntry).toHaveBeenCalledWith(
+        'u1',
+        'wi1',
+        body,
+      );
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.createPriceEntry('wi1', {} as any, '')).toThrow(BadRequestException);
+      expect(() => controller.createPriceEntry('wi1', {} as any, '')).toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('remove', () => {
     it('should call service remove with id and userId', () => {
-      mockWishlistService.remove.mockResolvedValue({ id: 'wi1', deletedAt: new Date() });
+      mockWishlistService.remove.mockResolvedValue({
+        id: 'wi1',
+        deletedAt: new Date(),
+      });
 
       controller.remove('wi1', 'u1');
 

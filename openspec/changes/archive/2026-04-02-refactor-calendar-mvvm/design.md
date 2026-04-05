@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `CalendarView` module will be functionally equivalent to the existing implementation but will strictly adhere to the MVVM layer division. It parses daily and monthly transactions dynamically to fulfill a six-mode visual spectrum: daily, weekly, monthly, 4-days, agenda, and yearly. 
+The `CalendarView` module will be functionally equivalent to the existing implementation but will strictly adhere to the MVVM layer division. It parses daily and monthly transactions dynamically to fulfill a six-mode visual spectrum: daily, weekly, monthly, 4-days, agenda, and yearly.
 
 We will port the core elements to `src/pages/calendar/` yielding five standard files.
 

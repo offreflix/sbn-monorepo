@@ -7,12 +7,14 @@ A migration `20260303000000_add_wishlist_price_entries` já existe no banco. Est
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Adicionar `cash_price`, `installment_count` e `installment_value` ao modelo `WishlistPriceEntry`
 - Manter retrocompatibilidade: entradas antigas (sem parcelamento) continuam válidas
 - UI exibe diferença de custo em tempo real ao preencher dados de parcelamento
 - Cobertura de testes no backend (service + controller)
 
 **Non-Goals:**
+
 - Cálculo de juros compostos (apenas diferença simples total parcelado − à vista)
 - Suporte a múltiplas moedas no mesmo parcelamento
 - Histórico de alteração de condições de parcelamento

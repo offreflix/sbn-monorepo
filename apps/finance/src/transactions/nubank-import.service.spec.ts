@@ -59,7 +59,9 @@ describe('NubankImportService', () => {
           walletId: 'w1',
           file: {
             originalname: 'nubank.csv',
-            buffer: Buffer.from('date,title,amount\n2024-01-10,Mercado,-100.00'),
+            buffer: Buffer.from(
+              'date,title,amount\n2024-01-10,Mercado,-100.00',
+            ),
           },
         }),
       ).rejects.toThrow(NotFoundException);
@@ -79,7 +81,9 @@ describe('NubankImportService', () => {
 
     it('should parse CSV and create transactions', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -100,7 +104,9 @@ describe('NubankImportService', () => {
 
     it('should parse OFX and create transactions', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -133,7 +139,9 @@ describe('NubankImportService', () => {
 
     it('should skip duplicate transactions (deduplication)', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue({ id: 'existingTx' });
 
       const result = await service.import({
@@ -151,16 +159,26 @@ describe('NubankImportService', () => {
 
     it('should parse PDF and create transactions', async () => {
       const pdfParse = require('pdf-parse');
-      const pdfText = '10/01/2024 Mercado 1.500,00\n15/01/2024 Salário -3.000,00';
+      const pdfText =
+        '10/01/2024 Mercado 1.500,00\n15/01/2024 Salário -3.000,00';
       (pdfParse as jest.Mock).mockResolvedValue({ text: pdfText });
 
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
-      const file = { originalname: 'nubank.pdf', buffer: Buffer.from('fake pdf') };
-      const result = await service.import({ userId: 'u1', walletId: 'w1', file });
+      const file = {
+        originalname: 'nubank.pdf',
+        buffer: Buffer.from('fake pdf'),
+      };
+      const result = await service.import({
+        userId: 'u1',
+        walletId: 'w1',
+        file,
+      });
 
       expect(pdfParse).toHaveBeenCalledWith(file.buffer);
       expect(result.length).toBeGreaterThan(0);
@@ -168,7 +186,9 @@ describe('NubankImportService', () => {
 
     it('should create all installments for a transaction series', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -191,7 +211,9 @@ describe('NubankImportService', () => {
   describe('CSV parsing', () => {
     it('should map negative amount to Receita type', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -211,7 +233,9 @@ describe('NubankImportService', () => {
 
     it('should map positive amount to Despesa type', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -232,7 +256,9 @@ describe('NubankImportService', () => {
   describe('OFX parsing', () => {
     it('should map CREDIT to Receita', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -253,7 +279,9 @@ describe('NubankImportService', () => {
 
     it('should map DEBIT to Despesa', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -276,7 +304,9 @@ describe('NubankImportService', () => {
   describe('installment detection', () => {
     it('should detect installment pattern "Desc - Parcela 2/6" and create all installments', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 
@@ -296,7 +326,9 @@ describe('NubankImportService', () => {
 
     it('should treat description without installment pattern as a single transaction', async () => {
       mockWalletsRepo.findByIdAndUser.mockResolvedValue({ id: 'w1' });
-      mockCatRepo.findForNubank.mockResolvedValue([{ id: 'cat1', name: 'Outros' }]);
+      mockCatRepo.findForNubank.mockResolvedValue([
+        { id: 'cat1', name: 'Outros' },
+      ]);
       mockTxRepo.findFirst.mockResolvedValue(null);
       mockTxRepo.create.mockResolvedValue({ id: 'tx1' });
 

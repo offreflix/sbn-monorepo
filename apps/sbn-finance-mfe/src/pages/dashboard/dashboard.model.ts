@@ -20,7 +20,10 @@ export function useDashboardModel(props: DashboardProps) {
       setDashboardLoading(true);
       const [dashSum, dashCats] = await Promise.all([
         financeApi.dashboard.summary(props.selectedMonth, props.selectedYear),
-        financeApi.dashboard.categories(props.selectedMonth, props.selectedYear),
+        financeApi.dashboard.categories(
+          props.selectedMonth,
+          props.selectedYear,
+        ),
       ]);
       setSummary(dashSum);
       setCategories(dashCats);

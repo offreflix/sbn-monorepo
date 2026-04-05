@@ -4,40 +4,40 @@ import {
   Outlet,
   Route,
   Routes,
-} from 'react-router-dom'
-import { Toaster } from 'sonner'
-import { AuthProvider, useAuth } from './auth/AuthProvider'
-import { ThemeProvider } from './theme/ThemeProvider'
-import { DashboardPage } from './pages/Dashboard'
-import { FinanceRemotePage } from './pages/FinanceRemote'
-import { LandingPage } from './pages/Landing'
-import { LoginPage } from './pages/Login'
-import { RegisterPage } from './pages/Register'
-import { SettingsPage } from './pages/Settings'
+} from "react-router-dom";
+import { Toaster } from "sonner";
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import { ThemeProvider } from "./theme/ThemeProvider";
+import { DashboardPage } from "./pages/Dashboard";
+import { FinanceRemotePage } from "./pages/FinanceRemote";
+import { LandingPage } from "./pages/Landing";
+import { LoginPage } from "./pages/Login";
+import { RegisterPage } from "./pages/Register";
+import { SettingsPage } from "./pages/Settings";
 
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center">
     <div className="text-sm text-muted-foreground">Carregando sessão...</div>
   </div>
-)
+);
 
 const AuthLayout = () => {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
-  if (loading) return <LoadingScreen />
-  if (user) return <Navigate to="/dashboard" replace />
+  if (loading) return <LoadingScreen />;
+  if (user) return <Navigate to="/dashboard" replace />;
 
-  return <Outlet />
-}
+  return <Outlet />;
+};
 
 const AppLayout = () => {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
-  if (loading) return <LoadingScreen />
-  if (!user) return <Navigate to="/login" replace />
+  if (loading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" replace />;
 
-  return <Outlet />
-}
+  return <Outlet />;
+};
 
 function App() {
   return (
@@ -63,7 +63,7 @@ function App() {
         <Toaster richColors closeButton />
       </AuthProvider>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;
