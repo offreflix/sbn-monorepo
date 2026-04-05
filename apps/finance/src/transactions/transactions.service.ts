@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateTransactionDto,
   TransactionType,
 } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { Prisma } from '@prisma/client-finance';
+import { Prisma, Transaction } from '@prisma/client-finance';
 import * as path from 'path';
+import { TransactionsRepository } from './transactions.repository';
+import { WalletsRepository } from '../wallets/wallets.repository';
+import { CategoriesRepository } from '../categories/categories.repository';
 
 declare const require: any;
 
@@ -19,7 +21,11 @@ type NubankParsedRow = {
 
 @Injectable()
 export class TransactionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private txRepo: TransactionsRepository,
+    private walletsRepo: WalletsRepository,
+    private catRepo: CategoriesRepository,
+  ) {}
 
   private isCreditCard(walletType: string): boolean {
     const t = walletType.toLowerCase();
@@ -55,9 +61,7 @@ export class TransactionsService {
     const installmentAmount =
       installments > 1 ? data.amount / installments : data.amount;
 
-    const wallet = await this.prisma.wallet.findFirst({
-      where: { id: data.walletId, userId: userId },
-    });
+    const wallet = await this.walletsRepo.findByIdAndUser(data.walletId, userId);
 
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
@@ -65,58 +69,26 @@ export class TransactionsService {
 
     const walletIsCredit = this.isCreditCard(wallet.type);
 
-    // Handle Recurrence Creation
-    let newRecurrenceId = data.recurrenceId;
-    if (data.recurrenceId) {
-      // recurrenceId passed, just use it
-    }
-    // Note: The logic for creating a new recurrence from transaction data seems implicit in the original code
-    // but the DTO doesn't have 'isRecurring' or 'frequency' fields.
-    // Assuming for now we stick to the DTO properties.
-    // If 'isRecurring' was passed in 'any', it needs to be in DTO or handled separately.
-    // Looking at DTO: no 'isRecurring'. I will strictly follow DTO.
-    // If logic is missing in DTO, it's a bug in DTO or service design, but I must adhere to strict typing.
-    // However, I must not break existing logic if possible.
-    // The original code accessed 'isRecurring' from 'data'.
-    // If 'CreateTransactionDto' does NOT have 'isRecurring', then the previous code was reading undefined or property exists at runtime.
-    // I previously read 'CreateTransactionDto' and it did NOT have 'isRecurring'.
-    // I will add 'isRecurring' and 'frequency' to the DTO in a separate step if strictly needed,
-    // but for now I will assume they might be missing or I should fix DTO.
-    // Actually, to avoid breaking logic, I should likely update the DTO or these fields are not currently used/tested?
-    // Let's assume for this refactor I only include fields present in DTO.
-    // ... wait, if I remove logic that relied on 'any', I break features.
-    // I will verify DTO again. It did NOT have isRecurring. Use of 'any' hid this.
-    // I'll stick to DTO and if fields are missing, I'll update DTO in next step.
-    // For this step, I will comment out recurrence creation logic that relies on non-existent DTO fields
-    // or better, I will assume the DTO *should* have them and cast `data as any` locally ONLY for those fields to safely migrate
-    // while noting the DTO deficiency, OR better: I will update DTO first? No, sequential tools.
-    // I'll just rely on `data` as typed by DTO. If DTO is missing fields, typescript will complain.
-    // To make it compile, I will temporarily cast to `any` for the missing fields inside the method to match behavior,
-    // but the method signature will be strict.
-    // Actually, looking at the previous file content, `isRecurring` WAS used.
-    // I will cast `data` to `any` specifically for those missing fields to preserve logic until DTO is updated.
-
     const safeData = data as any; // Temporary to preserve behavior for fields missing in DTO
 
+    let newRecurrenceId = data.recurrenceId;
     if (safeData.isRecurring) {
-      const recurrence = await this.prisma.recurrence.create({
-        data: {
-          userId: userId,
-          walletId: data.walletId,
-          categoryId: data.categoryId,
-          amount: data.amount, // Recurrence is usually the full value per period, not split
-          type: data.type,
-          description: data.description,
-          frequency: safeData.frequency || 'MONTHLY', // Default to Monthly
-          startDate: new Date(data.date),
-          active: true,
-        },
+      const recurrence = await this.txRepo.createRecurrence({
+        userId,
+        walletId: data.walletId,
+        categoryId: data.categoryId,
+        amount: data.amount,
+        type: data.type,
+        description: data.description,
+        frequency: safeData.frequency || 'MONTHLY',
+        startDate: new Date(data.date),
+        active: true,
       });
       newRecurrenceId = recurrence.id;
     }
 
     if (installments > 1) {
-      const transactions = [];
+      const creates: Prisma.PrismaPromise<Transaction>[] = [];
       const baseDate = new Date(data.date);
 
       for (let i = 0; i < installments; i++) {
@@ -126,40 +98,35 @@ export class TransactionsService {
         const isInstallmentPaid = i === 0 && data.isPaid;
         const status = isInstallmentPaid ? 'Pago' : 'Pendente';
 
-        transactions.push(
-          this.prisma.transaction.create({
-            data: {
-              userId: userId,
-              walletId: data.walletId,
-              categoryId: data.categoryId,
-              amount: installmentAmount,
-              date: date,
-              description: data.description
-                ? `${data.description} (${i + 1}/${installments})`
-                : `Parcela ${i + 1}/${installments}`,
-              tags: [] as string[],
-              status: status,
-              type: data.type,
-              isPaid: isInstallmentPaid,
-              installmentNumber: i + 1,
-              totalInstallments: data.installments,
-              purchaseGroupId: purchaseGroupId,
-              recurrenceId: newRecurrenceId,
-            },
+        creates.push(
+          this.txRepo.create({
+            userId,
+            walletId: data.walletId,
+            categoryId: data.categoryId,
+            amount: installmentAmount,
+            date: date,
+            description: data.description
+              ? `${data.description} (${i + 1}/${installments})`
+              : `Parcela ${i + 1}/${installments}`,
+            tags: [] as string[],
+            status: status,
+            type: data.type,
+            isPaid: isInstallmentPaid,
+            installmentNumber: i + 1,
+            totalInstallments: data.installments,
+            purchaseGroupId: purchaseGroupId,
+            recurrenceId: newRecurrenceId,
           }),
         );
       }
 
-      const createdTransactions = await this.prisma.$transaction(transactions);
+      const createdTransactions = await this.txRepo.createMany(creates);
 
       for (const tx of createdTransactions) {
         if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
           const increment =
             tx.type === 'Receita' ? Number(tx.amount) : -Number(tx.amount);
-          await this.prisma.wallet.update({
-            where: { id: tx.walletId },
-            data: { balance: { increment } },
-          });
+          await this.walletsRepo.updateBalance(tx.walletId, increment);
         }
       }
       return createdTransactions;
@@ -171,26 +138,22 @@ export class TransactionsService {
     if (status === 'Pago') isPaid = true;
     if (isPaid && status !== 'Pago') status = 'Pago';
 
-    const transaction = await this.prisma.transaction.create({
-      data: {
-        userId: userId,
-        walletId: data.walletId,
-        categoryId: data.categoryId,
-        amount: data.amount,
-        date: new Date(data.date),
-        description: data.description,
-        tags: [] as string[],
-        status: status,
-        type: data.type,
-        isPaid: isPaid,
-        installmentNumber: data.installmentNumber,
-        totalInstallments: data.totalInstallments,
-        recurrenceId: newRecurrenceId,
-      },
+    const transaction = await this.txRepo.create({
+      userId,
+      walletId: data.walletId,
+      categoryId: data.categoryId,
+      amount: data.amount,
+      date: new Date(data.date),
+      description: data.description,
+      tags: [] as string[],
+      status: status,
+      type: data.type,
+      isPaid: isPaid,
+      installmentNumber: data.installmentNumber,
+      totalInstallments: data.totalInstallments,
+      recurrenceId: newRecurrenceId,
     });
 
-    // CC Despesa pending: consumes limit. CC Despesa paid: no effect (limit was already
-    // consumed when pending; reverting on payment releases it). Regular: only when paid.
     if (
       this.shouldAffectBalance(
         walletIsCredit,
@@ -202,10 +165,7 @@ export class TransactionsService {
         transaction.type === 'Receita'
           ? Number(transaction.amount)
           : -Number(transaction.amount);
-      await this.prisma.wallet.update({
-        where: { id: transaction.walletId },
-        data: { balance: { increment } },
-      });
+      await this.walletsRepo.updateBalance(transaction.walletId, increment);
     }
 
     return transaction;
@@ -225,27 +185,17 @@ export class TransactionsService {
       };
     }
 
-    return this.prisma.transaction.findMany({
-      where,
-      include: {
-        wallet: true,
-        category: true,
-      },
-      orderBy: {
-        date: 'desc',
-      },
+    return this.txRepo.findMany(where, {
+      include: { wallet: true, category: true },
+      orderBy: { date: 'desc' },
     });
   }
 
   async findOne(id: string, userId: string) {
-    // Only return if belongs to user
-    return this.prisma.transaction.findFirst({
-      where: { id, userId },
-      include: {
-        wallet: true,
-        category: true,
-      },
-    });
+    return this.txRepo.findFirst(
+      { id, userId },
+      { wallet: true, category: true },
+    );
   }
 
   async update(id: string, userId: string, data: UpdateTransactionDto) {
@@ -316,12 +266,12 @@ export class TransactionsService {
       transaction.wallet?.type ?? '',
     );
 
-    // Determine if the target wallet changes and whether it's a credit card
     let nextWalletIsCredit = prevWalletIsCredit;
     if (data.walletId && data.walletId !== transaction.walletId) {
-      const nextWallet = await this.prisma.wallet.findFirst({
-        where: { id: data.walletId, userId },
-      });
+      const nextWallet = await this.walletsRepo.findByIdAndUser(
+        data.walletId,
+        userId,
+      );
       nextWalletIsCredit = nextWallet
         ? this.isCreditCard(nextWallet.type)
         : false;
@@ -339,16 +289,10 @@ export class TransactionsService {
         transaction.type === 'Receita'
           ? -Number(transaction.amount)
           : Number(transaction.amount);
-      await this.prisma.wallet.update({
-        where: { id: transaction.walletId },
-        data: { balance: { increment: revert } },
-      });
+      await this.walletsRepo.updateBalance(transaction.walletId, revert);
     }
 
-    const updated = await this.prisma.transaction.update({
-      where: { id },
-      data: updateData,
-    });
+    const updated = await this.txRepo.update(id, updateData);
 
     // Apply the new balance contribution of the updated transaction.
     if (
@@ -362,10 +306,7 @@ export class TransactionsService {
         updated.type === 'Receita'
           ? Number(updated.amount)
           : -Number(updated.amount);
-      await this.prisma.wallet.update({
-        where: { id: updated.walletId },
-        data: { balance: { increment: apply } },
-      });
+      await this.walletsRepo.updateBalance(updated.walletId, apply);
     }
 
     return updated;
@@ -405,10 +346,7 @@ export class TransactionsService {
         transaction.type === 'Receita'
           ? -Number(transaction.amount)
           : Number(transaction.amount);
-      await this.prisma.wallet.update({
-        where: { id: transaction.walletId },
-        data: { balance: { increment: revert } },
-      });
+      await this.walletsRepo.updateBalance(transaction.walletId, revert);
     }
 
     const purchaseGroupId = crypto.randomUUID();
@@ -426,58 +364,51 @@ export class TransactionsService {
     // Update existing transaction as installment #1
     const firstIsPaid = isPaid;
     const firstStatus = status;
-    await this.prisma.transaction.update({
-      where: { id },
-      data: {
-        amount: installmentAmount,
-        date: baseDate,
-        description: `${baseDesc} (1/${installments})`,
-        wallet: { connect: { id: walletIdToUse } },
-        category: { connect: { id: categoryIdToUse } },
-        type: typeToUse,
-        isPaid: firstIsPaid,
-        status: firstStatus,
-        installmentNumber: 1,
-        totalInstallments: installments,
-        purchaseGroupId,
-      },
+    await this.txRepo.update(id, {
+      amount: installmentAmount,
+      date: baseDate,
+      description: `${baseDesc} (1/${installments})`,
+      wallet: { connect: { id: walletIdToUse } },
+      category: { connect: { id: categoryIdToUse } },
+      type: typeToUse,
+      isPaid: firstIsPaid,
+      status: firstStatus,
+      installmentNumber: 1,
+      totalInstallments: installments,
+      purchaseGroupId,
     });
 
     // Create installments #2 through N
     for (let i = 2; i <= installments; i++) {
       const date = new Date(baseDate);
       date.setMonth(baseDate.getMonth() + (i - 1));
-      await this.prisma.transaction.create({
-        data: {
-          userId,
-          walletId: walletIdToUse,
-          categoryId: categoryIdToUse,
-          amount: installmentAmount,
-          date,
-          description: `${baseDesc} (${i}/${installments})`,
-          tags: [],
-          status: 'Pendente',
-          type: typeToUse,
-          isPaid: false,
-          installmentNumber: i,
-          totalInstallments: installments,
-          purchaseGroupId,
-        },
+      await this.txRepo.create({
+        userId,
+        walletId: walletIdToUse,
+        categoryId: categoryIdToUse,
+        amount: installmentAmount,
+        date,
+        description: `${baseDesc} (${i}/${installments})`,
+        tags: [],
+        status: 'Pendente',
+        type: typeToUse,
+        isPaid: false,
+        installmentNumber: i,
+        totalInstallments: installments,
+        purchaseGroupId,
       });
     }
 
     // Apply balance for all installments in the new group
-    const newGroup = await this.prisma.transaction.findMany({
-      where: { purchaseGroupId, userId },
-    });
+    const newGroup = await this.txRepo.findByPurchaseGroup(
+      purchaseGroupId,
+      userId,
+    );
     for (const tx of newGroup) {
       if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
         const apply =
           tx.type === 'Receita' ? Number(tx.amount) : -Number(tx.amount);
-        await this.prisma.wallet.update({
-          where: { id: tx.walletId },
-          data: { balance: { increment: apply } },
-        });
+        await this.walletsRepo.updateBalance(tx.walletId, apply);
       }
     }
 
@@ -514,20 +445,15 @@ export class TransactionsService {
       if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
         const revert =
           tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
-        await this.prisma.wallet.update({
-          where: { id: tx.walletId },
-          data: { balance: { increment: revert } },
-        });
+        await this.walletsRepo.updateBalance(tx.walletId, revert);
       }
     }
 
     // Delete all sibling installments (keep only the one being edited)
-    await this.prisma.transaction.deleteMany({
-      where: {
-        purchaseGroupId: transaction.purchaseGroupId,
-        userId,
-        id: { not: id },
-      },
+    await this.txRepo.deleteMany({
+      purchaseGroupId: transaction.purchaseGroupId,
+      userId,
+      id: { not: id },
     });
 
     // Total amount: if user changed it use that, otherwise sum of all installments
@@ -543,29 +469,26 @@ export class TransactionsService {
         : stripSuffix(transaction.description ?? '');
 
     // Update the remaining transaction as a plain single transaction
-    const updated = await this.prisma.transaction.update({
-      where: { id },
-      data: {
-        amount: totalAmount,
-        date: data.date ? new Date(data.date) : transaction.date,
-        description: singleDesc,
-        ...(data.walletId && { wallet: { connect: { id: data.walletId } } }),
-        ...(data.categoryId && {
-          category: { connect: { id: data.categoryId } },
-        }),
-        ...(data.type && { type: data.type }),
-        isPaid,
-        status,
-        installmentNumber: null,
-        totalInstallments: null,
-        purchaseGroupId: null,
-      },
+    const updated = await this.txRepo.update(id, {
+      amount: totalAmount,
+      date: data.date ? new Date(data.date) : transaction.date,
+      description: singleDesc,
+      ...(data.walletId && { wallet: { connect: { id: data.walletId } } }),
+      ...(data.categoryId && {
+        category: { connect: { id: data.categoryId } },
+      }),
+      ...(data.type && { type: data.type }),
+      isPaid,
+      status,
+      installmentNumber: null,
+      totalInstallments: null,
+      purchaseGroupId: null,
     });
 
     // Apply balance for the new single transaction
     const walletIdToUse = data.walletId ?? transaction.walletId;
     const nextWallet = data.walletId
-      ? await this.prisma.wallet.findFirst({ where: { id: walletIdToUse } })
+      ? await this.walletsRepo.findByIdAndUser(walletIdToUse, userId)
       : null;
     const nextWalletIsCredit = nextWallet
       ? this.isCreditCard(nextWallet.type)
@@ -578,10 +501,7 @@ export class TransactionsService {
         updated.type === 'Receita'
           ? Number(updated.amount)
           : -Number(updated.amount);
-      await this.prisma.wallet.update({
-        where: { id: updated.walletId },
-        data: { balance: { increment: apply } },
-      });
+      await this.walletsRepo.updateBalance(updated.walletId, apply);
     }
 
     return updated;
@@ -602,10 +522,11 @@ export class TransactionsService {
     isPaid: boolean;
     status: string;
   }) {
-    const allInGroup = await this.prisma.transaction.findMany({
-      where: { purchaseGroupId: transaction.purchaseGroupId, userId },
-      orderBy: { installmentNumber: 'asc' },
-    });
+    const allInGroup = await this.txRepo.findByPurchaseGroup(
+      transaction.purchaseGroupId!,
+      userId,
+      { orderBy: { installmentNumber: 'asc' } },
+    );
 
     const currentCount = allInGroup.length;
     const newCount = data.totalInstallments ?? currentCount;
@@ -648,20 +569,15 @@ export class TransactionsService {
     for (const t of toRevert) {
       const revert =
         t.type === 'Receita' ? -Number(t.amount) : Number(t.amount);
-      await this.prisma.wallet.update({
-        where: { id: t.walletId },
-        data: { balance: { increment: revert } },
-      });
+      await this.walletsRepo.updateBalance(t.walletId, revert);
     }
 
     // Handle count decrease: delete excess installments from the end
     if (newCount < currentCount) {
-      await this.prisma.transaction.deleteMany({
-        where: {
-          purchaseGroupId: transaction.purchaseGroupId,
-          userId,
-          installmentNumber: { gt: newCount },
-        },
+      await this.txRepo.deleteMany({
+        purchaseGroupId: transaction.purchaseGroupId,
+        userId,
+        installmentNumber: { gt: newCount },
       });
     }
 
@@ -676,31 +592,30 @@ export class TransactionsService {
       for (let i = currentCount + 1; i <= newCount; i++) {
         const newDate = new Date(lastDate);
         newDate.setMonth(lastDate.getMonth() + (i - currentCount));
-        await this.prisma.transaction.create({
-          data: {
-            userId,
-            walletId: walletIdToUse,
-            categoryId: categoryIdToUse,
-            amount: newInstallmentAmount,
-            date: newDate,
-            description: `${newBaseDesc} (${i}/${newCount})`,
-            tags: [],
-            status: 'Pendente',
-            type: typeToUse,
-            isPaid: false,
-            installmentNumber: i,
-            totalInstallments: newCount,
-            purchaseGroupId: transaction.purchaseGroupId,
-          },
+        await this.txRepo.create({
+          userId,
+          walletId: walletIdToUse,
+          categoryId: categoryIdToUse,
+          amount: newInstallmentAmount,
+          date: newDate,
+          description: `${newBaseDesc} (${i}/${newCount})`,
+          tags: [],
+          status: 'Pendente',
+          type: typeToUse,
+          isPaid: false,
+          installmentNumber: i,
+          totalInstallments: newCount,
+          purchaseGroupId: transaction.purchaseGroupId,
         });
       }
     }
 
     // Update all remaining installments
-    const remaining = await this.prisma.transaction.findMany({
-      where: { purchaseGroupId: transaction.purchaseGroupId, userId },
-      orderBy: { installmentNumber: 'asc' },
-    });
+    const remaining = await this.txRepo.findByPurchaseGroup(
+      transaction.purchaseGroupId!,
+      userId,
+      { orderBy: { installmentNumber: 'asc' } },
+    );
 
     for (const tx of remaining) {
       const txData: Prisma.TransactionUpdateInput = {
@@ -720,25 +635,20 @@ export class TransactionsService {
         if (data.date) txData.date = new Date(data.date);
       }
 
-      await this.prisma.transaction.update({
-        where: { id: tx.id },
-        data: txData,
-      });
+      await this.txRepo.update(tx.id, txData);
     }
 
     // Re-apply the balance contribution of each updated installment.
-    const updatedGroup = await this.prisma.transaction.findMany({
-      where: { purchaseGroupId: transaction.purchaseGroupId, userId },
-    });
+    const updatedGroup = await this.txRepo.findByPurchaseGroup(
+      transaction.purchaseGroupId!,
+      userId,
+    );
     const toApply = updatedGroup.filter((t) =>
       this.shouldAffectBalance(groupWalletIsCredit, t.isPaid, t.type),
     );
     for (const t of toApply) {
       const apply = t.type === 'Receita' ? Number(t.amount) : -Number(t.amount);
-      await this.prisma.wallet.update({
-        where: { id: t.walletId },
-        data: { balance: { increment: apply } },
-      });
+      await this.walletsRepo.updateBalance(t.walletId, apply);
     }
 
     return this.findOne(id, userId);
@@ -754,24 +664,23 @@ export class TransactionsService {
 
     // If the transaction belongs to an installment group, delete the entire group.
     if (transaction.purchaseGroupId) {
-      const allInGroup = await this.prisma.transaction.findMany({
-        where: { purchaseGroupId: transaction.purchaseGroupId, userId },
-      });
+      const allInGroup = await this.txRepo.findByPurchaseGroup(
+        transaction.purchaseGroupId,
+        userId,
+      );
 
       // Revert balance for every installment that was affecting it.
       for (const tx of allInGroup) {
         if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
           const increment =
             tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
-          await this.prisma.wallet.update({
-            where: { id: tx.walletId },
-            data: { balance: { increment } },
-          });
+          await this.walletsRepo.updateBalance(tx.walletId, increment);
         }
       }
 
-      await this.prisma.transaction.deleteMany({
-        where: { purchaseGroupId: transaction.purchaseGroupId, userId },
+      await this.txRepo.deleteMany({
+        purchaseGroupId: transaction.purchaseGroupId,
+        userId,
       });
 
       return { deleted: allInGroup.length };
@@ -789,15 +698,10 @@ export class TransactionsService {
         transaction.type === 'Receita'
           ? -Number(transaction.amount)
           : Number(transaction.amount);
-      await this.prisma.wallet.update({
-        where: { id: transaction.walletId },
-        data: { balance: { increment } },
-      });
+      await this.walletsRepo.updateBalance(transaction.walletId, increment);
     }
 
-    return this.prisma.transaction.delete({
-      where: { id },
-    });
+    return this.txRepo.delete(id);
   }
 
   async getSummary(userId: string, month: number, year: number) {
@@ -805,24 +709,15 @@ export class TransactionsService {
     const endDate = new Date(year, month, 0);
     endDate.setHours(23, 59, 59, 999);
 
-    // Get Total Balance from Wallets
-    const wallets = await this.prisma.wallet.findMany({
-      where: { userId },
-    });
+    const wallets = await this.walletsRepo.findAllByUser(userId);
     const totalBalance = wallets.reduce(
       (acc, wallet) => acc + Number(wallet.balance),
       0,
     );
 
-    // Get Income and Expenses for the period
-    const transactions = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        date: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
+    const transactions = await this.txRepo.findMany({
+      userId,
+      date: { gte: startDate, lte: endDate },
     });
 
     const totalIncome = transactions
@@ -833,19 +728,13 @@ export class TransactionsService {
       .filter((t) => t.type === 'Despesa')
       .reduce((acc, t) => acc + Number(t.amount), 0);
 
-    return {
-      totalBalance,
-      totalIncome,
-      totalExpenses,
-    };
+    return { totalBalance, totalIncome, totalExpenses };
   }
 
   async importNubank(params: { userId: string; walletId: string; file: any }) {
     const { userId, walletId, file } = params;
 
-    const wallet = await this.prisma.wallet.findFirst({
-      where: { id: walletId, userId },
-    });
+    const wallet = await this.walletsRepo.findByIdAndUser(walletId, userId);
 
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
@@ -864,7 +753,7 @@ export class TransactionsService {
       throw new Error('Unsupported Nubank file type');
     }
 
-    const createdTransactions = [];
+    const createdTransactions: Transaction[] = [];
 
     for (const row of rows) {
       const categoryId = await this.resolveCategoryIdForNubank(
@@ -875,16 +764,14 @@ export class TransactionsService {
       const installmentInfo = this.parseInstallmentInfo(row.description);
 
       if (installmentInfo) {
-        const existingSeries = await this.prisma.transaction.findFirst({
-          where: {
-            userId,
-            walletId,
-            totalInstallments: installmentInfo.totalInstallments,
-            amount: row.amount,
-            description: {
-              contains: installmentInfo.baseDescription,
-              mode: 'insensitive',
-            },
+        const existingSeries = await this.txRepo.findFirst({
+          userId,
+          walletId,
+          totalInstallments: installmentInfo.totalInstallments,
+          amount: row.amount,
+          description: {
+            contains: installmentInfo.baseDescription,
+            mode: 'insensitive',
           },
         });
 
@@ -906,36 +793,32 @@ export class TransactionsService {
 
           const description = `${installmentInfo.baseDescription} - Parcela ${i}/${installmentInfo.totalInstallments}`;
 
-          const existingInstallment = await this.prisma.transaction.findFirst({
-            where: {
-              userId,
-              walletId,
-              installmentNumber: i,
-              totalInstallments: installmentInfo.totalInstallments,
-              description,
-            },
+          const existingInstallment = await this.txRepo.findFirst({
+            userId,
+            walletId,
+            installmentNumber: i,
+            totalInstallments: installmentInfo.totalInstallments,
+            description,
           });
 
           if (existingInstallment) {
             continue;
           }
 
-          const created = await this.prisma.transaction.create({
-            data: {
-              userId,
-              walletId,
-              categoryId,
-              amount: row.amount,
-              date: installmentDate,
-              description,
-              tags: [] as string[],
-              status: 'Pendente',
-              type: row.type,
-              isPaid: false,
-              installmentNumber: i,
-              totalInstallments: installmentInfo.totalInstallments,
-              purchaseGroupId,
-            },
+          const created = await this.txRepo.create({
+            userId,
+            walletId,
+            categoryId,
+            amount: row.amount,
+            date: installmentDate,
+            description,
+            tags: [] as string[],
+            status: 'Pendente',
+            type: row.type,
+            isPaid: false,
+            installmentNumber: i,
+            totalInstallments: installmentInfo.totalInstallments,
+            purchaseGroupId,
           });
 
           createdTransactions.push(created);
@@ -944,33 +827,29 @@ export class TransactionsService {
         const date = new Date(row.date);
         date.setHours(0, 0, 0, 0);
 
-        const existing = await this.prisma.transaction.findFirst({
-          where: {
-            userId,
-            walletId,
-            date,
-            amount: row.amount,
-            description: row.description,
-          },
+        const existing = await this.txRepo.findFirst({
+          userId,
+          walletId,
+          date,
+          amount: row.amount,
+          description: row.description,
         });
 
         if (existing) {
           continue;
         }
 
-        const created = await this.prisma.transaction.create({
-          data: {
-            userId,
-            walletId,
-            categoryId,
-            amount: row.amount,
-            date,
-            description: row.description,
-            tags: [] as string[],
-            status: 'Pendente',
-            type: row.type,
-            isPaid: false,
-          },
+        const created = await this.txRepo.create({
+          userId,
+          walletId,
+          categoryId,
+          amount: row.amount,
+          date,
+          description: row.description,
+          tags: [] as string[],
+          status: 'Pendente',
+          type: row.type,
+          isPaid: false,
         });
 
         createdTransactions.push(created);
@@ -985,26 +864,14 @@ export class TransactionsService {
     type: TransactionType,
     description: string,
   ): Promise<string> {
-    const categories = await this.prisma.category.findMany({
-      where: {
-        deletedAt: null,
-        type,
-        OR: [{ userId }, { userId: null, isDefault: true }],
-      },
-    });
+    const categories = await this.catRepo.findForNubank(userId, type);
 
     if (!categories.length) {
-      const created = await this.prisma.category.create({
-        data: {
-          userId,
-          name:
-            type === TransactionType.Receita
-              ? 'Outras receitas'
-              : 'Outras despesas',
-          type,
-          isDefault: false,
-        },
-      });
+      const created = await this.catRepo.createDefault(
+        userId,
+        type === TransactionType.Receita ? 'Outras receitas' : 'Outras despesas',
+        type,
+      );
       return created.id;
     }
 
