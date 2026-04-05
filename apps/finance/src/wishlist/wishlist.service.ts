@@ -158,11 +158,7 @@ export class WishlistService {
     });
   }
 
-  async removePriceEntry(
-    userId: string,
-    itemId: string,
-    entryId: string,
-  ) {
+  async removePriceEntry(userId: string, itemId: string, entryId: string) {
     // Verifica propriedade do item pai
     const item = await this.prisma.wishlistItem.findFirst({
       where: { id: itemId, deletedAt: null },
@@ -212,11 +208,7 @@ export class WishlistService {
     });
   }
 
-  async removePriorityEntry(
-    userId: string,
-    itemId: string,
-    entryId: string,
-  ) {
+  async removePriorityEntry(userId: string, itemId: string, entryId: string) {
     const item = await this.prisma.wishlistItem.findFirst({
       where: { id: itemId, deletedAt: null },
     });

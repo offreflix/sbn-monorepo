@@ -1,31 +1,42 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+} from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AuthProvider, useAuth } from './auth/AuthProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
 import { DashboardPage } from './pages/Dashboard'
 import { FinanceRemotePage } from './pages/FinanceRemote'
+import { LandingPage } from './pages/Landing'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 import { SettingsPage } from './pages/Settings'
 
-const Protected = ({ children }: { children: React.ReactNode }) => {
+const LoadingScreen = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="text-sm text-muted-foreground">Carregando sessão...</div>
+  </div>
+)
+
+const AuthLayout = () => {
   const { user, loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-sm text-muted-foreground">
-          Carregando sessão...
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <LoadingScreen />
+  if (user) return <Navigate to="/dashboard" replace />
 
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
+  return <Outlet />
+}
 
-  return <>{children}</>
+const AppLayout = () => {
+  const { user, loading } = useAuth()
+
+  if (loading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+
+  return <Outlet />
 }
 
 function App() {
@@ -34,34 +45,19 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <Protected>
-                  <DashboardPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/finance/*"
-              element={
-                <Protected>
-                  <FinanceRemotePage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <Protected>
-                  <SettingsPage />
-                </Protected>
-              }
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/" element={<LandingPage />} />
+            </Route>
+
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/finance/*" element={<FinanceRemotePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
         <Toaster richColors closeButton />
