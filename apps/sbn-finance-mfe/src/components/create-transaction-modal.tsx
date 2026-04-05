@@ -129,7 +129,9 @@ export function CreateTransactionModal({
         currency: "BRL",
         totalInstallments: data.totalInstallments
           ? parseInt(data.totalInstallments)
-          : undefined,
+          : isEditingGroup
+            ? 1
+            : undefined,
         // installmentNumber and installments are only relevant for creation
         installmentNumber:
           !initialData && data.installmentNumber

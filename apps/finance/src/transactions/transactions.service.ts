@@ -192,7 +192,11 @@ export class TransactionsService {
     // CC Despesa pending: consumes limit. CC Despesa paid: no effect (limit was already
     // consumed when pending; reverting on payment releases it). Regular: only when paid.
     if (
-      this.shouldAffectBalance(walletIsCredit, transaction.isPaid, transaction.type)
+      this.shouldAffectBalance(
+        walletIsCredit,
+        transaction.isPaid,
+        transaction.type,
+      )
     ) {
       const increment =
         transaction.type === 'Receita'
@@ -279,14 +283,28 @@ export class TransactionsService {
       });
     }
 
+    // --- Convert single transaction to installment group ---
+    if (data.installments && data.installments > 1) {
+      return this.convertToInstallmentGroup({
+        id,
+        userId,
+        data,
+        transaction,
+        isPaid,
+        status,
+      });
+    }
+
     // --- Single transaction update ---
     const updateData: Prisma.TransactionUpdateInput = {};
     if (data.amount !== undefined) updateData.amount = data.amount;
     if (data.date !== undefined) updateData.date = new Date(data.date);
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.type !== undefined) updateData.type = data.type;
     if (data.walletId) updateData.wallet = { connect: { id: data.walletId } };
-    if (data.categoryId) updateData.category = { connect: { id: data.categoryId } };
+    if (data.categoryId)
+      updateData.category = { connect: { id: data.categoryId } };
     if (data.installmentNumber !== undefined)
       updateData.installmentNumber = data.installmentNumber;
     if (data.totalInstallments !== undefined)
@@ -294,7 +312,9 @@ export class TransactionsService {
     updateData.isPaid = isPaid;
     updateData.status = status;
 
-    const prevWalletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
+    const prevWalletIsCredit = this.isCreditCard(
+      transaction.wallet?.type ?? '',
+    );
 
     // Determine if the target wallet changes and whether it's a credit card
     let nextWalletIsCredit = prevWalletIsCredit;
@@ -302,12 +322,18 @@ export class TransactionsService {
       const nextWallet = await this.prisma.wallet.findFirst({
         where: { id: data.walletId, userId },
       });
-      nextWalletIsCredit = nextWallet ? this.isCreditCard(nextWallet.type) : false;
+      nextWalletIsCredit = nextWallet
+        ? this.isCreditCard(nextWallet.type)
+        : false;
     }
 
     // Revert the previous balance contribution of this transaction.
     if (
-      this.shouldAffectBalance(prevWalletIsCredit, transaction.isPaid, transaction.type as string)
+      this.shouldAffectBalance(
+        prevWalletIsCredit,
+        transaction.isPaid,
+        transaction.type as string,
+      )
     ) {
       const revert =
         transaction.type === 'Receita'
@@ -326,7 +352,227 @@ export class TransactionsService {
 
     // Apply the new balance contribution of the updated transaction.
     if (
-      this.shouldAffectBalance(nextWalletIsCredit, updated.isPaid, updated.type as string)
+      this.shouldAffectBalance(
+        nextWalletIsCredit,
+        updated.isPaid,
+        updated.type as string,
+      )
+    ) {
+      const apply =
+        updated.type === 'Receita'
+          ? Number(updated.amount)
+          : -Number(updated.amount);
+      await this.prisma.wallet.update({
+        where: { id: updated.walletId },
+        data: { balance: { increment: apply } },
+      });
+    }
+
+    return updated;
+  }
+
+  private async convertToInstallmentGroup({
+    id,
+    userId,
+    data,
+    transaction,
+    isPaid,
+    status,
+  }: {
+    id: string;
+    userId: string;
+    data: UpdateTransactionDto;
+    transaction: Awaited<ReturnType<typeof this.findOne>>;
+    isPaid: boolean;
+    status: string;
+  }) {
+    const installments = data.installments!;
+    const totalAmount =
+      data.amount !== undefined ? data.amount : Number(transaction.amount);
+    const installmentAmount = totalAmount / installments;
+
+    const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
+
+    // Revert the original transaction's balance contribution
+    if (
+      this.shouldAffectBalance(
+        walletIsCredit,
+        transaction.isPaid,
+        transaction.type as string,
+      )
+    ) {
+      const revert =
+        transaction.type === 'Receita'
+          ? -Number(transaction.amount)
+          : Number(transaction.amount);
+      await this.prisma.wallet.update({
+        where: { id: transaction.walletId },
+        data: { balance: { increment: revert } },
+      });
+    }
+
+    const purchaseGroupId = crypto.randomUUID();
+    const baseDate = new Date(data.date ?? transaction.date);
+    const walletIdToUse = data.walletId ?? transaction.walletId;
+    const categoryIdToUse = data.categoryId ?? transaction.categoryId;
+    const typeToUse = data.type ?? (transaction.type as string);
+    const stripSuffix = (desc: string) =>
+      (desc ?? '').replace(/\s*\(\d+\/\d+\)$/, '').trim();
+    const baseDesc =
+      data.description !== undefined
+        ? stripSuffix(data.description)
+        : stripSuffix(transaction.description ?? '');
+
+    // Update existing transaction as installment #1
+    const firstIsPaid = isPaid;
+    const firstStatus = status;
+    await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        amount: installmentAmount,
+        date: baseDate,
+        description: `${baseDesc} (1/${installments})`,
+        wallet: { connect: { id: walletIdToUse } },
+        category: { connect: { id: categoryIdToUse } },
+        type: typeToUse,
+        isPaid: firstIsPaid,
+        status: firstStatus,
+        installmentNumber: 1,
+        totalInstallments: installments,
+        purchaseGroupId,
+      },
+    });
+
+    // Create installments #2 through N
+    for (let i = 2; i <= installments; i++) {
+      const date = new Date(baseDate);
+      date.setMonth(baseDate.getMonth() + (i - 1));
+      await this.prisma.transaction.create({
+        data: {
+          userId,
+          walletId: walletIdToUse,
+          categoryId: categoryIdToUse,
+          amount: installmentAmount,
+          date,
+          description: `${baseDesc} (${i}/${installments})`,
+          tags: [],
+          status: 'Pendente',
+          type: typeToUse,
+          isPaid: false,
+          installmentNumber: i,
+          totalInstallments: installments,
+          purchaseGroupId,
+        },
+      });
+    }
+
+    // Apply balance for all installments in the new group
+    const newGroup = await this.prisma.transaction.findMany({
+      where: { purchaseGroupId, userId },
+    });
+    for (const tx of newGroup) {
+      if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
+        const apply =
+          tx.type === 'Receita' ? Number(tx.amount) : -Number(tx.amount);
+        await this.prisma.wallet.update({
+          where: { id: tx.walletId },
+          data: { balance: { increment: apply } },
+        });
+      }
+    }
+
+    return this.findOne(id, userId);
+  }
+
+  private async convertGroupToSingle({
+    id,
+    userId,
+    data,
+    transaction,
+    allInGroup,
+    isPaid,
+    status,
+  }: {
+    id: string;
+    userId: string;
+    data: UpdateTransactionDto;
+    transaction: Awaited<ReturnType<typeof this.findOne>>;
+    allInGroup: {
+      id: string;
+      amount: any;
+      isPaid: boolean;
+      type: string;
+      walletId: string;
+    }[];
+    isPaid: boolean;
+    status: string;
+  }) {
+    const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
+
+    // Revert balance for every installment in the group
+    for (const tx of allInGroup) {
+      if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
+        const revert =
+          tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
+        await this.prisma.wallet.update({
+          where: { id: tx.walletId },
+          data: { balance: { increment: revert } },
+        });
+      }
+    }
+
+    // Delete all sibling installments (keep only the one being edited)
+    await this.prisma.transaction.deleteMany({
+      where: {
+        purchaseGroupId: transaction.purchaseGroupId,
+        userId,
+        id: { not: id },
+      },
+    });
+
+    // Total amount: if user changed it use that, otherwise sum of all installments
+    const currentTotalAmount = Number(allInGroup[0].amount) * allInGroup.length;
+    const totalAmount =
+      data.amount !== undefined ? data.amount : currentTotalAmount;
+
+    const stripSuffix = (desc: string) =>
+      (desc ?? '').replace(/\s*\(\d+\/\d+\)$/, '').trim();
+    const singleDesc =
+      data.description !== undefined
+        ? stripSuffix(data.description)
+        : stripSuffix(transaction.description ?? '');
+
+    // Update the remaining transaction as a plain single transaction
+    const updated = await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        amount: totalAmount,
+        date: data.date ? new Date(data.date) : transaction.date,
+        description: singleDesc,
+        ...(data.walletId && { wallet: { connect: { id: data.walletId } } }),
+        ...(data.categoryId && {
+          category: { connect: { id: data.categoryId } },
+        }),
+        ...(data.type && { type: data.type }),
+        isPaid,
+        status,
+        installmentNumber: null,
+        totalInstallments: null,
+        purchaseGroupId: null,
+      },
+    });
+
+    // Apply balance for the new single transaction
+    const walletIdToUse = data.walletId ?? transaction.walletId;
+    const nextWallet = data.walletId
+      ? await this.prisma.wallet.findFirst({ where: { id: walletIdToUse } })
+      : null;
+    const nextWalletIsCredit = nextWallet
+      ? this.isCreditCard(nextWallet.type)
+      : walletIsCredit;
+
+    if (
+      this.shouldAffectBalance(nextWalletIsCredit, updated.isPaid, updated.type)
     ) {
       const apply =
         updated.type === 'Receita'
@@ -364,6 +610,19 @@ export class TransactionsService {
     const currentCount = allInGroup.length;
     const newCount = data.totalInstallments ?? currentCount;
 
+    // --- Convert installment group back to single transaction ---
+    if (newCount === 1) {
+      return this.convertGroupToSingle({
+        id,
+        userId,
+        data,
+        transaction,
+        allInGroup,
+        isPaid,
+        status,
+      });
+    }
+
     // Amount is treated as the NEW TOTAL; divide by newCount to get per-installment
     const currentTotalAmount = Number(allInGroup[0].amount) * currentCount;
     const newTotalAmount =
@@ -378,7 +637,9 @@ export class TransactionsService {
         ? stripSuffix(data.description)
         : stripSuffix(transaction.description ?? '');
 
-    const groupWalletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
+    const groupWalletIsCredit = this.isCreditCard(
+      transaction.wallet?.type ?? '',
+    );
 
     // Revert the balance contribution of each installment in the group.
     const toRevert = allInGroup.filter((t) =>
@@ -448,7 +709,8 @@ export class TransactionsService {
         totalInstallments: newCount,
       };
       if (data.walletId) txData.wallet = { connect: { id: data.walletId } };
-      if (data.categoryId) txData.category = { connect: { id: data.categoryId } };
+      if (data.categoryId)
+        txData.category = { connect: { id: data.categoryId } };
       if (data.type) txData.type = data.type;
 
       // isPaid, status and date only change for the specific transaction being edited
@@ -458,7 +720,10 @@ export class TransactionsService {
         if (data.date) txData.date = new Date(data.date);
       }
 
-      await this.prisma.transaction.update({ where: { id: tx.id }, data: txData });
+      await this.prisma.transaction.update({
+        where: { id: tx.id },
+        data: txData,
+      });
     }
 
     // Re-apply the balance contribution of each updated installment.
@@ -469,8 +734,7 @@ export class TransactionsService {
       this.shouldAffectBalance(groupWalletIsCredit, t.isPaid, t.type),
     );
     for (const t of toApply) {
-      const apply =
-        t.type === 'Receita' ? Number(t.amount) : -Number(t.amount);
+      const apply = t.type === 'Receita' ? Number(t.amount) : -Number(t.amount);
       await this.prisma.wallet.update({
         where: { id: t.walletId },
         data: { balance: { increment: apply } },
@@ -489,7 +753,13 @@ export class TransactionsService {
     const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
 
     // Revert balance on delete only if this transaction was affecting the balance.
-    if (this.shouldAffectBalance(walletIsCredit, transaction.isPaid, transaction.type as string)) {
+    if (
+      this.shouldAffectBalance(
+        walletIsCredit,
+        transaction.isPaid,
+        transaction.type as string,
+      )
+    ) {
       const increment =
         transaction.type === 'Receita'
           ? -Number(transaction.amount)
