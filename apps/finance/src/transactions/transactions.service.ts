@@ -9,6 +9,11 @@ import * as path from 'path';
 import { TransactionsRepository } from './transactions.repository';
 import { WalletsRepository } from '../wallets/wallets.repository';
 import { CategoriesRepository } from '../categories/categories.repository';
+import { BalanceService } from './balance.service';
+import {
+  InstallmentService,
+  InstallmentTransaction,
+} from './installment.service';
 
 declare const require: any;
 
@@ -25,34 +30,9 @@ export class TransactionsService {
     private txRepo: TransactionsRepository,
     private walletsRepo: WalletsRepository,
     private catRepo: CategoriesRepository,
+    private balanceService: BalanceService,
+    private installmentService: InstallmentService,
   ) {}
-
-  private isCreditCard(walletType: string): boolean {
-    const t = walletType.toLowerCase();
-    return (
-      t.includes('crédito') || t.includes('credito') || t.includes('credit')
-    );
-  }
-
-  /**
-   * Determines whether a transaction should affect the wallet balance.
-   *
-   * Credit card Despesas: only PENDING transactions consume the limit.
-   *   - Pending  → affects balance (limit consumed)
-   *   - Paid     → does NOT affect balance (limit is released by reverting the pending effect)
-   *
-   * All other cases (regular wallet or CC Receita): only PAID transactions affect balance.
-   */
-  private shouldAffectBalance(
-    walletIsCredit: boolean,
-    isPaid: boolean,
-    type: string,
-  ): boolean {
-    if (walletIsCredit && type === 'Despesa') {
-      return !isPaid; // pending CC purchase consumes the limit
-    }
-    return isPaid; // regular wallet or CC receita: only paid state affects balance
-  }
 
   async create(userId: string, data: CreateTransactionDto) {
     const installments =
@@ -61,13 +41,16 @@ export class TransactionsService {
     const installmentAmount =
       installments > 1 ? data.amount / installments : data.amount;
 
-    const wallet = await this.walletsRepo.findByIdAndUser(data.walletId, userId);
+    const wallet = await this.walletsRepo.findByIdAndUser(
+      data.walletId,
+      userId,
+    );
 
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
     }
 
-    const walletIsCredit = this.isCreditCard(wallet.type);
+    const walletIsCredit = this.balanceService.isCreditCard(wallet.type);
 
     const safeData = data as any; // Temporary to preserve behavior for fields missing in DTO
 
@@ -123,11 +106,15 @@ export class TransactionsService {
       const createdTransactions = await this.txRepo.createMany(creates);
 
       for (const tx of createdTransactions) {
-        if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
-          const increment =
-            tx.type === 'Receita' ? Number(tx.amount) : -Number(tx.amount);
-          await this.walletsRepo.updateBalance(tx.walletId, increment);
-        }
+        await this.balanceService.applyBalance(
+          {
+            walletId: tx.walletId,
+            isPaid: tx.isPaid,
+            type: tx.type,
+            amount: tx.amount,
+          },
+          walletIsCredit,
+        );
       }
       return createdTransactions;
     }
@@ -154,19 +141,15 @@ export class TransactionsService {
       recurrenceId: newRecurrenceId,
     });
 
-    if (
-      this.shouldAffectBalance(
-        walletIsCredit,
-        transaction.isPaid,
-        transaction.type,
-      )
-    ) {
-      const increment =
-        transaction.type === 'Receita'
-          ? Number(transaction.amount)
-          : -Number(transaction.amount);
-      await this.walletsRepo.updateBalance(transaction.walletId, increment);
-    }
+    await this.balanceService.applyBalance(
+      {
+        walletId: transaction.walletId,
+        isPaid: transaction.isPaid,
+        type: transaction.type,
+        amount: transaction.amount,
+      },
+      walletIsCredit,
+    );
 
     return transaction;
   }
@@ -221,25 +204,16 @@ export class TransactionsService {
       isPaid = false;
     }
 
-    // --- Installment group update ---
-    if (transaction.purchaseGroupId) {
-      return this.updateInstallmentGroup({
+    // Delegate to InstallmentService if this involves installments
+    if (
+      transaction.purchaseGroupId ||
+      (data.installments && data.installments > 1)
+    ) {
+      return this.installmentService.resolveUpdate({
         id,
         userId,
         data,
-        transaction,
-        isPaid,
-        status,
-      });
-    }
-
-    // --- Convert single transaction to installment group ---
-    if (data.installments && data.installments > 1) {
-      return this.convertToInstallmentGroup({
-        id,
-        userId,
-        data,
-        transaction,
+        transaction: transaction as InstallmentTransaction,
         isPaid,
         status,
       });
@@ -262,396 +236,42 @@ export class TransactionsService {
     updateData.isPaid = isPaid;
     updateData.status = status;
 
-    const prevWalletIsCredit = this.isCreditCard(
+    const prevWalletIsCredit = this.balanceService.isCreditCard(
       transaction.wallet?.type ?? '',
     );
 
     let nextWalletIsCredit = prevWalletIsCredit;
     if (data.walletId && data.walletId !== transaction.walletId) {
-      const nextWallet = await this.walletsRepo.findByIdAndUser(
+      nextWalletIsCredit = await this.balanceService.getWalletIsCredit(
         data.walletId,
         userId,
+        false,
       );
-      nextWalletIsCredit = nextWallet
-        ? this.isCreditCard(nextWallet.type)
-        : false;
     }
 
-    // Revert the previous balance contribution of this transaction.
-    if (
-      this.shouldAffectBalance(
-        prevWalletIsCredit,
-        transaction.isPaid,
-        transaction.type as string,
-      )
-    ) {
-      const revert =
-        transaction.type === 'Receita'
-          ? -Number(transaction.amount)
-          : Number(transaction.amount);
-      await this.walletsRepo.updateBalance(transaction.walletId, revert);
-    }
+    await this.balanceService.revertBalance(
+      {
+        walletId: transaction.walletId,
+        isPaid: transaction.isPaid,
+        type: transaction.type as string,
+        amount: transaction.amount,
+      },
+      prevWalletIsCredit,
+    );
 
     const updated = await this.txRepo.update(id, updateData);
 
-    // Apply the new balance contribution of the updated transaction.
-    if (
-      this.shouldAffectBalance(
-        nextWalletIsCredit,
-        updated.isPaid,
-        updated.type as string,
-      )
-    ) {
-      const apply =
-        updated.type === 'Receita'
-          ? Number(updated.amount)
-          : -Number(updated.amount);
-      await this.walletsRepo.updateBalance(updated.walletId, apply);
-    }
+    await this.balanceService.applyBalance(
+      {
+        walletId: updated.walletId,
+        isPaid: updated.isPaid,
+        type: updated.type as string,
+        amount: updated.amount,
+      },
+      nextWalletIsCredit,
+    );
 
     return updated;
-  }
-
-  private async convertToInstallmentGroup({
-    id,
-    userId,
-    data,
-    transaction,
-    isPaid,
-    status,
-  }: {
-    id: string;
-    userId: string;
-    data: UpdateTransactionDto;
-    transaction: Awaited<ReturnType<typeof this.findOne>>;
-    isPaid: boolean;
-    status: string;
-  }) {
-    const installments = data.installments!;
-    const totalAmount =
-      data.amount !== undefined ? data.amount : Number(transaction.amount);
-    const installmentAmount = totalAmount / installments;
-
-    const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
-
-    // Revert the original transaction's balance contribution
-    if (
-      this.shouldAffectBalance(
-        walletIsCredit,
-        transaction.isPaid,
-        transaction.type as string,
-      )
-    ) {
-      const revert =
-        transaction.type === 'Receita'
-          ? -Number(transaction.amount)
-          : Number(transaction.amount);
-      await this.walletsRepo.updateBalance(transaction.walletId, revert);
-    }
-
-    const purchaseGroupId = crypto.randomUUID();
-    const baseDate = new Date(data.date ?? transaction.date);
-    const walletIdToUse = data.walletId ?? transaction.walletId;
-    const categoryIdToUse = data.categoryId ?? transaction.categoryId;
-    const typeToUse = data.type ?? (transaction.type as string);
-    const stripSuffix = (desc: string) =>
-      (desc ?? '').replace(/\s*\(\d+\/\d+\)$/, '').trim();
-    const baseDesc =
-      data.description !== undefined
-        ? stripSuffix(data.description)
-        : stripSuffix(transaction.description ?? '');
-
-    // Update existing transaction as installment #1
-    const firstIsPaid = isPaid;
-    const firstStatus = status;
-    await this.txRepo.update(id, {
-      amount: installmentAmount,
-      date: baseDate,
-      description: `${baseDesc} (1/${installments})`,
-      wallet: { connect: { id: walletIdToUse } },
-      category: { connect: { id: categoryIdToUse } },
-      type: typeToUse,
-      isPaid: firstIsPaid,
-      status: firstStatus,
-      installmentNumber: 1,
-      totalInstallments: installments,
-      purchaseGroupId,
-    });
-
-    // Create installments #2 through N
-    for (let i = 2; i <= installments; i++) {
-      const date = new Date(baseDate);
-      date.setMonth(baseDate.getMonth() + (i - 1));
-      await this.txRepo.create({
-        userId,
-        walletId: walletIdToUse,
-        categoryId: categoryIdToUse,
-        amount: installmentAmount,
-        date,
-        description: `${baseDesc} (${i}/${installments})`,
-        tags: [],
-        status: 'Pendente',
-        type: typeToUse,
-        isPaid: false,
-        installmentNumber: i,
-        totalInstallments: installments,
-        purchaseGroupId,
-      });
-    }
-
-    // Apply balance for all installments in the new group
-    const newGroup = await this.txRepo.findByPurchaseGroup(
-      purchaseGroupId,
-      userId,
-    );
-    for (const tx of newGroup) {
-      if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
-        const apply =
-          tx.type === 'Receita' ? Number(tx.amount) : -Number(tx.amount);
-        await this.walletsRepo.updateBalance(tx.walletId, apply);
-      }
-    }
-
-    return this.findOne(id, userId);
-  }
-
-  private async convertGroupToSingle({
-    id,
-    userId,
-    data,
-    transaction,
-    allInGroup,
-    isPaid,
-    status,
-  }: {
-    id: string;
-    userId: string;
-    data: UpdateTransactionDto;
-    transaction: Awaited<ReturnType<typeof this.findOne>>;
-    allInGroup: {
-      id: string;
-      amount: any;
-      isPaid: boolean;
-      type: string;
-      walletId: string;
-    }[];
-    isPaid: boolean;
-    status: string;
-  }) {
-    const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
-
-    // Revert balance for every installment in the group
-    for (const tx of allInGroup) {
-      if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
-        const revert =
-          tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
-        await this.walletsRepo.updateBalance(tx.walletId, revert);
-      }
-    }
-
-    // Delete all sibling installments (keep only the one being edited)
-    await this.txRepo.deleteMany({
-      purchaseGroupId: transaction.purchaseGroupId,
-      userId,
-      id: { not: id },
-    });
-
-    // Total amount: if user changed it use that, otherwise sum of all installments
-    const currentTotalAmount = Number(allInGroup[0].amount) * allInGroup.length;
-    const totalAmount =
-      data.amount !== undefined ? data.amount : currentTotalAmount;
-
-    const stripSuffix = (desc: string) =>
-      (desc ?? '').replace(/\s*\(\d+\/\d+\)$/, '').trim();
-    const singleDesc =
-      data.description !== undefined
-        ? stripSuffix(data.description)
-        : stripSuffix(transaction.description ?? '');
-
-    // Update the remaining transaction as a plain single transaction
-    const updated = await this.txRepo.update(id, {
-      amount: totalAmount,
-      date: data.date ? new Date(data.date) : transaction.date,
-      description: singleDesc,
-      ...(data.walletId && { wallet: { connect: { id: data.walletId } } }),
-      ...(data.categoryId && {
-        category: { connect: { id: data.categoryId } },
-      }),
-      ...(data.type && { type: data.type }),
-      isPaid,
-      status,
-      installmentNumber: null,
-      totalInstallments: null,
-      purchaseGroupId: null,
-    });
-
-    // Apply balance for the new single transaction
-    const walletIdToUse = data.walletId ?? transaction.walletId;
-    const nextWallet = data.walletId
-      ? await this.walletsRepo.findByIdAndUser(walletIdToUse, userId)
-      : null;
-    const nextWalletIsCredit = nextWallet
-      ? this.isCreditCard(nextWallet.type)
-      : walletIsCredit;
-
-    if (
-      this.shouldAffectBalance(nextWalletIsCredit, updated.isPaid, updated.type)
-    ) {
-      const apply =
-        updated.type === 'Receita'
-          ? Number(updated.amount)
-          : -Number(updated.amount);
-      await this.walletsRepo.updateBalance(updated.walletId, apply);
-    }
-
-    return updated;
-  }
-
-  private async updateInstallmentGroup({
-    id,
-    userId,
-    data,
-    transaction,
-    isPaid,
-    status,
-  }: {
-    id: string;
-    userId: string;
-    data: UpdateTransactionDto;
-    transaction: Awaited<ReturnType<typeof this.findOne>>;
-    isPaid: boolean;
-    status: string;
-  }) {
-    const allInGroup = await this.txRepo.findByPurchaseGroup(
-      transaction.purchaseGroupId!,
-      userId,
-      { orderBy: { installmentNumber: 'asc' } },
-    );
-
-    const currentCount = allInGroup.length;
-    const newCount = data.totalInstallments ?? currentCount;
-
-    // --- Convert installment group back to single transaction ---
-    if (newCount === 1) {
-      return this.convertGroupToSingle({
-        id,
-        userId,
-        data,
-        transaction,
-        allInGroup,
-        isPaid,
-        status,
-      });
-    }
-
-    // Amount is treated as the NEW TOTAL; divide by newCount to get per-installment
-    const currentTotalAmount = Number(allInGroup[0].amount) * currentCount;
-    const newTotalAmount =
-      data.amount !== undefined ? data.amount : currentTotalAmount;
-    const newInstallmentAmount = newTotalAmount / newCount;
-
-    // Strip "(N/M)" suffix to get base description
-    const stripSuffix = (desc: string) =>
-      (desc ?? '').replace(/\s*\(\d+\/\d+\)$/, '').trim();
-    const newBaseDesc =
-      data.description !== undefined
-        ? stripSuffix(data.description)
-        : stripSuffix(transaction.description ?? '');
-
-    const groupWalletIsCredit = this.isCreditCard(
-      transaction.wallet?.type ?? '',
-    );
-
-    // Revert the balance contribution of each installment in the group.
-    const toRevert = allInGroup.filter((t) =>
-      this.shouldAffectBalance(groupWalletIsCredit, t.isPaid, t.type),
-    );
-    for (const t of toRevert) {
-      const revert =
-        t.type === 'Receita' ? -Number(t.amount) : Number(t.amount);
-      await this.walletsRepo.updateBalance(t.walletId, revert);
-    }
-
-    // Handle count decrease: delete excess installments from the end
-    if (newCount < currentCount) {
-      await this.txRepo.deleteMany({
-        purchaseGroupId: transaction.purchaseGroupId,
-        userId,
-        installmentNumber: { gt: newCount },
-      });
-    }
-
-    // Handle count increase: create new installments
-    if (newCount > currentCount) {
-      const lastTx = allInGroup[allInGroup.length - 1];
-      const lastDate = new Date(lastTx.date);
-      const walletIdToUse = data.walletId ?? lastTx.walletId;
-      const categoryIdToUse = data.categoryId ?? lastTx.categoryId;
-      const typeToUse = data.type ?? lastTx.type;
-
-      for (let i = currentCount + 1; i <= newCount; i++) {
-        const newDate = new Date(lastDate);
-        newDate.setMonth(lastDate.getMonth() + (i - currentCount));
-        await this.txRepo.create({
-          userId,
-          walletId: walletIdToUse,
-          categoryId: categoryIdToUse,
-          amount: newInstallmentAmount,
-          date: newDate,
-          description: `${newBaseDesc} (${i}/${newCount})`,
-          tags: [],
-          status: 'Pendente',
-          type: typeToUse,
-          isPaid: false,
-          installmentNumber: i,
-          totalInstallments: newCount,
-          purchaseGroupId: transaction.purchaseGroupId,
-        });
-      }
-    }
-
-    // Update all remaining installments
-    const remaining = await this.txRepo.findByPurchaseGroup(
-      transaction.purchaseGroupId!,
-      userId,
-      { orderBy: { installmentNumber: 'asc' } },
-    );
-
-    for (const tx of remaining) {
-      const txData: Prisma.TransactionUpdateInput = {
-        amount: newInstallmentAmount,
-        description: `${newBaseDesc} (${tx.installmentNumber}/${newCount})`,
-        totalInstallments: newCount,
-      };
-      if (data.walletId) txData.wallet = { connect: { id: data.walletId } };
-      if (data.categoryId)
-        txData.category = { connect: { id: data.categoryId } };
-      if (data.type) txData.type = data.type;
-
-      // isPaid, status and date only change for the specific transaction being edited
-      if (tx.id === id) {
-        txData.isPaid = isPaid;
-        txData.status = status;
-        if (data.date) txData.date = new Date(data.date);
-      }
-
-      await this.txRepo.update(tx.id, txData);
-    }
-
-    // Re-apply the balance contribution of each updated installment.
-    const updatedGroup = await this.txRepo.findByPurchaseGroup(
-      transaction.purchaseGroupId!,
-      userId,
-    );
-    const toApply = updatedGroup.filter((t) =>
-      this.shouldAffectBalance(groupWalletIsCredit, t.isPaid, t.type),
-    );
-    for (const t of toApply) {
-      const apply = t.type === 'Receita' ? Number(t.amount) : -Number(t.amount);
-      await this.walletsRepo.updateBalance(t.walletId, apply);
-    }
-
-    return this.findOne(id, userId);
   }
 
   async remove(id: string, userId: string) {
@@ -660,22 +280,26 @@ export class TransactionsService {
       throw new Error('Transaction not found or denied access');
     }
 
-    const walletIsCredit = this.isCreditCard(transaction.wallet?.type ?? '');
+    const walletIsCredit = this.balanceService.isCreditCard(
+      transaction.wallet?.type ?? '',
+    );
 
-    // If the transaction belongs to an installment group, delete the entire group.
     if (transaction.purchaseGroupId) {
       const allInGroup = await this.txRepo.findByPurchaseGroup(
         transaction.purchaseGroupId,
         userId,
       );
 
-      // Revert balance for every installment that was affecting it.
       for (const tx of allInGroup) {
-        if (this.shouldAffectBalance(walletIsCredit, tx.isPaid, tx.type)) {
-          const increment =
-            tx.type === 'Receita' ? -Number(tx.amount) : Number(tx.amount);
-          await this.walletsRepo.updateBalance(tx.walletId, increment);
-        }
+        await this.balanceService.revertBalance(
+          {
+            walletId: tx.walletId,
+            isPaid: tx.isPaid,
+            type: tx.type,
+            amount: tx.amount,
+          },
+          walletIsCredit,
+        );
       }
 
       await this.txRepo.deleteMany({
@@ -686,20 +310,15 @@ export class TransactionsService {
       return { deleted: allInGroup.length };
     }
 
-    // Revert balance on delete only if this transaction was affecting the balance.
-    if (
-      this.shouldAffectBalance(
-        walletIsCredit,
-        transaction.isPaid,
-        transaction.type as string,
-      )
-    ) {
-      const increment =
-        transaction.type === 'Receita'
-          ? -Number(transaction.amount)
-          : Number(transaction.amount);
-      await this.walletsRepo.updateBalance(transaction.walletId, increment);
-    }
+    await this.balanceService.revertBalance(
+      {
+        walletId: transaction.walletId,
+        isPaid: transaction.isPaid,
+        type: transaction.type as string,
+        amount: transaction.amount,
+      },
+      walletIsCredit,
+    );
 
     return this.txRepo.delete(id);
   }
@@ -869,7 +488,9 @@ export class TransactionsService {
     if (!categories.length) {
       const created = await this.catRepo.createDefault(
         userId,
-        type === TransactionType.Receita ? 'Outras receitas' : 'Outras despesas',
+        type === TransactionType.Receita
+          ? 'Outras receitas'
+          : 'Outras despesas',
         type,
       );
       return created.id;

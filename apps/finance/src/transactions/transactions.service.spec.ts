@@ -3,6 +3,8 @@ import { TransactionsService } from './transactions.service';
 import { TransactionsRepository } from './transactions.repository';
 import { WalletsRepository } from '../wallets/wallets.repository';
 import { CategoriesRepository } from '../categories/categories.repository';
+import { BalanceService } from './balance.service';
+import { InstallmentService } from './installment.service';
 import {
   CreateTransactionDto,
   TransactionType,
@@ -35,6 +37,10 @@ const mockCatRepo = {
   createDefault: jest.fn(),
 };
 
+const mockInstallmentSvc = {
+  resolveUpdate: jest.fn(),
+};
+
 describe('TransactionsService', () => {
   let service: TransactionsService;
 
@@ -42,9 +48,11 @@ describe('TransactionsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TransactionsService,
+        BalanceService,
         { provide: TransactionsRepository, useValue: mockTxRepo },
         { provide: WalletsRepository, useValue: mockWalletsRepo },
         { provide: CategoriesRepository, useValue: mockCatRepo },
+        { provide: InstallmentService, useValue: mockInstallmentSvc },
       ],
     }).compile();
 

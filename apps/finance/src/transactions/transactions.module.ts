@@ -4,6 +4,8 @@ import { TransactionsController } from './transactions.controller';
 import { TransactionsRepository } from './transactions.repository';
 import { WalletsRepository } from '../wallets/wallets.repository';
 import { CategoriesRepository } from '../categories/categories.repository';
+import { BalanceService } from './balance.service';
+import { InstallmentService } from './installment.service';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
@@ -14,6 +16,8 @@ import { PrismaModule } from '../prisma/prisma.module';
     TransactionsRepository,
     WalletsRepository,
     CategoriesRepository,
+    BalanceService,
+    InstallmentService,
   ],
 })
 export class TransactionsModule {}
