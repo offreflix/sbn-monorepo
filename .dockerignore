@@ -1,0 +1,46 @@
+# Dependencies — each Dockerfile installs its own inside the container
+node_modules
+**/node_modules
+
+# Build output — built inside the container
+dist
+**/dist
+.rsbuild
+**/.rsbuild
+
+# Turborepo cache
+.turbo
+**/.turbo
+
+# Test coverage
+coverage
+**/coverage
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.vscode
+.idea
+*.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript generated types (MFE)
+@mf-types
+**/@mf-types
+
+# Python (MCP server)
+**/__pycache__
+**/*.pyc
+**/venv
+**/env

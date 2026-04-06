@@ -34,6 +34,11 @@ export default defineConfig({
     port: 9001,
     open: false,
   },
+  output: {
+    // In production (Docker), chunks must use absolute URLs so the host app
+    // can load them from the MFE origin (localhost:9001) instead of its own (localhost:9000).
+    assetPrefix: process.env.MFE_ASSET_PREFIX || "http://localhost:9001",
+  },
   dev: {
     assetPrefix: "http://localhost:9001",
     hmr: true,

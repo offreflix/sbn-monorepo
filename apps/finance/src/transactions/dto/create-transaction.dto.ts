@@ -76,4 +76,12 @@ export class CreateTransactionDto {
   @IsUUID()
   @IsOptional()
   recurrenceId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isRecurring?: boolean;
+
+  @IsString()
+  @IsOptional()
+  frequency?: string;
 }

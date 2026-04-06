@@ -27,15 +27,18 @@ services:
   # Backend Services
   sbn-auth:
     build:
-      context: ./apps/auth
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/auth/Dockerfile
     ports:
       - '56081:56081'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
       JWT_SECRET: your_jwt_secret_key
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
       - postgres
+      - redis
     networks:
       - sbn-network
     profiles:
@@ -44,14 +47,18 @@ services:
 
   sbn-finance:
     build:
-      context: ./apps/finance
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/finance/Dockerfile
     ports:
       - '56082:56082'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      INTERNAL_SERVICE_KEY: internal-secret
     depends_on:
       - postgres
+      - redis
     networks:
       - sbn-network
     profiles:
@@ -60,8 +67,8 @@ services:
 
   sbn-orchestrator:
     build:
-      context: ./apps/orchestrator
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/orchestrator/Dockerfile
     ports:
       - '56080:56080'
     environment:
@@ -69,6 +76,7 @@ services:
       FINANCE_SERVICE_URL: http://sbn-finance:56082
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      JWT_SECRET: your_jwt_secret_key
     depends_on:
       - sbn-auth
       - sbn-finance
@@ -79,15 +87,34 @@ services:
       - backend
       - all
 
+  sbn-jobs:
+    build:
+      context: .
+      dockerfile: apps/jobs/Dockerfile
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      FINANCE_SERVICE_URL: http://sbn-finance:56082
+      INTERNAL_SERVICE_KEY: internal-secret
+    depends_on:
+      - redis
+      - sbn-finance
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
   # Frontend Services
+  # Note: VITE_API_BASE is baked at build time by Rsbuild (import.meta.env).
+  # The default fallback in source code is http://localhost:56080, which works
+  # since the orchestrator port is exposed to the host machine.
   sbn-host:
     build:
       context: .
       dockerfile: apps/host/Dockerfile
     ports:
       - '9000:80'
-    environment:
-      VITE_API_BASE: http://localhost:56080
     networks:
       - sbn-network
     profiles:
@@ -100,8 +127,6 @@ services:
       dockerfile: apps/sbn-finance-mfe/Dockerfile
     ports:
       - '9001:80'
-    environment:
-      VITE_API_BASE: http://localhost:56080
     networks:
       - sbn-network
     profiles:
@@ -111,7 +136,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-
 
 networks:
   sbn-network:

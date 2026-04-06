@@ -22,7 +22,9 @@
       "Bash(npx prisma generate)",
       "Bash(openspec list --json)",
       "Bash(npx prisma:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(docker compose:*)",
+      "Bash(pnpm --filter @sbn/finance add @nestjs/bullmq bullmq)"
     ]
   }
 }

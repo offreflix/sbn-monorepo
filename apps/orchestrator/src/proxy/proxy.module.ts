@@ -9,6 +9,7 @@ import { ProxyService } from './proxy.service';
 import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from '../auth/auth.module';
 import { HeaderSanitizationMiddleware } from './header-sanitization.middleware';
+import { CorrelationIdMiddleware } from './correlation-id.middleware';
 
 @Module({
   imports: [HttpModule, AuthModule],
@@ -18,6 +19,8 @@ import { HeaderSanitizationMiddleware } from './header-sanitization.middleware';
 export class ProxyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
+      .apply(CorrelationIdMiddleware)
+      .forRoutes({ path: 'api/*', method: RequestMethod.ALL })
       .apply(HeaderSanitizationMiddleware)
       .forRoutes({ path: 'api/*', method: RequestMethod.ALL });
   }

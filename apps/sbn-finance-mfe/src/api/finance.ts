@@ -115,6 +115,8 @@ export const financeApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
+    delete: (id: string) =>
+      request<void>(`/api/finance/recurrences/${id}`, { method: "DELETE" }),
   },
 
   // Projections

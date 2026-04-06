@@ -4,28 +4,33 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 WORKDIR /app
 
-# Copy workspace files
+# Copy workspace files needed for pnpm install
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/orchestrator/package.json ./apps/orchestrator/
 
-# Install dependencies
+# Install all dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source and build
 COPY apps/orchestrator ./apps/orchestrator
+
 WORKDIR /app/apps/orchestrator
 RUN pnpm build
 
-FROM node:20-alpine
+# Create self-contained production deployment (resolves pnpm symlinks)
+WORKDIR /app
+RUN pnpm deploy --filter=@sbn/orchestrator --prod /prod/orchestrator
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/apps/orchestrator/node_modules ./node_modules
+# node_modules from pnpm deploy (real files, no symlinks)
+COPY --from=builder /prod/orchestrator/node_modules ./node_modules
+# Built output (not copied by pnpm deploy since dist is gitignored)
 COPY --from=builder /app/apps/orchestrator/dist ./dist
 COPY --from=builder /app/apps/orchestrator/package.json ./
 
-EXPOSE 3000
+EXPOSE 56080
 
-CMD ["pnpm", "start:prod"]
+CMD ["node", "dist/main"]

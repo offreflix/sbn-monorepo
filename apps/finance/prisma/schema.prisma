@@ -91,6 +91,7 @@ model Recurrence {
   description   String?
   type          String
   frequency     String
+  timezone      String    @default("America/Sao_Paulo")
   startDate     DateTime  @map("start_date")
   endDate       DateTime? @map("end_date")
   lastGenerated DateTime? @map("last_generated")

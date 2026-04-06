@@ -40,10 +40,8 @@ export class TransactionsService {
 
     const walletIsCredit = this.balanceService.isCreditCard(wallet.type);
 
-    const safeData = data as any; // Temporary to preserve behavior for fields missing in DTO
-
     let newRecurrenceId = data.recurrenceId;
-    if (safeData.isRecurring) {
+    if (data.isRecurring) {
       const recurrence = await this.txRepo.createRecurrence({
         userId,
         walletId: data.walletId,
@@ -51,7 +49,7 @@ export class TransactionsService {
         amount: data.amount,
         type: data.type,
         description: data.description,
-        frequency: safeData.frequency || 'MONTHLY',
+        frequency: data.frequency || 'MONTHLY',
         startDate: new Date(data.date),
         active: true,
       });

@@ -7,6 +7,7 @@ import {
   Tags,
   Calendar,
   Heart,
+  Repeat,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { MonthYearSelector } from "./components/month-year-selector";
@@ -16,6 +17,7 @@ import { CategoryGrid } from "./pages/categories/page";
 import { CalendarView } from "./pages/calendar/page";
 import { WishlistPage } from "./pages/wishlist/page";
 import { WishlistDetailPage } from "./pages/wishlist-detail/page";
+import { RecurrencesPage } from "./pages/recurrences/page";
 import type { AppModelOutput } from "./app.model";
 
 export function AppView({
@@ -79,6 +81,15 @@ export function AppView({
                 >
                   <Heart className="h-4 w-4" />
                   Wishlist
+                </Button>
+                <Button
+                  variant={isTabActive("recurrences") ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => handleNavigate("recurrences")}
+                  className="gap-2"
+                >
+                  <Repeat className="h-4 w-4" />
+                  Recorrências
                 </Button>
               </div>
             </div>
@@ -164,6 +175,7 @@ export function AppView({
               />
               <Route path="wishlist" element={<WishlistPage />} />
               <Route path="wishlist/:id" element={<WishlistDetailPage />} />
+              <Route path="recurrences" element={<RecurrencesPage />} />
               <Route path="*" element={<Navigate to="." replace />} />
             </Routes>
           </div>
