@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { DashboardProps } from "./dashboard.type";
 import { financeApi } from "../../api/finance";
 import type { DashboardSummary, DashboardCategories } from "./dashboard.type";
+import type { Recurrence } from "../recurrences/recurrences.type";
 import { toast } from "sonner";
 
 export function useDashboardModel(props: DashboardProps) {
@@ -13,20 +14,23 @@ export function useDashboardModel(props: DashboardProps) {
     income: [],
     expense: [],
   });
+  const [recurrences, setRecurrences] = useState<Recurrence[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setDashboardLoading(true);
-      const [dashSum, dashCats] = await Promise.all([
+      const [dashSum, dashCats, recList] = await Promise.all([
         financeApi.dashboard.summary(props.selectedMonth, props.selectedYear),
         financeApi.dashboard.categories(
           props.selectedMonth,
           props.selectedYear,
         ),
+        financeApi.recurrences.list(),
       ]);
       setSummary(dashSum);
       setCategories(dashCats);
+      setRecurrences(recList);
     } catch (error) {
       console.error("Erro ao carregar dashboard:", error);
       toast.error("Erro ao carregar resumo do dashboard.");
@@ -48,6 +52,7 @@ export function useDashboardModel(props: DashboardProps) {
     data: {
       summary,
       categories,
+      recurrences,
       wallets: props.wallets,
       allCategories: props.allCategories,
       transactions: props.transactions,

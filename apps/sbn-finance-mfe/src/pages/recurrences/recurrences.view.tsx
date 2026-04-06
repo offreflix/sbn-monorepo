@@ -8,20 +8,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/ui";
-import {
-  TrendingUp,
-  TrendingDown,
-  Trash2,
-  RefreshCcw,
-  Repeat,
-} from "lucide-react";
-import type { RecurrencesModelOutput } from "./recurrences.model";
-
-const FREQUENCY_LABEL: Record<string, string> = {
-  MONTHLY: "Mensal",
-  WEEKLY: "Semanal",
-};
+} from '@repo/ui'
+import { RefreshCcw, Repeat } from 'lucide-react'
+import type { RecurrencesModelOutput } from './recurrences.model'
+import { RecurrenceList } from '../../components/recurrences-list'
 
 export function RecurrencesView({
   data: { recurrences },
@@ -29,7 +19,7 @@ export function RecurrencesView({
   setters: { setDeletingId },
   actions: { handleDelete, loadRecurrences },
 }: RecurrencesModelOutput) {
-  const deletingRecurrence = recurrences.find((r) => r.id === deletingId);
+  const deletingRecurrence = recurrences.find((r) => r.id === deletingId)
 
   return (
     <div className="space-y-6">
@@ -67,69 +57,10 @@ export function RecurrencesView({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {recurrences.map((recurrence) => (
-            <div
-              key={recurrence.id}
-              className="glass-dark rounded-xl p-4 flex items-center justify-between gap-4 group"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-                    recurrence.type === "Receita"
-                      ? "bg-emerald-500/20"
-                      : "bg-red-500/20"
-                  }`}
-                >
-                  {recurrence.type === "Receita" ? (
-                    <TrendingUp className="h-5 w-5 text-emerald-400" />
-                  ) : (
-                    <TrendingDown className="h-5 w-5 text-red-400" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-medium text-sm text-foreground truncate">
-                    {recurrence.description || "Sem descrição"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {FREQUENCY_LABEL[recurrence.frequency] ??
-                      recurrence.frequency}
-                    {" · "}
-                    Desde{" "}
-                    {new Date(recurrence.startDate).toLocaleDateString("pt-BR")}
-                    {!recurrence.active && (
-                      <span className="ml-2 text-yellow-500">Inativa</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 shrink-0">
-                <span
-                  className={`text-sm font-semibold ${
-                    recurrence.type === "Receita"
-                      ? "text-emerald-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {recurrence.type === "Despesa" ? "- " : "+ "}
-                  R${" "}
-                  {Number(recurrence.amount).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setDeletingId(recurrence.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <RecurrenceList
+          recurrences={recurrences}
+          setDeletingId={setDeletingId}
+        />
       )}
 
       <AlertDialog
@@ -140,9 +71,9 @@ export function RecurrencesView({
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Recorrência</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a recorrência{" "}
+              Tem certeza que deseja excluir a recorrência{' '}
               <strong>
-                {deletingRecurrence?.description || "sem descrição"}
+                {deletingRecurrence?.description || 'sem descrição'}
               </strong>
               ? As transações já criadas não serão afetadas.
             </AlertDialogDescription>
@@ -156,11 +87,11 @@ export function RecurrencesView({
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Excluindo..." : "Excluir"}
+              {isDeleting ? 'Excluindo...' : 'Excluir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  );
+  )
 }

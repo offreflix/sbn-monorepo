@@ -120,8 +120,8 @@ export class RecurrenceQueueService {
     const get = (type: string) =>
       parseInt(parts.find((p) => p.type === type)!.value, 10);
 
-    let year = get('year');
-    let month = get('month'); // 1-based
+    const year = get('year');
+    const month = get('month'); // 1-based
     const day = get('day');
 
     // If today is before or on the target day this month, use this month
