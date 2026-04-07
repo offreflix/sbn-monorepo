@@ -1,17 +1,17 @@
-import { useNavigate } from 'react-router-dom'
-import { Button } from '@repo/ui'
+import { Button } from "@repo/ui";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@repo/ui'
-import { Header } from '../components/Header'
+} from "@repo/ui";
+import { Header } from "../../components/Header";
+import type { DashboardModelOutput } from "./dashboard.model";
 
-export const DashboardPage = () => {
-  const navigate = useNavigate()
-
+export function DashboardView({
+  actions: { handleReload },
+}: DashboardModelOutput) {
   return (
     <div className="min-h-screen bg-background">
       <Header subtitle="Dashboard" />
@@ -30,10 +30,10 @@ export const DashboardPage = () => {
               Por enquanto, este é um placeholder. Use o menu para navegar ou
               avance com a integração do remote de finanças.
             </p>
-            <Button onClick={() => navigate('/dashboard')}>Recarregar</Button>
+            <Button onClick={handleReload}>Recarregar</Button>
           </CardContent>
         </Card>
       </main>
     </div>
-  )
+  );
 }

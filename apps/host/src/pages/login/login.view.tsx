@@ -1,8 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import { Button } from "@repo/ui";
 import {
   Card,
@@ -20,43 +16,13 @@ import {
   FormMessage,
   Input,
 } from "@repo/ui";
-import { useAuth } from "../auth/AuthProvider";
-import { z } from "zod";
+import type { LoginModelOutput } from "./login.model";
 
-const schema = z.object({
-  email: z.string().email("Informe um e-mail válido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-export const LoginPage = () => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { email: "", password: "" },
-  });
-
-  const [submitting, setSubmitting] = useState(false);
-  const { login, user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) navigate("/dashboard", { replace: true });
-  }, [user, loading, navigate]);
-
-  const onSubmit = async (data: FormValues) => {
-    setSubmitting(true);
-    try {
-      await login(data);
-      toast.success("Login realizado");
-      navigate("/dashboard", { replace: true });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao entrar");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+export function LoginView({
+  data: { form },
+  state: { submitting },
+  actions: { onSubmit },
+}: LoginModelOutput) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md glass-card">
@@ -122,4 +88,4 @@ export const LoginPage = () => {
       </Card>
     </div>
   );
-};
+}

@@ -1,10 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { z } from "zod";
-import { useAuth } from "../auth/AuthProvider";
+import { Link } from "react-router-dom";
 import { Button } from "@repo/ui";
 import {
   Card,
@@ -22,42 +16,13 @@ import {
   FormMessage,
   Input,
 } from "@repo/ui";
+import type { RegisterModelOutput } from "./register.model";
 
-const schema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("Informe um e-mail válido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-export const RegisterPage = () => {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", password: "" },
-  });
-
-  const [submitting, setSubmitting] = useState(false);
-  const { register: doRegister, user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) navigate("/dashboard", { replace: true });
-  }, [user, loading, navigate]);
-
-  const onSubmit = async (data: FormValues) => {
-    setSubmitting(true);
-    try {
-      await doRegister(data);
-      toast.success("Conta criada com sucesso");
-      navigate("/dashboard", { replace: true });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao registrar");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+export function RegisterView({
+  data: { form },
+  state: { submitting },
+  actions: { onSubmit },
+}: RegisterModelOutput) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md glass-card">
@@ -143,4 +108,4 @@ export const RegisterPage = () => {
       </Card>
     </div>
   );
-};
+}

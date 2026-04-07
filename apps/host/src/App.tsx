@@ -8,12 +8,12 @@ import {
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { ThemeProvider } from "./theme/ThemeProvider";
-import { DashboardPage } from "./pages/Dashboard";
-import { FinanceRemotePage } from "./pages/FinanceRemote";
-import { LandingPage } from "./pages/Landing";
-import { LoginPage } from "./pages/Login";
-import { RegisterPage } from "./pages/Register";
-import { SettingsPage } from "./pages/Settings";
+import { DashboardPage } from "./pages/dashboard/page";
+import { FinanceRemotePage } from "./pages/finance-remote/page";
+import { LandingPage } from "./pages/landing/page";
+import { LoginPage } from "./pages/login/page";
+import { RegisterPage } from "./pages/register/page";
+import { SettingsPage } from "./pages/settings/page";
 
 const LoadingScreen = () => (
   <div className="flex min-h-screen items-center justify-center">

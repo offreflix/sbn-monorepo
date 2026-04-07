@@ -1,9 +1,10 @@
-import { Suspense, lazy } from "react";
-import { Header } from "../components/Header";
+import { Suspense } from "react";
+import { Header } from "../../components/Header";
+import type { FinanceRemoteModelOutput } from "./finance-remote.model";
 
-const RemoteFinance = lazy(() => import("sbn_finance_mfe/App"));
-
-export const FinanceRemotePage = () => {
+export function FinanceRemoteView({
+  data: { RemoteFinance },
+}: FinanceRemoteModelOutput) {
   return (
     <div className="min-h-screen bg-background">
       <Header subtitle="Finanças" />
@@ -22,4 +23,4 @@ export const FinanceRemotePage = () => {
       </main>
     </div>
   );
-};
+}

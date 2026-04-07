@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { Header } from "../components/Header";
-import { apiKeysApi, type ApiKey } from "../api/apiKeys";
+import { Badge, Button } from "@repo/ui";
 import {
   Card,
   CardContent,
@@ -8,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui";
-import { Button } from "@repo/ui";
 import {
   Dialog,
   DialogContent,
@@ -19,85 +16,16 @@ import {
 } from "@repo/ui";
 import { Input } from "@repo/ui";
 import { Label } from "@repo/ui";
-import { Badge } from "@repo/ui";
 import { Plus, Key, Copy, Trash2, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
+import { Header } from "../../components/Header";
+import type { SettingsModelOutput } from "./settings.model";
 
-export const SettingsPage = () => {
-  const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [createdRawKey, setCreatedRawKey] = useState<string | null>(null);
-
-  const [formName, setFormName] = useState("");
-  const [formExpiresAt, setFormExpiresAt] = useState("");
-
-  const loadKeys = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await apiKeysApi.list();
-      setKeys(data);
-    } catch (error) {
-      console.error("Erro ao carregar chaves API:", error);
-      toast.error("Erro ao carregar chaves API");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadKeys();
-  }, [loadKeys]);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const result = await apiKeysApi.create(
-        formName,
-        formExpiresAt || undefined,
-      );
-      setCreatedRawKey(result.key);
-      toast.success("Chave API criada com sucesso!");
-      setFormName("");
-      setFormExpiresAt("");
-      loadKeys();
-    } catch (error) {
-      console.error("Erro ao criar chave API:", error);
-      toast.error("Erro ao criar chave API");
-    }
-  };
-
-  const handleRevoke = async (id: string) => {
-    if (!confirm("Tem certeza que deseja revogar esta chave?")) return;
-
-    try {
-      await apiKeysApi.revoke(id);
-      toast.success("Chave revogada!");
-      loadKeys();
-    } catch (error) {
-      console.error("Erro ao revogar chave:", error);
-      toast.error("Erro ao revogar chave");
-    }
-  };
-
-  const handleCopy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Chave copiada!");
-    } catch {
-      toast.error("Erro ao copiar chave");
-    }
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    setIsDialogOpen(open);
-    if (!open) {
-      setCreatedRawKey(null);
-      setFormName("");
-      setFormExpiresAt("");
-    }
-  };
-
+export function SettingsView({
+  data: { keys },
+  state: { isDialogOpen, createdRawKey, formName, formExpiresAt, loading },
+  setters: { setFormName, setFormExpiresAt },
+  actions: { handleCreate, handleRevoke, handleCopy, handleDialogClose },
+}: SettingsModelOutput) {
   return (
     <div className="min-h-screen bg-background">
       <Header subtitle="Configurações" />
@@ -262,4 +190,4 @@ export const SettingsPage = () => {
       </main>
     </div>
   );
-};
+}
