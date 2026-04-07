@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import {
   Wallet,
   TrendingUp,
@@ -6,13 +6,13 @@ import {
   CreditCard,
   DollarSign,
   Calendar,
-} from 'lucide-react'
-import { formatCurrency } from '../../lib/utils'
-import { WalletCards } from '../../components/wallet-cards'
-import { CategoryGrid } from '../../pages/categories/page'
-import { TransactionList } from '../../pages/transactions/page'
-import type { DashboardModelOutput } from './dashboard.model'
-import { RecurrenceList } from '../../components/recurrences-list'
+} from "lucide-react";
+import { formatCurrency } from "../../lib/utils";
+import { WalletCards } from "../../components/wallet-cards";
+import { CategoryGrid } from "../../pages/categories/page";
+import { TransactionList } from "../../pages/transactions/page";
+import type { DashboardModelOutput } from "./dashboard.model";
+import { RecurrenceList } from "../../components/recurrences-list";
 
 export function DashboardView({
   data: {
@@ -29,27 +29,27 @@ export function DashboardView({
   // Helper for Skeleton or value
   const Val = ({
     val,
-    type = 'currency',
+    type = "currency",
   }: {
-    val: number | undefined
-    type?: 'currency' | 'text'
+    val: number | undefined;
+    type?: "currency" | "text";
   }) => {
     if (loading || val === undefined)
-      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+      return <div className="h-6 w-24 bg-muted animate-pulse rounded" />;
     return (
-      <span className={type === 'currency' ? 'tabular-nums' : ''}>
-        {type === 'currency' ? formatCurrency(val) : val}
+      <span className={type === "currency" ? "tabular-nums" : ""}>
+        {type === "currency" ? formatCurrency(val) : val}
       </span>
-    )
-  }
+    );
+  };
 
   // Simple Progress Component
   const SimpleProgress = ({
     value,
     colorClass,
   }: {
-    value: number
-    colorClass: string
+    value: number;
+    colorClass: string;
   }) => (
     <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
       <div
@@ -57,7 +57,7 @@ export function DashboardView({
         style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
       />
     </div>
-  )
+  );
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -191,7 +191,7 @@ export function DashboardView({
                 </span>
               </div>
               <div
-                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? 'text-primary' : 'text-red-400'}`}
+                className={`text-2xl font-bold ${summary.overview.balance >= 0 ? "text-primary" : "text-red-400"}`}
               >
                 <Val val={summary.overview.balance} />
               </div>
@@ -217,7 +217,7 @@ export function DashboardView({
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                      {cat.name}{' '}
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
@@ -251,7 +251,7 @@ export function DashboardView({
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-400" />
-                      {cat.name}{' '}
+                      {cat.name}{" "}
                       <span className="text-muted-foreground">
                         ({cat.percentage.toFixed(1)}%)
                       </span>
@@ -316,5 +316,5 @@ export function DashboardView({
         )}
       </section>
     </div>
-  )
+  );
 }

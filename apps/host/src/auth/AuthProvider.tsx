@@ -7,7 +7,12 @@ import React, {
   useState,
 } from "react";
 import { authApi } from "../api/auth";
-import type { AuthResponse, AuthTokens, RefreshResponse, User } from "../types/auth";
+import type {
+  AuthResponse,
+  AuthTokens,
+  RefreshResponse,
+  User,
+} from "../types/auth";
 
 type SessionState = {
   user: User | null;

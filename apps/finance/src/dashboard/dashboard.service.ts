@@ -105,7 +105,10 @@ export class DashboardService {
 
   async getYearOverview(userId: string, year: number) {
     const targetYear = year || new Date().getFullYear();
-    const transactions = await this.repo.findYearTransactions(userId, targetYear);
+    const transactions = await this.repo.findYearTransactions(
+      userId,
+      targetYear,
+    );
 
     const months = Array.from({ length: 12 }, () => ({
       income: 0,
@@ -156,7 +159,13 @@ export class DashboardService {
             balance: agg.income - agg.expense,
           }))
           .sort((a, b) => a.day - b.day);
-        return { month: idx + 1, income: m.income, expense: m.expense, balance: m.balance, days };
+        return {
+          month: idx + 1,
+          income: m.income,
+          expense: m.expense,
+          balance: m.balance,
+          days,
+        };
       }),
       totals: {
         income: totals.income,

@@ -105,9 +105,9 @@ describe('WishlistController', () => {
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.update('wi1', {} as UpdateWishlistItemDto, '')).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        controller.update('wi1', {} as UpdateWishlistItemDto, ''),
+      ).toThrow(BadRequestException);
     });
   });
 
@@ -158,7 +158,11 @@ describe('WishlistController', () => {
     });
 
     it('should call service createPriceEntry without installment fields', () => {
-      const body: CreatePriceEntryDto = { price: 500, store: 'Shopee', date: '2026-04-01' };
+      const body: CreatePriceEntryDto = {
+        price: 500,
+        store: 'Shopee',
+        date: '2026-04-01',
+      };
       mockWishlistService.createPriceEntry.mockResolvedValue({
         id: 'pe2',
         ...body,
@@ -174,9 +178,9 @@ describe('WishlistController', () => {
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.createPriceEntry('wi1', {} as CreatePriceEntryDto, '')).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        controller.createPriceEntry('wi1', {} as CreatePriceEntryDto, ''),
+      ).toThrow(BadRequestException);
     });
   });
 

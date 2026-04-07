@@ -7,12 +7,14 @@ The `apps/sbn-finance-mfe` already follows a well-established pattern where each
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Apply the finance MFE page pattern consistently to all 6 host pages
 - Separate business logic, UI rendering, types, and validation into dedicated files
 - Update route imports in `App.tsx` to reference the new directory structure
 - Maintain 100% functional parity — no behavior changes
 
 **Non-Goals:**
+
 - Refactoring shared components (`Header`, `MoneyInput`) — they stay as-is
 - Adding new features or changing existing behavior
 - Creating shared abstractions or base classes for the pattern

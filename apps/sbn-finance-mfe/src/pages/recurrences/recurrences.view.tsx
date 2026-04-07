@@ -8,10 +8,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@repo/ui'
-import { RefreshCcw, Repeat } from 'lucide-react'
-import type { RecurrencesModelOutput } from './recurrences.model'
-import { RecurrenceList } from '../../components/recurrences-list'
+} from "@repo/ui";
+import { RefreshCcw, Repeat } from "lucide-react";
+import type { RecurrencesModelOutput } from "./recurrences.model";
+import { RecurrenceList } from "../../components/recurrences-list";
 
 export function RecurrencesView({
   data: { recurrences },
@@ -19,7 +19,7 @@ export function RecurrencesView({
   setters: { setDeletingId },
   actions: { handleDelete, loadRecurrences },
 }: RecurrencesModelOutput) {
-  const deletingRecurrence = recurrences.find((r) => r.id === deletingId)
+  const deletingRecurrence = recurrences.find((r) => r.id === deletingId);
 
   return (
     <div className="space-y-6">
@@ -71,9 +71,9 @@ export function RecurrencesView({
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Recorrência</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a recorrência{' '}
+              Tem certeza que deseja excluir a recorrência{" "}
               <strong>
-                {deletingRecurrence?.description || 'sem descrição'}
+                {deletingRecurrence?.description || "sem descrição"}
               </strong>
               ? As transações já criadas não serão afetadas.
             </AlertDialogDescription>
@@ -87,11 +87,11 @@ export function RecurrencesView({
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? 'Excluindo...' : 'Excluir'}
+              {isDeleting ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

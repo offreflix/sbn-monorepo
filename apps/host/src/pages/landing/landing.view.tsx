@@ -10,9 +10,7 @@ import {
 import { ChevronRight, TrendingUp, Zap } from "lucide-react";
 import type { LandingModelOutput } from "./landing.model";
 
-export function LandingView({
-  data: { features, stats },
-}: LandingModelOutput) {
+export function LandingView({ data: { features, stats } }: LandingModelOutput) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Background gradient orbs */}
