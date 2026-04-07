@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DashboardService } from './dashboard.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { DashboardRepository } from './dashboard.repository';
 
-const mockPrismaService = {
-  wallet: {
-    findMany: jest.fn(),
-  },
-  transaction: {
-    findMany: jest.fn(),
-  },
+const mockDashboardRepo = {
+  findWalletsByUser: jest.fn(),
+  findCcTransactionsByMonth: jest.fn(),
+  findMonthTransactions: jest.fn(),
+  findYearTransactions: jest.fn(),
 };
 
 describe('DashboardService', () => {
@@ -18,7 +16,7 @@ describe('DashboardService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DashboardService,
-        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: DashboardRepository, useValue: mockDashboardRepo },
       ],
     }).compile();
 
@@ -32,11 +30,12 @@ describe('DashboardService', () => {
 
   describe('getSummary', () => {
     it('should sum balance of non-credit-card wallets', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([
+      mockDashboardRepo.findWalletsByUser.mockResolvedValue([
         { id: 'w1', type: 'Conta Corrente', balance: 1000 },
         { id: 'w2', type: 'Poupança', balance: 500 },
       ]);
-      mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockDashboardRepo.findCcTransactionsByMonth.mockResolvedValue([]);
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([]);
 
       const result = await service.getSummary('u1', 1, 2024);
 
@@ -48,11 +47,8 @@ describe('DashboardService', () => {
     it('should calculate currentInvoice and nextInvoice for credit card with invoiceClosingDay', async () => {
       const year = 2024;
       const month = 2;
-      // Previous closing: Jan 15. Current closing: Feb 15.
-      // Tx1 on Feb 10 → between Jan15 and Feb15 → currentInvoice
-      // Tx2 on Feb 20 → after Feb 15 → nextInvoice
 
-      mockPrismaService.wallet.findMany.mockResolvedValue([
+      mockDashboardRepo.findWalletsByUser.mockResolvedValue([
         {
           id: 'cc1',
           type: 'Cartão de Crédito',
@@ -64,27 +60,25 @@ describe('DashboardService', () => {
       const ccTx1Date = new Date(year, month - 1, 10);
       const ccTx2Date = new Date(year, month - 1, 20);
 
-      mockPrismaService.transaction.findMany
-        .mockResolvedValueOnce([
-          // CC transactions
-          {
-            id: 't1',
-            walletId: 'cc1',
-            amount: 200,
-            type: 'Despesa',
-            date: ccTx1Date,
-            status: 'Pendente',
-          },
-          {
-            id: 't2',
-            walletId: 'cc1',
-            amount: 300,
-            type: 'Despesa',
-            date: ccTx2Date,
-            status: 'Pendente',
-          },
-        ])
-        .mockResolvedValueOnce([]); // month transactions
+      mockDashboardRepo.findCcTransactionsByMonth.mockResolvedValue([
+        {
+          id: 't1',
+          walletId: 'cc1',
+          amount: 200,
+          type: 'Despesa',
+          date: ccTx1Date,
+          status: 'Pendente',
+        },
+        {
+          id: 't2',
+          walletId: 'cc1',
+          amount: 300,
+          type: 'Despesa',
+          date: ccTx2Date,
+          status: 'Pendente',
+        },
+      ]);
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([]);
 
       const result = await service.getSummary('u1', month, year);
 
@@ -97,7 +91,7 @@ describe('DashboardService', () => {
       const year = 2024;
       const month = 2;
 
-      mockPrismaService.wallet.findMany.mockResolvedValue([
+      mockDashboardRepo.findWalletsByUser.mockResolvedValue([
         {
           id: 'cc1',
           type: 'Cartão de Crédito',
@@ -109,26 +103,25 @@ describe('DashboardService', () => {
       const inMonthDate = new Date(year, month - 1, 15);
       const afterMonthDate = new Date(year, month, 5);
 
-      mockPrismaService.transaction.findMany
-        .mockResolvedValueOnce([
-          {
-            id: 't1',
-            walletId: 'cc1',
-            amount: 150,
-            type: 'Despesa',
-            date: inMonthDate,
-            status: 'Pendente',
-          },
-          {
-            id: 't2',
-            walletId: 'cc1',
-            amount: 250,
-            type: 'Despesa',
-            date: afterMonthDate,
-            status: 'Pendente',
-          },
-        ])
-        .mockResolvedValueOnce([]);
+      mockDashboardRepo.findCcTransactionsByMonth.mockResolvedValue([
+        {
+          id: 't1',
+          walletId: 'cc1',
+          amount: 150,
+          type: 'Despesa',
+          date: inMonthDate,
+          status: 'Pendente',
+        },
+        {
+          id: 't2',
+          walletId: 'cc1',
+          amount: 250,
+          type: 'Despesa',
+          date: afterMonthDate,
+          status: 'Pendente',
+        },
+      ]);
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([]);
 
       const result = await service.getSummary('u1', month, year);
 
@@ -137,14 +130,13 @@ describe('DashboardService', () => {
     });
 
     it('should calculate income, expense and periodBalance from month transactions', async () => {
-      mockPrismaService.wallet.findMany.mockResolvedValue([]);
-      mockPrismaService.transaction.findMany
-        .mockResolvedValueOnce([]) // cc transactions (empty wallets)
-        .mockResolvedValueOnce([
-          { type: 'Receita', amount: 3000 },
-          { type: 'Receita', amount: 500 },
-          { type: 'Despesa', amount: 1200 },
-        ]);
+      mockDashboardRepo.findWalletsByUser.mockResolvedValue([]);
+      mockDashboardRepo.findCcTransactionsByMonth.mockResolvedValue([]);
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([
+        { type: 'Receita', amount: 3000 },
+        { type: 'Receita', amount: 500 },
+        { type: 'Despesa', amount: 1200 },
+      ]);
 
       const result = await service.getSummary('u1', 1, 2024);
 
@@ -156,7 +148,7 @@ describe('DashboardService', () => {
 
   describe('getYearOverview', () => {
     it('should aggregate transactions by month', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([
+      mockDashboardRepo.findYearTransactions.mockResolvedValue([
         { date: new Date(2024, 0, 15), amount: 1000, type: 'Receita' },
         { date: new Date(2024, 0, 20), amount: 400, type: 'Despesa' },
         { date: new Date(2024, 5, 10), amount: 2000, type: 'Receita' },
@@ -172,7 +164,7 @@ describe('DashboardService', () => {
     });
 
     it('should return correct totals', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([
+      mockDashboardRepo.findYearTransactions.mockResolvedValue([
         { date: new Date(2024, 0, 1), amount: 500, type: 'Receita' },
         { date: new Date(2024, 1, 1), amount: 200, type: 'Despesa' },
       ]);
@@ -185,7 +177,7 @@ describe('DashboardService', () => {
     });
 
     it('should include days aggregations within months', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([
+      mockDashboardRepo.findYearTransactions.mockResolvedValue([
         { date: new Date(2024, 0, 10), amount: 100, type: 'Receita' },
         { date: new Date(2024, 0, 10), amount: 50, type: 'Despesa' },
         { date: new Date(2024, 0, 15), amount: 200, type: 'Receita' },
@@ -204,7 +196,7 @@ describe('DashboardService', () => {
     });
 
     it('should use current year when no year is given', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([]);
+      mockDashboardRepo.findYearTransactions.mockResolvedValue([]);
 
       const result = await service.getYearOverview('u1', 0);
 
@@ -214,7 +206,7 @@ describe('DashboardService', () => {
 
   describe('getCategories', () => {
     it('should return income and expense breakdown with percentages', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([
         { type: 'Receita', amount: 100, category: { name: 'Salário' } },
         { type: 'Receita', amount: 300, category: { name: 'Freelance' } },
         { type: 'Despesa', amount: 200, category: { name: 'Alimentação' } },
@@ -234,7 +226,7 @@ describe('DashboardService', () => {
     });
 
     it('should use "Outros" for transactions without a category', async () => {
-      mockPrismaService.transaction.findMany.mockResolvedValue([
+      mockDashboardRepo.findMonthTransactions.mockResolvedValue([
         { type: 'Despesa', amount: 100, category: null },
         { type: 'Despesa', amount: 50, category: null },
       ]);

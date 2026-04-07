@@ -1,26 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { DashboardRepository } from './dashboard.repository';
 
 @Injectable()
 export class DashboardService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private repo: DashboardRepository) {}
 
   async getSummary(userId: string, month: number, year: number) {
-    const now = new Date();
-    const currentMonth = month || now.getMonth() + 1;
-    const currentYear = year || now.getFullYear();
+    const currentMonth = month || new Date().getMonth() + 1;
+    const currentYear = year || new Date().getFullYear();
 
-    const startDate = new Date(currentYear, currentMonth - 1, 1);
-    const endDate = new Date(currentYear, currentMonth, 0);
-    endDate.setHours(23, 59, 59, 999);
+    const allWallets = await this.repo.findWalletsByUser(userId);
 
-    // 1. Wallets Balance (Cash) - excludes credit cards
-    // Types can be: "Conta Corrente", "Poupança", "Cartão de Crédito", "Investimento", "Dinheiro", "Outro"
-    const allWallets = await this.prisma.wallet.findMany({
-      where: { userId, deletedAt: null },
-    });
-
-    // Credit card types (case-insensitive check)
     const isCreditCard = (type: string) =>
       type.toLowerCase().includes('crédito') ||
       type.toLowerCase().includes('credito') ||
@@ -30,36 +20,30 @@ export class DashboardService {
     const wallets = allWallets.filter((w) => !isCreditCard(w.type));
     const totalBalance = wallets.reduce((acc, w) => acc + Number(w.balance), 0);
 
-    // 2. Credit Card Invoices
+    // Credit Card Invoices
     const creditCards = allWallets.filter((w) => isCreditCard(w.type));
 
     let currentInvoice = 0;
     let nextInvoice = 0;
     let totalInvoices = 0;
 
-    // Fetch all unpaid CC transactions (or future ones)
-    // Simplified: Fetch all expenses on CC wallets
-    const ccTransactions = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        walletId: { in: creditCards.map((c) => c.id) },
-        type: 'Despesa',
-        status: { not: 'Pago' }, // Assuming paid invoices mark transactions as paid? Or using specific logic?
-        // Usually, paying an invoice creates a transfer or balance adjustment, but individual transactions might remain 'Pendente' until reconciled.
-        // For 'Fatura Atual', we usually sum up transactions that fall into the current billing cycle.
-      },
-    });
+    const ccTransactions =
+      creditCards.length > 0
+        ? await this.repo.findCcTransactionsByMonth(
+            userId,
+            creditCards.map((c) => c.id),
+            currentMonth,
+            currentYear,
+          )
+        : [];
 
     for (const tx of ccTransactions) {
       totalInvoices += Number(tx.amount);
 
-      // Determine if it belongs to Current or Next invoice
-      // This requires knowing the Closing Day.
-      // If we don't have wallet info easily mapped, we find it.
       const wallet = creditCards.find((c) => c.id === tx.walletId);
       if (wallet && wallet.invoiceClosingDay) {
         const txDate = new Date(tx.date);
-        const closingDateCurrent = new Date(
+        const closingDateCurrentMonth = new Date(
           currentYear,
           currentMonth - 1,
           wallet.invoiceClosingDay,
@@ -70,15 +54,16 @@ export class DashboardService {
           wallet.invoiceClosingDay,
         );
 
-        // Current Invoice: Transactions between Previous Closing + 1 Day AND Current Closing
-        // This is a rough approximation.
-        if (txDate > closingDatePrevious && txDate <= closingDateCurrent) {
+        if (txDate > closingDatePrevious && txDate <= closingDateCurrentMonth) {
           currentInvoice += Number(tx.amount);
-        } else if (txDate > closingDateCurrent) {
+        } else if (txDate > closingDateCurrentMonth) {
           nextInvoice += Number(tx.amount);
         }
       } else {
-        // Fallback: Use Calendar Month
+        const startDate = new Date(currentYear, currentMonth - 1, 1);
+        const endDate = new Date(currentYear, currentMonth, 0);
+        endDate.setHours(23, 59, 59, 999);
+
         const txDate = new Date(tx.date);
         if (txDate >= startDate && txDate <= endDate) {
           currentInvoice += Number(tx.amount);
@@ -88,13 +73,12 @@ export class DashboardService {
       }
     }
 
-    // 3. Overview (Income vs Expense vs Balance for the specific month)
-    const monthTransactions = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        date: { gte: startDate, lte: endDate },
-      },
-    });
+    // Overview (Income vs Expense)
+    const monthTransactions = await this.repo.findMonthTransactions(
+      userId,
+      currentMonth,
+      currentYear,
+    );
 
     const income = monthTransactions
       .filter((t) => t.type === 'Receita')
@@ -103,8 +87,6 @@ export class DashboardService {
     const expense = monthTransactions
       .filter((t) => t.type === 'Despesa')
       .reduce((acc, t) => acc + Number(t.amount), 0);
-
-    const periodBalance = income - expense;
 
     return {
       cards: {
@@ -116,30 +98,15 @@ export class DashboardService {
       overview: {
         income,
         expense,
-        balance: periodBalance,
+        balance: income - expense,
       },
     };
   }
 
   async getYearOverview(userId: string, year: number) {
     const targetYear = year || new Date().getFullYear();
-    const startDate = new Date(targetYear, 0, 1);
-    const endDate = new Date(targetYear, 11, 31);
-    endDate.setHours(23, 59, 59, 999);
+    const transactions = await this.repo.findYearTransactions(userId, targetYear);
 
-    const transactions = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        date: { gte: startDate, lte: endDate },
-      },
-      select: {
-        date: true,
-        amount: true,
-        type: true,
-      },
-    });
-
-    // Month aggregates + per-day aggregates (only days with transactions)
     const months = Array.from({ length: 12 }, () => ({
       income: 0,
       expense: 0,
@@ -148,7 +115,7 @@ export class DashboardService {
     }));
 
     for (const tx of transactions) {
-      const m = new Date(tx.date).getMonth(); // 0-11
+      const m = new Date(tx.date).getMonth();
       const amount = Number(tx.amount);
       if (tx.type === 'Receita') {
         months[m].income += amount;
@@ -189,13 +156,7 @@ export class DashboardService {
             balance: agg.income - agg.expense,
           }))
           .sort((a, b) => a.day - b.day);
-        return {
-          month: idx + 1,
-          income: m.income,
-          expense: m.expense,
-          balance: m.balance,
-          days,
-        };
+        return { month: idx + 1, income: m.income, expense: m.expense, balance: m.balance, days };
       }),
       totals: {
         income: totals.income,
@@ -206,48 +167,42 @@ export class DashboardService {
   }
 
   async getCategories(userId: string, month: number, year: number) {
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
-    endDate.setHours(23, 59, 59, 999);
-
-    const transactions = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        date: { gte: startDate, lte: endDate },
-      },
-      include: { category: true },
-    });
+    const transactions = await this.repo.findMonthTransactions(
+      userId,
+      month,
+      year,
+      { include: { category: true } },
+    );
 
     const incomeMap = new Map<string, number>();
     const expenseMap = new Map<string, number>();
-    const incomeTotal = { value: 0 };
-    const expenseTotal = { value: 0 };
+    let incomeTotal = 0;
+    let expenseTotal = 0;
 
-    transactions.forEach((tx) => {
-      const catName = tx.category?.name || 'Outros';
+    for (const tx of transactions) {
+      const catName = tx.category?.name ?? 'Outros';
       const amount = Number(tx.amount);
       if (tx.type === 'Receita') {
         incomeMap.set(catName, (incomeMap.get(catName) || 0) + amount);
-        incomeTotal.value += amount;
+        incomeTotal += amount;
       } else {
         expenseMap.set(catName, (expenseMap.get(catName) || 0) + amount);
-        expenseTotal.value += amount;
+        expenseTotal += amount;
       }
-    });
+    }
 
-    const format = (map: Map<string, number>, total: number) => {
-      return Array.from(map.entries())
+    const format = (map: Map<string, number>, total: number) =>
+      Array.from(map.entries())
         .map(([name, value]) => ({
           name,
           value,
           percentage: total > 0 ? (value / total) * 100 : 0,
         }))
         .sort((a, b) => b.value - a.value);
-    };
 
     return {
-      income: format(incomeMap, incomeTotal.value),
-      expense: format(expenseMap, expenseTotal.value),
+      income: format(incomeMap, incomeTotal),
+      expense: format(expenseMap, expenseTotal),
     };
   }
 }
