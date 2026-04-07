@@ -36,6 +36,8 @@ def register(mcp: FastMCP):
         name: str,
         description: str | None = None,
         price: float | None = None,
+        installment_count: int | None = None,
+        installment_value: float | None = None,
         currency: str | None = None,
         url: str | None = None,
         image_url: str | None = None,
@@ -50,6 +52,8 @@ def register(mcp: FastMCP):
             name: Item name.
             description: Item description.
             price: Item price.
+            installment_count: Number of installments (minimum 2). Use when the item is paid in installments.
+            installment_value: Value of each installment (minimum 0.01).
             currency: Currency code (e.g. "BRL").
             url: Product URL.
             image_url: Image URL.
@@ -62,6 +66,8 @@ def register(mcp: FastMCP):
             "name": name,
             "description": description,
             "price": price,
+            "installment_count": installment_count,
+            "installment_value": installment_value,
             "currency": currency,
             "url": url,
             "image_url": image_url,
@@ -79,6 +85,8 @@ def register(mcp: FastMCP):
         name: str | None = None,
         description: str | None = None,
         price: float | None = None,
+        installment_count: int | None = None,
+        installment_value: float | None = None,
         currency: str | None = None,
         url: str | None = None,
         image_url: str | None = None,
@@ -94,6 +102,8 @@ def register(mcp: FastMCP):
             name: Item name.
             description: Item description.
             price: Item price.
+            installment_count: Number of installments (minimum 2).
+            installment_value: Value of each installment (minimum 0.01).
             currency: Currency code.
             url: Product URL.
             image_url: Image URL.
@@ -106,6 +116,8 @@ def register(mcp: FastMCP):
             "name": name,
             "description": description,
             "price": price,
+            "installment_count": installment_count,
+            "installment_value": installment_value,
             "currency": currency,
             "url": url,
             "image_url": image_url,

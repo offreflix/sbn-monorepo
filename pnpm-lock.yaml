@@ -363,9 +363,24 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react-is@18.3.1)(react@19.2.3)(redux@5.0.1)
     devDependencies:
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
       '@vitest/coverage-v8':
         specifier: 2.1.9
         version: 2.1.9(vitest@2.1.9(@types/node@22.19.3)(jsdom@26.1.0)(lightningcss@1.30.2)(terser@5.46.0))
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
+      react-router-dom:
+        specifier: ^7.1.2
+        version: 7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
 
   apps/jobs:
     dependencies:
@@ -600,9 +615,24 @@ importers:
       '@types/luxon':
         specifier: ^3.7.1
         version: 3.7.1
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
       eslint:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
+      react-router-dom:
+        specifier: ^7.1.2
+        version: 7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
 
   packages/eslint-config:
     devDependencies:

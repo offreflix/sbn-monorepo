@@ -39,6 +39,11 @@ export default defineConfig({
     hmr: true,
     liveReload: true,
     writeToDisk: true,
+    // Watch MFE dist output so the host reloads the page when the MFE rebuilds
+    watchFiles: {
+      paths: ["../sbn-finance-mfe/dist"],
+      type: "reload-page",
+    },
   },
   tools: {
     rspack: {
@@ -55,7 +60,7 @@ export default defineConfig({
           "**/*.log",
         ],
         aggregateTimeout: 100,
-        poll: 1000,
+        poll: 300,
       },
       plugins: [
         new ModuleFederationPlugin({
@@ -81,9 +86,7 @@ export default defineConfig({
               eager: true,
             },
           },
-          dts: {
-            enabled: false,
-          },
+          dts: false,
         }),
       ],
     },

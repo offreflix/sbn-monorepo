@@ -60,7 +60,7 @@ export default defineConfig({
           "**/*.log",
         ],
         aggregateTimeout: 100,
-        poll: 1000,
+        poll: 300,
       },
       plugins: [
         new ModuleFederationPlugin({

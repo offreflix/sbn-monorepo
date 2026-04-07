@@ -24,7 +24,13 @@
       "Bash(npx prisma:*)",
       "Bash(npx prettier:*)",
       "Bash(docker compose:*)",
-      "Bash(pnpm --filter @sbn/finance add @nestjs/bullmq bullmq)"
+      "Bash(pnpm --filter @sbn/finance add @nestjs/bullmq bullmq)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:rajrajhans.com)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:rsbuild.rs)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('exports',{}\\).keys\\(\\)]\")"
     ]
   }
 }
