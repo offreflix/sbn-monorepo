@@ -120,21 +120,21 @@ export class RecurrenceQueueService {
     const get = (type: string) =>
       parseInt(parts.find((p) => p.type === type)!.value, 10);
 
-    const year = get('year');
-    const month = get('month'); // 1-based
+    const currentYear = get('year');
+    const currentMonth = get('month'); // 1-based
     const day = get('day');
 
     // If today is before or on the target day this month, use this month
     // Otherwise, use next month
-    let candidateMonth = month;
-    let candidateYear = year;
+    let candidateMonth = currentMonth;
+    let candidateYear = currentYear;
 
     if (day >= targetDay) {
       // Move to next month
-      candidateMonth = month + 1;
+      candidateMonth = currentMonth + 1;
       if (candidateMonth > 12) {
         candidateMonth = 1;
-        candidateYear = year + 1;
+        candidateYear = currentYear + 1;
       }
     }
 
