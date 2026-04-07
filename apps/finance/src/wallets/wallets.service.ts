@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateWalletDto } from './dto/update-wallet.dto';
 
 @Injectable()
 export class WalletsService {
@@ -39,16 +40,12 @@ export class WalletsService {
     return wallet;
   }
 
-  async update(id: string, userId: string, data: any) {
+  async update(id: string, userId: string, data: UpdateWalletDto) {
     await this.findOne(id, userId); // Verify ownership
-
-    const updateData: any = { ...data };
-    delete updateData.userId;
-    delete updateData.id;
 
     return this.prisma.wallet.update({
       where: { id },
-      data: updateData,
+      data,
     });
   }
 

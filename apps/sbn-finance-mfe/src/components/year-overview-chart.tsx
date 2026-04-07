@@ -42,12 +42,12 @@ export function YearOverviewChart({
         <ChartTooltip content={<ChartTooltipContent />} />
         <Bar
           dataKey="income"
-          fill={(config as any).income?.color || "#059669"}
+          fill={config['income']?.color || "#059669"}
           radius={4}
         />
         <Bar
           dataKey="expense"
-          fill={(config as any).expense?.color || "#e11d48"}
+          fill={config['expense']?.color || "#e11d48"}
           radius={4}
         />
       </BarChart>

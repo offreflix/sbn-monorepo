@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { WishlistController } from './wishlist.controller';
 import { WishlistService } from './wishlist.service';
+import { CreateWishlistItemDto } from './dto/create-wishlist-item.dto';
+import { UpdateWishlistItemDto } from './dto/update-wishlist-item.dto';
+import { CreatePriceEntryDto } from './dto/create-price-entry.dto';
 
 const mockWishlistService = {
   create: jest.fn(),
@@ -34,7 +37,7 @@ describe('WishlistController', () => {
 
   describe('create', () => {
     it('should call service create with userId merged', () => {
-      const dto: any = { name: 'Teclado', price: 200 };
+      const dto: CreateWishlistItemDto = { name: 'Teclado', price: 200 };
       const mockItem = { id: 'wi1', ...dto };
       mockWishlistService.create.mockResolvedValue(mockItem);
 
@@ -47,7 +50,7 @@ describe('WishlistController', () => {
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.create({} as any, '')).toThrow(
+      expect(() => controller.create({} as CreateWishlistItemDto, '')).toThrow(
         BadRequestException,
       );
     });
@@ -86,7 +89,7 @@ describe('WishlistController', () => {
 
   describe('update', () => {
     it('should call service update with id, userId and body', () => {
-      const body: any = { name: 'Updated' };
+      const body: UpdateWishlistItemDto = { name: 'Updated' };
       mockWishlistService.update.mockResolvedValue({
         id: 'wi1',
         name: 'Updated',
@@ -102,7 +105,7 @@ describe('WishlistController', () => {
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.update('wi1', {} as any, '')).toThrow(
+      expect(() => controller.update('wi1', {} as UpdateWishlistItemDto, '')).toThrow(
         BadRequestException,
       );
     });
@@ -132,7 +135,7 @@ describe('WishlistController', () => {
 
   describe('createPriceEntry', () => {
     it('should call service createPriceEntry with installment fields', () => {
-      const body: any = {
+      const body: CreatePriceEntryDto = {
         price: 3097.91,
         cashPrice: 3097.91,
         installmentCount: 12,
@@ -155,7 +158,7 @@ describe('WishlistController', () => {
     });
 
     it('should call service createPriceEntry without installment fields', () => {
-      const body: any = { price: 500, store: 'Shopee', date: '2026-04-01' };
+      const body: CreatePriceEntryDto = { price: 500, store: 'Shopee', date: '2026-04-01' };
       mockWishlistService.createPriceEntry.mockResolvedValue({
         id: 'pe2',
         ...body,
@@ -171,7 +174,7 @@ describe('WishlistController', () => {
     });
 
     it('should throw BadRequestException when userId is missing', () => {
-      expect(() => controller.createPriceEntry('wi1', {} as any, '')).toThrow(
+      expect(() => controller.createPriceEntry('wi1', {} as CreatePriceEntryDto, '')).toThrow(
         BadRequestException,
       );
     });

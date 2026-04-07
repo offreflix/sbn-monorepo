@@ -32,7 +32,7 @@ describe('AuthService', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let prisma: PrismaService;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let redis: any;
+  let redis: typeof mockRedis;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

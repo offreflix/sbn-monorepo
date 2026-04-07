@@ -4,9 +4,9 @@ import {
   InternalServerErrorException,
   HttpException,
 } from '@nestjs/common';
-import { AxiosRequestConfig } from 'axios';
+import { AxiosError, AxiosRequestConfig } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import { HeadersDictionary, JsonValue } from '../common/types';
+import { HeadersDictionary } from '../common/types';
 
 @Injectable()
 export class ProxyService {
@@ -15,10 +15,10 @@ export class ProxyService {
   async forwardRequest<TResponse = unknown>(
     url: string,
     method: string,
-    data?: any,
+    data?: unknown,
     headers?: HeadersDictionary,
   ): Promise<TResponse> {
-    const config: AxiosRequestConfig<any> = {
+    const config: AxiosRequestConfig = {
       method,
       url,
       data,
@@ -31,7 +31,7 @@ export class ProxyService {
       );
       return response.data;
     } catch (error: unknown) {
-      if (this.isAxiosError(error) && error.response) {
+      if (error instanceof AxiosError && error.response) {
         throw new HttpException(error.response.data, error.response.status);
       }
 
@@ -39,21 +39,5 @@ export class ProxyService {
         error instanceof Error ? error.message : 'Unknown proxy error';
       throw new InternalServerErrorException(message);
     }
-  }
-
-  private isAxiosError(
-    error: unknown,
-  ): error is { response: { data: unknown; status: number } } {
-    // Basic check to see if it has response with data and status
-    // Real AxiosError check would be better but this maintains the previous logic safely
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'response' in error &&
-      typeof (error as any).response === 'object' &&
-      (error as any).response !== null &&
-      'data' in (error as any).response &&
-      'status' in (error as any).response
-    );
   }
 }

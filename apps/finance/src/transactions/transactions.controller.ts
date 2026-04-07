@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import type { NubankFile } from './nubank/nubank-file-parser.interface';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -101,7 +102,7 @@ export class TransactionsController {
   @Post('import/nubank')
   @UseInterceptors(FileInterceptor('file'))
   importNubank(
-    @UploadedFile() file: any,
+    @UploadedFile() file: NubankFile,
     @Body('walletId') walletId: string,
     @Headers('x-user-id') userId: string,
   ) {

@@ -8,6 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { Request } from 'express';
+import type { AuthenticatedUser } from './auth.types';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -41,7 +42,7 @@ export class ApiKeyGuard implements CanActivate {
         throw new UnauthorizedException('Invalid API key');
       }
 
-      (request as any).user = {
+      (request as Request & { user: AuthenticatedUser }).user = {
         userId: response.data.userId,
         email: '',
       };

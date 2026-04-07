@@ -5,6 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { CompositeAuthGuard } from '../auth/composite-auth.guard';
 import { CanActivate } from '@nestjs/common';
 import { Request } from 'express';
+import type { AuthenticatedUser } from '../auth/auth.types';
+
+type TestAuthRequest = Request & { user: AuthenticatedUser };
 
 describe('ProxyController', () => {
   let controller: ProxyController;
@@ -190,13 +193,13 @@ describe('ProxyController', () => {
         method: 'GET',
         originalUrl: '/api/finance/wallets',
         user: { userId: 'real-user-id', email: 'user@example.com' },
-      }) as any;
+      }) as unknown as TestAuthRequest;
 
     it('sets x-user-id from the validated JWT, not from the client', async () => {
       const req = makeAuthReq({ 'x-user-id': 'spoofed-id' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req as any, undefined);
+      await controller.handleFinanceRequest(req, undefined);
 
       const [, , , forwardedHeaders] =
         mockProxyService.forwardRequest.mock.calls[0];
@@ -207,7 +210,7 @@ describe('ProxyController', () => {
       const req = makeAuthReq();
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req as any, undefined);
+      await controller.handleFinanceRequest(req, undefined);
 
       const [, , , forwardedHeaders] =
         mockProxyService.forwardRequest.mock.calls[0];
@@ -218,7 +221,7 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ connection: 'keep-alive', upgrade: 'h2c' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req as any, undefined);
+      await controller.handleFinanceRequest(req, undefined);
 
       const [, , , forwardedHeaders] =
         mockProxyService.forwardRequest.mock.calls[0];
@@ -230,7 +233,7 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ 'x-custom': 'val\r\nX-Evil: injected' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req as any, undefined);
+      await controller.handleFinanceRequest(req, undefined);
 
       const [, , , forwardedHeaders] =
         mockProxyService.forwardRequest.mock.calls[0];
@@ -241,7 +244,7 @@ describe('ProxyController', () => {
       const req = makeAuthReq({ 'accept-language': 'pt-BR' });
       mockProxyService.forwardRequest.mockResolvedValue({});
 
-      await controller.handleFinanceRequest(req as any, undefined);
+      await controller.handleFinanceRequest(req, undefined);
 
       const [, , , forwardedHeaders] =
         mockProxyService.forwardRequest.mock.calls[0];

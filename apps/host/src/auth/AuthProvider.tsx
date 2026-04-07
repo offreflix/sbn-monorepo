@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { authApi } from "../api/auth";
-import type { AuthTokens, User } from "../types/auth";
+import type { AuthResponse, AuthTokens, RefreshResponse, User } from "../types/auth";
 
 type SessionState = {
   user: User | null;
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const applyAuthResponse = (resp: any) => {
+  const applyAuthResponse = (resp: AuthResponse) => {
     // Backend retorna camelCase
     console.log("[AuthProvider] Auth Response:", resp);
     const accessToken = resp.accessToken;
@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!refreshPromise.current) {
       refreshPromise.current = authApi
         .refresh(stored)
-        .then((tokens: any) => {
+        .then((tokens: RefreshResponse) => {
           // Backend retorna camelCase
           const accessToken = tokens.accessToken;
           const refreshToken = tokens.refreshToken || stored;
@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (credentials: { email: string; password: string }) => {
-    const resp = (await authApi.login(credentials)) as any;
+    const resp = await authApi.login(credentials);
     applyAuthResponse(resp);
   };
 
@@ -187,14 +187,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string;
   }) => {
     // Register pode não retornar tokens, então fazemos login após registro
-    const registerResp = (await authApi.register(payload)) as any;
+    const registerResp = await authApi.register(payload);
 
     // Se não tiver tokens, faz login automaticamente
-    if (!registerResp.accessToken && !registerResp.access_token) {
-      const loginResp = (await authApi.login({
+    if (!registerResp.accessToken) {
+      const loginResp = await authApi.login({
         email: payload.email,
         password: payload.password,
-      })) as any;
+      });
       applyAuthResponse(loginResp);
     } else {
       applyAuthResponse(registerResp);

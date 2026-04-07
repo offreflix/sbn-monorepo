@@ -5,6 +5,7 @@ import { WalletsRepository } from '../wallets/wallets.repository';
 import { BalanceService } from '../transactions/balance.service';
 import { RecurrenceQueueService } from './recurrence-queue.service';
 import { CreateRecurrenceDto } from './dto/create-recurrence.dto';
+import { UpdateRecurrenceDto } from './dto/update-recurrence.dto';
 
 @Injectable()
 export class RecurrencesService {
@@ -62,14 +63,15 @@ export class RecurrencesService {
     return recurrence;
   }
 
-  async update(id: string, userId: string, data: any) {
+  async update(id: string, userId: string, data: UpdateRecurrenceDto) {
     const existing = await this.findOne(id, userId);
 
-    const updateData: any = { ...data };
-    if (data.startDate) updateData.startDate = new Date(data.startDate);
-    if (data.endDate) updateData.endDate = new Date(data.endDate);
-    delete updateData.userId;
-    delete updateData.id;
+    const { startDate, endDate, ...rest } = data;
+    const updateData = {
+      ...rest,
+      ...(startDate !== undefined && { startDate: new Date(startDate) }),
+      ...(endDate !== undefined && { endDate: new Date(endDate) }),
+    };
 
     const updated = await this.prisma.recurrence.update({
       where: { id },

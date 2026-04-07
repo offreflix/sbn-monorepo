@@ -51,21 +51,13 @@ export class WishlistService {
     userId: string,
     filters?: { status?: string; priority?: string },
   ) {
-    const where: any = {
-      userId,
-      deletedAt: null,
-    };
-
-    if (filters?.status) {
-      where.status = filters.status;
-    }
-
-    if (filters?.priority) {
-      where.priority = filters.priority;
-    }
-
     return this.prisma.wishlistItem.findMany({
-      where,
+      where: {
+        userId,
+        deletedAt: null,
+        ...(filters?.status ? { status: filters.status } : {}),
+        ...(filters?.priority ? { priority: filters.priority } : {}),
+      },
       orderBy: [
         { priority: 'desc' }, // HIGH, MEDIUM, LOW
         { createdAt: 'desc' },
@@ -86,18 +78,12 @@ export class WishlistService {
   async update(id: string, userId: string, data: UpdateWishlistItemDto) {
     await this.findOne(id, userId); // Verify ownership
 
-    const updateData: any = { ...data };
-    delete updateData.userId;
-    delete updateData.id;
-
-    // If status is being set to PURCHASED, set purchasedAt
-    if (data.status === 'PURCHASED' && !updateData.purchasedAt) {
-      updateData.purchasedAt = new Date();
-    }
-
     return this.prisma.wishlistItem.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...data,
+        ...(data.status === 'PURCHASED' ? { purchasedAt: new Date() } : {}),
+      },
     });
   }
 

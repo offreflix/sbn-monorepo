@@ -124,7 +124,9 @@ export class ProxyController {
           : '';
     const isMultipart = contentType.startsWith('multipart/form-data');
 
-    const data = isMultipart ? (req as any) : (body as JsonValue | undefined);
+    const data: AuthenticatedRequest | JsonValue | undefined = isMultipart
+      ? req
+      : body;
 
     return this.proxyService.forwardRequest(
       url,

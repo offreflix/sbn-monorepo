@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { RecurrencesService } from './recurrences.service';
 import { CreateRecurrenceDto } from './dto/create-recurrence.dto';
+import { UpdateRecurrenceDto } from './dto/update-recurrence.dto';
 
 const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY ?? 'internal-secret';
 
@@ -43,7 +44,7 @@ export class RecurrencesController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: UpdateRecurrenceDto,
     @Headers('x-user-id') userId: string,
   ) {
     if (!userId) throw new BadRequestException('x-user-id header is required');

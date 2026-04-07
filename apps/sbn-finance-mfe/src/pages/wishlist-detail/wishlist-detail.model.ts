@@ -88,7 +88,7 @@ function buildPriceChart(entries: WishlistPriceEntry[]) {
   }));
   const config: ChartConfig = {};
   series.forEach((s) => {
-    (config as any)[s.key] = { label: s.key, color: s.color };
+    config[s.key] = { label: s.key, color: s.color };
   });
   const data = dates.map((date) => {
     const point: Record<string, string | number | null> = { date };

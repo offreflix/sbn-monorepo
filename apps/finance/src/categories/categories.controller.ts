@@ -10,6 +10,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -24,7 +26,10 @@ export class CategoriesController {
   }
 
   @Post()
-  create(@Body() body: any, @Headers('x-user-id') userId: string) {
+  create(
+    @Body() body: CreateCategoryDto,
+    @Headers('x-user-id') userId: string,
+  ) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
     }
@@ -42,7 +47,7 @@ export class CategoriesController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: UpdateCategoryDto,
     @Headers('x-user-id') userId: string,
   ) {
     if (!userId) {

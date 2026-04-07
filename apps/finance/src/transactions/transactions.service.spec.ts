@@ -176,7 +176,7 @@ describe('TransactionsService', () => {
         isPaid: false,
       });
 
-      const dto: any = {
+      const dto: CreateTransactionDto = {
         walletId: 'w1',
         categoryId: 'c1',
         amount: 100,

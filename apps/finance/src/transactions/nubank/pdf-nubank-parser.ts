@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import pdfParse from 'pdf-parse';
 import { TransactionType } from '../dto/create-transaction.dto';
 import {
   NubankFile,
@@ -6,14 +7,11 @@ import {
   NubankParsedRow,
 } from './nubank-file-parser.interface';
 
-declare const require: any;
-
 @Injectable()
 export class PdfNubankParser implements NubankFileParser {
   readonly extension = '.pdf';
 
   async parse(file: NubankFile): Promise<NubankParsedRow[]> {
-    const pdfParse = require('pdf-parse');
     const result = await pdfParse(file.buffer);
     const text: string = result.text || '';
 
