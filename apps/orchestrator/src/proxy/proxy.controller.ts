@@ -91,6 +91,32 @@ export class ProxyController {
   }
 
   @UseGuards(CompositeAuthGuard)
+  @All('health/*')
+  async handleHealthRequest(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: JsonValue | undefined,
+  ) {
+    const healthUrl = this.configService.get<string>(
+      'HEALTH_SERVICE_URL',
+      'http://localhost:56083',
+    );
+    const url = `${healthUrl}${req.originalUrl.replace('/api/health', '')}`;
+    const { user } = req;
+
+    const { authorization: _auth, ...sanitized } = this.sanitizeClientHeaders(
+      req.headers,
+    );
+    void _auth;
+
+    const finalHeaders: HeadersDictionary = {
+      ...sanitized,
+      'x-user-id': user.userId,
+    };
+
+    return this.proxyService.forwardRequest(url, req.method, body, finalHeaders);
+  }
+
+  @UseGuards(CompositeAuthGuard)
   @All('finance/*')
   async handleFinanceRequest(
     @Req() req: AuthenticatedRequest,

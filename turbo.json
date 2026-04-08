@@ -8,7 +8,8 @@
     "REDIS_HOST",
     "REDIS_PORT",
     "AUTH_SERVICE_URL",
-    "FINANCE_SERVICE_URL"
+    "FINANCE_SERVICE_URL",
+    "HEALTH_SERVICE_URL"
   ],
   "tasks": {
     "build": {

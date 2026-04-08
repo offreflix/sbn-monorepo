@@ -65,6 +65,22 @@ services:
       - backend
       - all
 
+  sbn-health:
+    build:
+      context: .
+      dockerfile: apps/health/Dockerfile
+    ports:
+      - '56083:56083'
+    environment:
+      DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
+    depends_on:
+      - postgres
+    networks:
+      - sbn-network
+    profiles:
+      - backend
+      - all
+
   sbn-orchestrator:
     build:
       context: .
@@ -74,12 +90,14 @@ services:
     environment:
       AUTH_SERVICE_URL: http://sbn-auth:56081
       FINANCE_SERVICE_URL: http://sbn-finance:56082
+      HEALTH_SERVICE_URL: http://sbn-health:56083
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: your_jwt_secret_key
     depends_on:
       - sbn-auth
       - sbn-finance
+      - sbn-health
       - redis
     networks:
       - sbn-network

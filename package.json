@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
-    "dev:backend": "turbo run dev --filter=@sbn/auth --filter=@sbn/finance --filter=@sbn/orchestrator --filter=@sbn/jobs",
+    "dev:backend": "turbo run dev --filter=@sbn/auth --filter=@sbn/finance --filter=@sbn/health --filter=@sbn/orchestrator --filter=@sbn/jobs",
     "dev:frontend": "turbo run dev --filter=host --filter=sbn-finance-mfe",
     "build": "turbo run build",
     "test": "turbo run test",
