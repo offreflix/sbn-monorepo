@@ -44,36 +44,56 @@ def register(mcp: FastMCP):
         installments: int | None = None,
         installment_number: int | None = None,
         total_installments: int | None = None,
+        amount_is_per_installment: bool = False,
         recurrence_id: str | None = None,
     ) -> str:
         """Create a new financial transaction.
 
+        INSTALLMENT RULES:
+        - The backend expects `amount` to be the TOTAL purchase value.
+          It will divide that total equally across all installments.
+        - If you know only the per-installment value (e.g. "R$ 10,89 per installment"),
+          set `amount_is_per_installment=True` and pass the per-installment value in `amount`.
+          The tool will automatically calculate the total (amount × installments) before sending.
+        - Example: "4 installments of R$ 10.89" → amount=10.89, installments=4, amount_is_per_installment=True
+          → backend receives amount=43.56, creates 4 × R$ 10.89 installments.
+
         Args:
             wallet_id: UUID of the wallet.
             category_id: UUID of the category.
-            amount: Transaction amount (positive number).
+            amount: TOTAL transaction amount. If amount_is_per_installment=True, pass the per-installment value instead.
             date: ISO date string (e.g. "2025-01-15").
             type: "Receita" (income) or "Despesa" (expense).
             description: Optional description.
             status: "Pendente", "Pago", or "Cancelado".
             is_paid: Whether the transaction is paid.
-            installments: Number of installments.
-            installment_number: Current installment number.
-            total_installments: Total number of installments.
+            installments: Number of installments. Required when creating installment transactions.
+            installment_number: Current installment number (informational only).
+            total_installments: Total number of installments (falls back to `installments` if omitted).
+            amount_is_per_installment: Set True when `amount` represents the value of a single installment.
+                The tool will multiply amount × installments to get the total sent to the backend.
             recurrence_id: UUID of linked recurrence.
         """
+        # Resolve effective installment count (total_installments takes precedence, fallback to installments)
+        effective_installments = total_installments or installments
+
+        # When the caller provides the per-installment amount, calculate the total for the backend
+        final_amount = amount
+        if amount_is_per_installment and effective_installments and effective_installments > 1:
+            final_amount = round(amount * effective_installments, 2)
+
         body = convert_keys_to_camel({
             "wallet_id": wallet_id,
             "category_id": category_id,
-            "amount": amount,
+            "amount": final_amount,
             "date": date,
             "type": type,
             "description": description,
             "status": status,
             "is_paid": is_paid,
-            "installments": installments,
+            "installments": effective_installments,
             "installment_number": installment_number,
-            "total_installments": total_installments,
+            "total_installments": effective_installments,
             "recurrence_id": recurrence_id,
         })
         result = await api_request("POST", "/api/finance/transactions", json=body)
