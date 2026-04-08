@@ -1,5 +1,5 @@
 {
-  "name": "host",
+  "name": "sbn-health-mfe",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,16 +7,23 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev --open",
     "preview": "rsbuild preview",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint ."
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
     "@repo/ui": "workspace:*",
-    "recharts": "^3.6.0"
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.454.0",
+    "react-hook-form": "^7.53.2",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.5.4",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitest/coverage-v8": "2.1.9",
+    "eslint": "^9.39.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.1.2"

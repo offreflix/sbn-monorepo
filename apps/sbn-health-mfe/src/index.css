@@ -1,0 +1,5 @@
+@import "@repo/ui/styles.css";
+@source "../../../packages/ui";
+
+@import "tw-animate-css";
+

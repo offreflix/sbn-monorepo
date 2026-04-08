@@ -14,3 +14,8 @@ declare module "sbn_finance_mfe/App" {
   const RemoteApp: React.ComponentType;
   export default RemoteApp;
 }
+
+declare module "sbn_health_mfe/App" {
+  const RemoteApp: React.ComponentType;
+  export default RemoteApp;
+}

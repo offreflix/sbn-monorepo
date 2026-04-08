@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Documentar o padrão usado no `apps/sbn-finance-mfe` para páginas de feature (especialmente `dashboard`) e servir como guia para aplicar a mesma organização no `apps/host`.
+Documentar o padrão usado no `apps/sbn-finance-mfe` para páginas de feature (especialmente `dashboard`) e servir como guia para aplicar a mesma organização no `apps/health`.
 
 ## Visão geral da arquitetura no `sbn-finance-mfe`
 
@@ -132,7 +132,7 @@ Divisão:
 - `register.view.tsx`: card e formulário, recebendo dados/ações do model.
 - `page.tsx`: cria model e renderiza view.
 
-## Benefícios esperados no host
+## Benefícios esperados no health
 
 - Melhor legibilidade e manutenção.
 - Menor acoplamento entre UI e regra de negócio.
@@ -140,12 +140,12 @@ Divisão:
 - Testes mais simples (model testável sem render completo).
 - Padronização entre apps do monorepo.
 
-## Checklist de adoção no host
+## Checklist de adoção no health
 
 1. Criar pasta por feature em `src/pages`.
-2. Extrair schema/tipos do arquivo único.
-3. Mover lógica de estado e efeitos para `<feature>.model.ts`.
-4. Manter `<feature>.view.tsx` focado em renderização.
+2. Criar schema em cada pasta.
+3. Criar lógica de estado e efeitos para `<feature>.model.ts`.
+4. Criar `<feature>.view.tsx` focado em renderização.
 5. Deixar `page.tsx` mínimo.
-6. Atualizar imports das rotas em `App.tsx` para os novos `page.tsx`.
+6. Criar imports das rotas em `App.tsx` para os novos `page.tsx`.
 7. Repetir para as páginas restantes.

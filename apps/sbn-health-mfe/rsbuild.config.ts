@@ -3,7 +3,6 @@ import { pluginReact } from "@rsbuild/plugin-react";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { dependencies } from "./package.json";
 
-// Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [pluginReact()],
   html: {
@@ -28,27 +27,25 @@ export default defineConfig({
         },
       },
     ],
-    title: "SBN - Personal Finance",
+    title: "SBN Health",
   },
   server: {
-    port: 9000,
+    port: 9002,
     open: false,
   },
+  output: {
+    assetPrefix: process.env.MFE_ASSET_PREFIX || "http://localhost:9002",
+  },
   dev: {
-    assetPrefix: "http://localhost:9000",
+    assetPrefix: "http://localhost:9002",
     hmr: true,
     liveReload: true,
     writeToDisk: true,
-    // Watch MFE dist output so the host reloads the page when the MFE rebuilds
-    watchFiles: {
-      paths: ["../sbn-finance-mfe/dist", "../sbn-health-mfe/dist"],
-      type: "reload-page",
-    },
   },
   tools: {
     rspack: {
       output: {
-        uniqueName: "host",
+        uniqueName: "sbn_health_mfe",
       },
       watchOptions: {
         ignored: [
@@ -64,12 +61,9 @@ export default defineConfig({
       },
       plugins: [
         new ModuleFederationPlugin({
-          name: "host",
-          remotes: {
-            sbn_finance_mfe:
-              "sbn_finance_mfe@http://localhost:9001/mf-manifest.json",
-            sbn_health_mfe:
-              "sbn_health_mfe@http://localhost:9002/mf-manifest.json",
+          name: "sbn_health_mfe",
+          exposes: {
+            "./App": "./src/app.tsx",
           },
           shared: {
             react: {
@@ -94,3 +88,4 @@ export default defineConfig({
     },
   },
 });
+

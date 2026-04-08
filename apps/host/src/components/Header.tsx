@@ -9,6 +9,7 @@ import {
   X,
   Home,
   DollarSign,
+  Activity,
   Settings,
   LogOut,
   Sun,
@@ -111,6 +112,15 @@ export function Header({ title = "SBN Shell", subtitle }: HeaderProps) {
             >
               <DollarSign className="h-4 w-4" />
               <span className="sm:inline">Financeiro</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/health")}
+              className="gap-2"
+            >
+              <Activity className="h-4 w-4" />
+              <span className="sm:inline">Saúde</span>
             </Button>
             <Button
               variant="ghost"
@@ -276,6 +286,18 @@ export function Header({ title = "SBN Shell", subtitle }: HeaderProps) {
               >
                 <DollarSign className="h-4 w-4" />
                 Financeiro
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigate("/health");
+                  setMobileMenuOpen(false);
+                }}
+                className="justify-start gap-2"
+              >
+                <Activity className="h-4 w-4" />
+                Saúde
               </Button>
               <Button
                 variant="ghost"

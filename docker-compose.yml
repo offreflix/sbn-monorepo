@@ -151,6 +151,18 @@ services:
       - frontend
       - all
 
+  sbn-health-mfe:
+    build:
+      context: .
+      dockerfile: apps/sbn-health-mfe/Dockerfile
+    ports:
+      - '9002:80'
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
 volumes:
   postgres_data:
   redis_data:

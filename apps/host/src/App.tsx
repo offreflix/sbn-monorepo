@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { DashboardPage } from "./pages/dashboard/page";
 import { FinanceRemotePage } from "./pages/finance-remote/page";
+import { HealthRemotePage } from "./pages/health-remote/page";
 import { LandingPage } from "./pages/landing/page";
 import { LoginPage } from "./pages/login/page";
 import { RegisterPage } from "./pages/register/page";
@@ -54,6 +55,7 @@ function App() {
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/finance/*" element={<FinanceRemotePage />} />
+              <Route path="/health/*" element={<HealthRemotePage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
