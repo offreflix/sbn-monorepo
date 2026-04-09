@@ -25,6 +25,7 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-separator": "^1.1.8",
     "recharts": "^3.6.0"
   },
   "peerDependencies": {

@@ -207,6 +207,15 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
     return {
       count: all.length,
       calories: all.reduce((acc, it) => acc + (it.calcCalories || 0), 0),
+      protein: Math.round(
+        all.reduce((acc, it) => acc + Number(it.calcProtein || 0), 0) * 10,
+      ) / 10,
+      carbs: Math.round(
+        all.reduce((acc, it) => acc + Number(it.calcCarbs || 0), 0) * 10,
+      ) / 10,
+      fat: Math.round(
+        all.reduce((acc, it) => acc + Number(it.calcFat || 0), 0) * 10,
+      ) / 10,
     }
   }, [logs])
 
