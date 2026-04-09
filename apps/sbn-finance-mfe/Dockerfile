@@ -12,6 +12,11 @@ RUN pnpm install --frozen-lockfile
 
 COPY apps/sbn-finance-mfe ./apps/sbn-finance-mfe
 
+ARG MFE_ASSET_PREFIX=http://localhost:9001
+ARG VITE_API_BASE=http://localhost:56080
+ENV MFE_ASSET_PREFIX=$MFE_ASSET_PREFIX
+ENV VITE_API_BASE=$VITE_API_BASE
+
 RUN pnpm --filter sbn-finance-mfe build
 
 FROM nginx:alpine

@@ -6,6 +6,19 @@ import { dependencies } from "./package.json";
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
   plugins: [pluginReact()],
+  source: {
+    define: {
+      "import.meta.env.VITE_API_BASE": JSON.stringify(
+        process.env.VITE_API_BASE ?? "http://localhost:56080",
+      ),
+      "import.meta.env.VITE_FINANCE_MFE_URL": JSON.stringify(
+        process.env.VITE_FINANCE_MFE_URL ?? "http://localhost:9001",
+      ),
+      "import.meta.env.VITE_HEALTH_MFE_URL": JSON.stringify(
+        process.env.VITE_HEALTH_MFE_URL ?? "http://localhost:9002",
+      ),
+    },
+  },
   html: {
     tags: [
       {
@@ -66,10 +79,8 @@ export default defineConfig({
         new ModuleFederationPlugin({
           name: "host",
           remotes: {
-            sbn_finance_mfe:
-              "sbn_finance_mfe@http://localhost:9001/mf-manifest.json",
-            sbn_health_mfe:
-              "sbn_health_mfe@http://localhost:9002/mf-manifest.json",
+            sbn_finance_mfe: `sbn_finance_mfe@${process.env.VITE_FINANCE_MFE_URL || "http://localhost:9001"}/mf-manifest.json`,
+            sbn_health_mfe: `sbn_health_mfe@${process.env.VITE_HEALTH_MFE_URL || "http://localhost:9002"}/mf-manifest.json`,
           },
           shared: {
             react: {

@@ -5,6 +5,13 @@ import { dependencies } from "./package.json";
 
 export default defineConfig({
   plugins: [pluginReact()],
+  source: {
+    define: {
+      "import.meta.env.VITE_API_BASE": JSON.stringify(
+        process.env.VITE_API_BASE ?? "http://localhost:56080",
+      ),
+    },
+  },
   html: {
     tags: [
       {

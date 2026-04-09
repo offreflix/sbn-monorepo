@@ -11,6 +11,11 @@ RUN pnpm install --frozen-lockfile
 
 COPY apps/sbn-health-mfe ./apps/sbn-health-mfe
 
+ARG MFE_ASSET_PREFIX=http://localhost:9002
+ARG VITE_API_BASE=http://localhost:56080
+ENV MFE_ASSET_PREFIX=$MFE_ASSET_PREFIX
+ENV VITE_API_BASE=$VITE_API_BASE
+
 RUN pnpm --filter sbn-health-mfe build
 
 FROM nginx:alpine

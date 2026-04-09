@@ -131,6 +131,10 @@ services:
     build:
       context: .
       dockerfile: apps/host/Dockerfile
+      args:
+        VITE_API_BASE: http://${LOCAL_IP:-localhost}
+        VITE_FINANCE_MFE_URL: http://${LOCAL_IP:-localhost}/mfe/finance
+        VITE_HEALTH_MFE_URL: http://${LOCAL_IP:-localhost}/mfe/health
     ports:
       - '9000:80'
     networks:
@@ -143,6 +147,9 @@ services:
     build:
       context: .
       dockerfile: apps/sbn-finance-mfe/Dockerfile
+      args:
+        MFE_ASSET_PREFIX: http://${LOCAL_IP:-localhost}/mfe/finance
+        VITE_API_BASE: http://${LOCAL_IP:-localhost}
     ports:
       - '9001:80'
     networks:
@@ -155,8 +162,28 @@ services:
     build:
       context: .
       dockerfile: apps/sbn-health-mfe/Dockerfile
+      args:
+        MFE_ASSET_PREFIX: http://${LOCAL_IP:-localhost}/mfe/health
+        VITE_API_BASE: http://${LOCAL_IP:-localhost}
     ports:
       - '9002:80'
+    networks:
+      - sbn-network
+    profiles:
+      - frontend
+      - all
+
+  sbn-nginx:
+    image: nginx:alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/local.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - sbn-host
+      - sbn-finance-mfe
+      - sbn-health-mfe
+      - sbn-orchestrator
     networks:
       - sbn-network
     profiles:
