@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -140,9 +141,61 @@ export function FoodsView({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-md text-sm font-semibold shrink-0 w-fit">
-                    <Flame className="h-3.5 w-3.5" />
-                    {f.caloriesPerServing} kcal
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0 sm:justify-end">
+                    {/* Calorias (Destaque Principal) */}
+                    <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-2.5 py-1 rounded-md text-sm font-bold w-fit">
+                      <Flame className="h-4 w-4" />
+                      {f.caloriesPerServing} kcal
+                    </div>
+
+                    {/* Macros (Tags Secundárias) */}
+                    {(f.proteinPerServing != null ||
+                      f.carbsPerServing != null ||
+                      f.fatPerServing != null) && (
+                      <div className="flex items-center gap-1.5">
+                        {f.proteinPerServing != null && (
+                          <div
+                            className="flex items-baseline gap-0.5 px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                            title="Proteínas"
+                          >
+                            <span className="text-xs font-semibold tabular-nums">
+                              {f.proteinPerServing}g
+                            </span>
+                            <span className="text-[10px] uppercase font-bold opacity-70">
+                              P
+                            </span>
+                          </div>
+                        )}
+
+                        {f.carbsPerServing != null && (
+                          <div
+                            className="flex items-baseline gap-0.5 px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                            title="Carboidratos"
+                          >
+                            <span className="text-xs font-semibold tabular-nums">
+                              {f.carbsPerServing}g
+                            </span>
+                            <span className="text-[10px] uppercase font-bold opacity-70">
+                              C
+                            </span>
+                          </div>
+                        )}
+
+                        {f.fatPerServing != null && (
+                          <div
+                            className="flex items-baseline gap-0.5 px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                            title="Gorduras"
+                          >
+                            <span className="text-xs font-semibold tabular-nums">
+                              {f.fatPerServing}g
+                            </span>
+                            <span className="text-[10px] uppercase font-bold opacity-70">
+                              G
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
