@@ -37,6 +37,13 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
     defaultValues: createMealLogDefaultValues,
   })
 
+  const groups: Array<[MealType, string]> = [
+    ['breakfast', 'Café da manhã'],
+    ['lunch', 'Almoço'],
+    ['dinner', 'Jantar'],
+    ['snack', 'Lanche'],
+  ]
+
   const selectedFoodId = useWatch({ control: form.control, name: 'foodId' })
   const quantity = useWatch({ control: form.control, name: 'quantity' })
   const servingMode = useWatch({ control: form.control, name: 'servingMode' })
@@ -107,15 +114,18 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
       amount: rawAmount,
       unit: selectedFood.servingSizeUnit,
       kcal: Math.round(selectedFood.caloriesPerServing * ratio),
-      protein: selectedFood.proteinPerServing != null
-        ? Math.round(Number(selectedFood.proteinPerServing) * ratio * 10) / 10
-        : null,
-      carbs: selectedFood.carbsPerServing != null
-        ? Math.round(Number(selectedFood.carbsPerServing) * ratio * 10) / 10
-        : null,
-      fat: selectedFood.fatPerServing != null
-        ? Math.round(Number(selectedFood.fatPerServing) * ratio * 10) / 10
-        : null,
+      protein:
+        selectedFood.proteinPerServing != null
+          ? Math.round(Number(selectedFood.proteinPerServing) * ratio * 10) / 10
+          : null,
+      carbs:
+        selectedFood.carbsPerServing != null
+          ? Math.round(Number(selectedFood.carbsPerServing) * ratio * 10) / 10
+          : null,
+      fat:
+        selectedFood.fatPerServing != null
+          ? Math.round(Number(selectedFood.fatPerServing) * ratio * 10) / 10
+          : null,
     }
   }, [selectedFood, quantity, servingMode])
 
@@ -201,7 +211,7 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
   }, [logs])
 
   return {
-    data: { logs, foods, selectedFood, servingPreview, groupedTotal },
+    data: { logs, foods, selectedFood, servingPreview, groupedTotal, groups },
     state: {
       loading,
       isCreateOpen,

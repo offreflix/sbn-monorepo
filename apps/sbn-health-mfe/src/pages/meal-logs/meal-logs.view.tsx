@@ -16,29 +16,22 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui";
-import type { MealLogsModelOutput } from "./meal-logs.model";
-import { Plus, RefreshCcw, Trash2 } from "lucide-react";
-import { Controller } from "react-hook-form";
+} from '@repo/ui'
+import type { MealLogsModelOutput } from './meal-logs.model'
+import { Plus, RefreshCcw, Trash2 } from 'lucide-react'
+import { Controller } from 'react-hook-form'
 
 export function MealLogsView({
-  data: { logs, foods, selectedFood, servingPreview, groupedTotal },
+  data: { logs, foods, selectedFood, servingPreview, groupedTotal, groups },
   state: { loading, isCreateOpen, foodSearch, saving, deletingId, form },
   setters: { setIsCreateOpen, setFoodSearch },
   actions: { reload, openCreate, submitCreateMealLog, deleteMealLog },
 }: MealLogsModelOutput) {
-  const groups: Array<["breakfast" | "lunch" | "dinner" | "snack", string]> = [
-    ["breakfast", "Café da manhã"],
-    ["lunch", "Almoço"],
-    ["dinner", "Jantar"],
-    ["snack", "Lanche"],
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Refeições</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Refeiçaões</h2>
           <p className="text-muted-foreground">Registros do dia</p>
         </div>
         <div className="flex items-center gap-2">
@@ -81,14 +74,14 @@ export function MealLogsView({
         <h3 className="text-xl font-semibold">Por refeição</h3>
         <div className="grid gap-4 lg:grid-cols-2">
           {groups.map(([key, label]) => {
-            const items = logs[key] ?? [];
+            const items = logs[key] ?? []
             return (
               <Card key={key} variant="glass">
                 <CardHeader>
                   <CardTitle className="text-base font-medium flex items-center justify-between">
                     <span>{label}</span>
                     <span className="text-sm font-normal text-muted-foreground">
-                      {loading ? "—" : `${items.length} itens`}
+                      {loading ? '—' : `${items.length} itens`}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -96,7 +89,9 @@ export function MealLogsView({
                   {loading ? (
                     <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
                   ) : items.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">Sem registros</div>
+                    <div className="text-sm text-muted-foreground">
+                      Sem registros
+                    </div>
                   ) : (
                     items.map((it) => (
                       <div
@@ -104,7 +99,9 @@ export function MealLogsView({
                         className="flex items-center justify-between text-sm"
                       >
                         <div className="min-w-0">
-                          <div className="truncate">{it.food?.name ?? "Alimento"}</div>
+                          <div className="truncate">
+                            {it.food?.name ?? 'Alimento'}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {it.amountConsumed} {it.unitConsumed}
                           </div>
@@ -128,7 +125,7 @@ export function MealLogsView({
                   )}
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
       </section>
@@ -180,8 +177,8 @@ export function MealLogsView({
               />
               {selectedFood && (
                 <div className="text-xs text-muted-foreground">
-                  1 porção = {selectedFood.servingSizeValue}{" "}
-                  {selectedFood.servingSizeUnit} •{" "}
+                  1 porção = {selectedFood.servingSizeValue}{' '}
+                  {selectedFood.servingSizeUnit} •{' '}
                   {selectedFood.caloriesPerServing} kcal
                 </div>
               )}
@@ -217,7 +214,7 @@ export function MealLogsView({
               <div className="flex gap-2">
                 <div className="w-28 shrink-0">
                   <Input
-                    {...form.register("quantity")}
+                    {...form.register('quantity')}
                     inputMode="decimal"
                     placeholder="1"
                     disabled={saving}
@@ -237,10 +234,13 @@ export function MealLogsView({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="serving">
-                          porção{selectedFood ? ` (${selectedFood.servingSizeValue}${selectedFood.servingSizeUnit})` : ""}
+                          porção
+                          {selectedFood
+                            ? ` (${selectedFood.servingSizeValue}${selectedFood.servingSizeUnit})`
+                            : ''}
                         </SelectItem>
                         <SelectItem value="unit">
-                          {selectedFood?.servingSizeUnit ?? "unidade"}
+                          {selectedFood?.servingSizeUnit ?? 'unidade'}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -252,13 +252,16 @@ export function MealLogsView({
                 <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      = {servingPreview.amount}{servingPreview.unit}
+                      = {servingPreview.amount}
+                      {servingPreview.unit}
                     </span>
                     <span className="font-semibold tabular-nums">
                       {servingPreview.kcal} kcal
                     </span>
                   </div>
-                  {(servingPreview.protein != null || servingPreview.carbs != null || servingPreview.fat != null) && (
+                  {(servingPreview.protein != null ||
+                    servingPreview.carbs != null ||
+                    servingPreview.fat != null) && (
                     <div className="flex gap-3 text-xs text-muted-foreground tabular-nums">
                       {servingPreview.protein != null && (
                         <span>P {servingPreview.protein}g</span>
@@ -285,12 +288,12 @@ export function MealLogsView({
                 Cancelar
               </Button>
               <Button type="submit" disabled={saving}>
-                {saving ? "Salvando..." : "Salvar"}
+                {saving ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
