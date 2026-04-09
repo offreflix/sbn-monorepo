@@ -15,7 +15,7 @@ export class SummaryService {
     const dateIso = dateStr ?? new Date().toISOString().split('T')[0];
 
     const [goal, meals, water] = await Promise.all([
-      this.goalsService.findCurrent(userId).catch(() => null),
+      this.goalsService.findForDate(userId, new Date(dateIso)).catch(() => null),
       this.mealLogsService.findByDate(userId, dateIso),
       this.waterLogsService.findByDate(userId, dateIso),
     ]);

@@ -28,10 +28,8 @@ export class MealLogsService {
       ? Number(food.fatPerServing) * ratio
       : undefined;
 
-    const loggedAtDate = dto.loggedAtDate
-      ? new Date(dto.loggedAtDate)
-      : new Date();
-    loggedAtDate.setHours(0, 0, 0, 0);
+    const loggedAtDate = dto.loggedAtDate ? new Date(dto.loggedAtDate) : new Date();
+    loggedAtDate.setUTCHours(0, 0, 0, 0);
 
     return this.mealLogsRepository.create({
       userId,

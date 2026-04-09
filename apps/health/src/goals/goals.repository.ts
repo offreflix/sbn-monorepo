@@ -16,11 +16,11 @@ export class GoalsRepository {
     });
   }
 
-  findCurrent(userId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  findCurrent(userId: string, asOf: Date = new Date()) {
+    const d = new Date(asOf);
+    d.setUTCHours(0, 0, 0, 0);
     return this.prisma.goal.findFirst({
-      where: { userId, activeFrom: { lte: today } },
+      where: { userId, activeFrom: { lte: d } },
       orderBy: { activeFrom: 'desc' },
     });
   }

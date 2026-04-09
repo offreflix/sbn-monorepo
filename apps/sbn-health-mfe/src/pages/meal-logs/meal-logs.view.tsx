@@ -22,7 +22,7 @@ import { Plus, RefreshCcw, Trash2 } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 export function MealLogsView({
-  data: { logs, foods, selectedFood, groupedTotal },
+  data: { logs, foods, selectedFood, servingPreview, groupedTotal },
   state: { loading, isCreateOpen, foodSearch, saving, deletingId, form },
   setters: { setIsCreateOpen, setFoodSearch },
   actions: { reload, openCreate, submitCreateMealLog, deleteMealLog },
@@ -134,7 +134,7 @@ export function MealLogsView({
       </section>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Adicionar refeição</DialogTitle>
             <DialogDescription>
@@ -180,56 +180,99 @@ export function MealLogsView({
               />
               {selectedFood && (
                 <div className="text-xs text-muted-foreground">
-                  {selectedFood.caloriesPerServing} kcal por{" "}
-                  {selectedFood.servingSizeValue} {selectedFood.servingSizeUnit}
+                  1 porção = {selectedFood.servingSizeValue}{" "}
+                  {selectedFood.servingSizeUnit} •{" "}
+                  {selectedFood.caloriesPerServing} kcal
                 </div>
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Refeição</Label>
+            <div className="space-y-2">
+              <Label>Refeição</Label>
+              <Controller
+                control={form.control}
+                name="mealType"
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={saving}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="breakfast">Café da manhã</SelectItem>
+                      <SelectItem value="lunch">Almoço</SelectItem>
+                      <SelectItem value="dinner">Jantar</SelectItem>
+                      <SelectItem value="snack">Lanche</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Quantidade</Label>
+              <div className="flex gap-2">
+                <div className="w-28 shrink-0">
+                  <Input
+                    {...form.register("quantity")}
+                    inputMode="decimal"
+                    placeholder="1"
+                    disabled={saving}
+                  />
+                </div>
                 <Controller
                   control={form.control}
-                  name="mealType"
+                  name="servingMode"
                   render={({ field }) => (
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={saving}
+                      disabled={saving || !selectedFood}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="breakfast">Café da manhã</SelectItem>
-                        <SelectItem value="lunch">Almoço</SelectItem>
-                        <SelectItem value="dinner">Jantar</SelectItem>
-                        <SelectItem value="snack">Lanche</SelectItem>
+                        <SelectItem value="serving">
+                          porção{selectedFood ? ` (${selectedFood.servingSizeValue}${selectedFood.servingSizeUnit})` : ""}
+                        </SelectItem>
+                        <SelectItem value="unit">
+                          {selectedFood?.servingSizeUnit ?? "unidade"}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="amount">Quantidade</Label>
-                <Input
-                  id="amount"
-                  {...form.register("amountConsumed")}
-                  inputMode="decimal"
-                  disabled={saving}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="unit">Unidade</Label>
-              <Input
-                id="unit"
-                {...form.register("unitConsumed")}
-                disabled={saving}
-              />
+              {servingPreview && (
+                <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      = {servingPreview.amount}{servingPreview.unit}
+                    </span>
+                    <span className="font-semibold tabular-nums">
+                      {servingPreview.kcal} kcal
+                    </span>
+                  </div>
+                  {(servingPreview.protein != null || servingPreview.carbs != null || servingPreview.fat != null) && (
+                    <div className="flex gap-3 text-xs text-muted-foreground tabular-nums">
+                      {servingPreview.protein != null && (
+                        <span>P {servingPreview.protein}g</span>
+                      )}
+                      {servingPreview.carbs != null && (
+                        <span>C {servingPreview.carbs}g</span>
+                      )}
+                      {servingPreview.fat != null && (
+                        <span>G {servingPreview.fat}g</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-2">

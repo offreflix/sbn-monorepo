@@ -8,7 +8,7 @@ export class WaterLogsService {
 
   create(userId: string, dto: CreateWaterLogDto) {
     const loggedDate = dto.loggedDate ? new Date(dto.loggedDate) : new Date();
-    loggedDate.setHours(0, 0, 0, 0);
+    loggedDate.setUTCHours(0, 0, 0, 0);
     return this.waterLogsRepository.create({ userId, volumeMl: dto.volumeMl, loggedDate });
   }
 

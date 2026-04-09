@@ -41,19 +41,20 @@ export function useGoalsModel(_props: GoalsProps) {
   const [loading, setLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const defaultValues = {
+    dailyCalorieGoal: '',
+    proteinAsPct: false,
+    proteinGoalG: '',
+    carbsAsPct: false,
+    carbsGoalG: '',
+    fatAsPct: false,
+    fatGoalG: '',
+    waterGoalMl: '',
+  }
 
   const form = useForm<CreateGoalForm>({
     resolver: zodResolver(createGoalSchema),
-    defaultValues: {
-      dailyCalorieGoal: '',
-      proteinAsPct: false,
-      proteinGoalG: '',
-      carbsAsPct: false,
-      carbsGoalG: '',
-      fatAsPct: false,
-      fatGoalG: '',
-      waterGoalMl: '',
-    },
+    defaultValues,
   })
 
   const load = useCallback(async () => {
@@ -81,16 +82,20 @@ export function useGoalsModel(_props: GoalsProps) {
   }, [load])
 
   const openCreate = () => {
-    form.reset({
-      dailyCalorieGoal: '',
-      proteinAsPct: false,
-      proteinGoalG: '',
-      carbsAsPct: false,
-      carbsGoalG: '',
-      fatAsPct: false,
-      fatGoalG: '',
-      waterGoalMl: '',
-    })
+    form.reset(
+      current
+        ? {
+            dailyCalorieGoal: String(current.dailyCalorieGoal),
+            proteinAsPct: false,
+            proteinGoalG: String(current.proteinGoalG),
+            carbsAsPct: false,
+            carbsGoalG: String(current.carbsGoalG),
+            fatAsPct: false,
+            fatGoalG: String(current.fatGoalG),
+            waterGoalMl: current.waterGoalMl ? String(current.waterGoalMl) : '',
+          }
+        : defaultValues,
+    )
     setIsCreateOpen(true)
   }
 
@@ -120,7 +125,7 @@ export function useGoalsModel(_props: GoalsProps) {
         fatGoalG = computed
       }
 
-      await healthApi.goals.create({
+      const payload = {
         dailyCalorieGoal: dailyCalories,
         proteinGoalG,
         carbsGoalG,
@@ -128,8 +133,15 @@ export function useGoalsModel(_props: GoalsProps) {
         waterGoalMl: values.waterGoalMl
           ? Number(values.waterGoalMl)
           : undefined,
-      })
-      toast.success('Meta criada')
+      }
+
+      if (current) {
+        await healthApi.goals.update(current.id, payload)
+        toast.success('Meta atualizada')
+      } else {
+        await healthApi.goals.create(payload)
+        toast.success('Meta criada')
+      }
       setIsCreateOpen(false)
       await load()
     } catch (e) {
@@ -161,58 +173,90 @@ export function useGoalsModel(_props: GoalsProps) {
   const carbsReg = form.register('carbsGoalG')
   const fatReg = form.register('fatGoalG')
 
-  const setVal = <K extends keyof CreateGoalForm>(field: K, value: CreateGoalForm[K]) =>
-    form.setValue(field, value, { shouldDirty: true, shouldValidate: true })
+  const setOpts = { shouldDirty: true, shouldValidate: true } as const
 
   const toggleProteinAsPct = (checked: boolean) => {
-    setVal('proteinAsPct', checked)
+    form.setValue('proteinAsPct', checked, setOpts)
     if (!checked) return
-    const clamped = clampPct(String(toNumberOrZero(proteinValue)), 100 - carbsPct - fatPct)
-    if (clamped !== proteinValue) setVal('proteinGoalG', clamped)
+    const clamped = clampPct(
+      String(toNumberOrZero(proteinValue)),
+      100 - carbsPct - fatPct,
+    )
+    if (clamped !== proteinValue)
+      form.setValue('proteinGoalG', clamped, setOpts)
   }
 
   const toggleCarbsAsPct = (checked: boolean) => {
-    setVal('carbsAsPct', checked)
+    form.setValue('carbsAsPct', checked, setOpts)
     if (!checked) return
-    const clamped = clampPct(String(toNumberOrZero(carbsValue)), 100 - proteinPct - fatPct)
-    if (clamped !== carbsValue) setVal('carbsGoalG', clamped)
+    const clamped = clampPct(
+      String(toNumberOrZero(carbsValue)),
+      100 - proteinPct - fatPct,
+    )
+    if (clamped !== carbsValue) form.setValue('carbsGoalG', clamped, setOpts)
   }
 
   const toggleFatAsPct = (checked: boolean) => {
-    setVal('fatAsPct', checked)
+    form.setValue('fatAsPct', checked, setOpts)
     if (!checked) return
-    const clamped = clampPct(String(toNumberOrZero(fatValue)), 100 - proteinPct - carbsPct)
-    if (clamped !== fatValue) setVal('fatGoalG', clamped)
+    const clamped = clampPct(
+      String(toNumberOrZero(fatValue)),
+      100 - proteinPct - carbsPct,
+    )
+    if (clamped !== fatValue) form.setValue('fatGoalG', clamped, setOpts)
   }
 
   const onProteinChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!proteinAsPct) return proteinReg.onChange(e)
-    setVal('proteinGoalG', clampPct(e.target.value, 100 - carbsPct - fatPct))
+    form.setValue(
+      'proteinGoalG',
+      clampPct(e.target.value, 100 - carbsPct - fatPct),
+      setOpts,
+    )
   }
 
   const onCarbsChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!carbsAsPct) return carbsReg.onChange(e)
-    setVal('carbsGoalG', clampPct(e.target.value, 100 - proteinPct - fatPct))
+    form.setValue(
+      'carbsGoalG',
+      clampPct(e.target.value, 100 - proteinPct - fatPct),
+      setOpts,
+    )
   }
 
   const onFatChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!fatAsPct) return fatReg.onChange(e)
-    setVal('fatGoalG', clampPct(e.target.value, 100 - proteinPct - carbsPct))
+    form.setValue(
+      'fatGoalG',
+      clampPct(e.target.value, 100 - proteinPct - carbsPct),
+      setOpts,
+    )
   }
 
   return {
     data: { current, history },
-    state: { loading, isCreateOpen, saving, form },
+    state: { loading, isCreateOpen, saving, form, isEditing: current !== null },
     setters: { setIsCreateOpen },
     actions: { reload: load, openCreate, submitCreateGoal },
     macros: {
       dailyCalories,
-      proteinAsPct, carbsAsPct, fatAsPct,
-      proteinPct, carbsPct, fatPct,
-      totalPct, anyPct,
-      proteinReg, carbsReg, fatReg,
-      toggleProteinAsPct, toggleCarbsAsPct, toggleFatAsPct,
-      onProteinChange, onCarbsChange, onFatChange,
+      proteinAsPct,
+      carbsAsPct,
+      fatAsPct,
+      proteinPct,
+      carbsPct,
+      fatPct,
+      totalPct,
+      anyPct,
+      proteinReg,
+      carbsReg,
+      fatReg,
+      toggleProteinAsPct,
+      toggleCarbsAsPct,
+      toggleFatAsPct,
+      onProteinChange,
+      onCarbsChange,
+      onFatChange,
     },
   }
 }

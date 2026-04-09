@@ -27,7 +27,7 @@ const SimpleProgress = ({ value }: { value: number }) => (
 
 export function GoalsView({
   data: { current, history },
-  state: { loading, isCreateOpen, saving, form },
+  state: { loading, isCreateOpen, saving, form, isEditing },
   setters: { setIsCreateOpen },
   actions: { reload, openCreate, submitCreateGoal },
   macros: {
@@ -50,7 +50,7 @@ export function GoalsView({
         <div className="flex items-center gap-2">
           <Button onClick={openCreate} className="gap-2" disabled={loading}>
             <Plus className="h-4 w-4" />
-            Nova meta
+            {isEditing ? 'Editar meta' : 'Nova meta'}
           </Button>
           <Button
             variant="ghost"
@@ -125,7 +125,7 @@ export function GoalsView({
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nova meta</DialogTitle>
+            <DialogTitle>{isEditing ? 'Editar meta' : 'Nova meta'}</DialogTitle>
             <DialogDescription>
               Defina suas metas diárias de calorias, macros e hidratação.
             </DialogDescription>

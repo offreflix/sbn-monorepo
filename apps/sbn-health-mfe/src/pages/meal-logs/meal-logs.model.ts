@@ -13,8 +13,8 @@ import {
 const createMealLogDefaultValues: CreateMealLogFormValues = {
   foodId: '',
   mealType: 'lunch',
-  amountConsumed: '100',
-  unitConsumed: 'g',
+  quantity: '1',
+  servingMode: 'serving',
 }
 
 export function useMealLogsModel({ selectedDate }: MealLogsProps) {
@@ -37,10 +37,9 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
     defaultValues: createMealLogDefaultValues,
   })
 
-  const selectedFoodId = useWatch({
-    control: form.control,
-    name: 'foodId',
-  })
+  const selectedFoodId = useWatch({ control: form.control, name: 'foodId' })
+  const quantity = useWatch({ control: form.control, name: 'quantity' })
+  const servingMode = useWatch({ control: form.control, name: 'servingMode' })
 
   const load = useCallback(async () => {
     try {
@@ -95,6 +94,31 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
     [foods, selectedFoodId],
   )
 
+  const servingPreview = useMemo(() => {
+    if (!selectedFood) return null
+    const qty = Number(quantity)
+    if (!Number.isFinite(qty) || qty <= 0) return null
+
+    const servingSize = Number(selectedFood.servingSizeValue)
+    const rawAmount = servingMode === 'serving' ? qty * servingSize : qty
+    const ratio = rawAmount / servingSize
+
+    return {
+      amount: rawAmount,
+      unit: selectedFood.servingSizeUnit,
+      kcal: Math.round(selectedFood.caloriesPerServing * ratio),
+      protein: selectedFood.proteinPerServing != null
+        ? Math.round(Number(selectedFood.proteinPerServing) * ratio * 10) / 10
+        : null,
+      carbs: selectedFood.carbsPerServing != null
+        ? Math.round(Number(selectedFood.carbsPerServing) * ratio * 10) / 10
+        : null,
+      fat: selectedFood.fatPerServing != null
+        ? Math.round(Number(selectedFood.fatPerServing) * ratio * 10) / 10
+        : null,
+    }
+  }, [selectedFood, quantity, servingMode])
+
   const openCreate = async () => {
     form.reset(createMealLogDefaultValues)
     setIsCreateOpen(true)
@@ -113,11 +137,18 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
     async (values) => {
       try {
         setSaving(true)
+        if (!selectedFood) throw new Error('Alimento não encontrado')
+
+        const qty = Number(values.quantity)
+        const servingSize = Number(selectedFood.servingSizeValue)
+        const amountConsumed =
+          values.servingMode === 'serving' ? qty * servingSize : qty
+
         await healthApi.mealLogs.create({
           foodId: values.foodId,
           mealType: values.mealType as MealType,
-          amountConsumed: Number(values.amountConsumed),
-          unitConsumed: values.unitConsumed.trim(),
+          amountConsumed,
+          unitConsumed: selectedFood.servingSizeUnit,
           loggedAtDate: selectedDate,
         })
         setIsCreateOpen(false)
@@ -170,7 +201,7 @@ export function useMealLogsModel({ selectedDate }: MealLogsProps) {
   }, [logs])
 
   return {
-    data: { logs, foods, selectedFood, groupedTotal },
+    data: { logs, foods, selectedFood, servingPreview, groupedTotal },
     state: {
       loading,
       isCreateOpen,

@@ -13,7 +13,7 @@ export class GoalsService {
 
   async create(userId: string, dto: CreateGoalDto) {
     const activeFrom = dto.activeFrom ? new Date(dto.activeFrom) : new Date();
-    activeFrom.setHours(0, 0, 0, 0);
+    activeFrom.setUTCHours(0, 0, 0, 0);
 
     try {
       return await this.goalsRepository.create({
@@ -45,6 +45,10 @@ export class GoalsService {
       throw new NotFoundException('No active goal found for today');
     }
     return goal;
+  }
+
+  findForDate(userId: string, date: Date) {
+    return this.goalsRepository.findCurrent(userId, date);
   }
 
   async update(id: string, userId: string, dto: UpdateGoalDto) {
