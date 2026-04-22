@@ -30,6 +30,7 @@ import {
   Search,
 } from 'lucide-react'
 import { Controller } from 'react-hook-form'
+import { MacronutrientsBadge } from '../../components/macro-badge'
 
 // Utilitário para mapear ícones por tipo de refeição
 const getMealIcon = (key: string) => {
@@ -121,6 +122,18 @@ export function MealLogsView({
                   {groupedTotal.count === 1 ? 'item' : 'itens'}
                 </div>
               </div>
+
+              <div className="flex gap-1.5 text-sm">
+                <MacronutrientsBadge
+                  variant="protein"
+                  value={groupedTotal.protein}
+                />
+                <MacronutrientsBadge
+                  variant="carbs"
+                  value={groupedTotal.carbs}
+                />
+                <MacronutrientsBadge variant="fat" value={groupedTotal.fat} />
+              </div>
               <div className="flex gap-4 text-sm">
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-blue-500" />
@@ -161,10 +174,27 @@ export function MealLogsView({
         <div className="grid gap-6 lg:grid-cols-2">
           {groups.map(([key, label]) => {
             const items = logs[key] ?? []
-            const groupCalories = items.reduce((acc, it) => acc + (it.calcCalories || 0), 0)
-            const groupProtein = Math.round(items.reduce((acc, it) => acc + Number(it.calcProtein || 0), 0) * 10) / 10
-            const groupCarbs = Math.round(items.reduce((acc, it) => acc + Number(it.calcCarbs || 0), 0) * 10) / 10
-            const groupFat = Math.round(items.reduce((acc, it) => acc + Number(it.calcFat || 0), 0) * 10) / 10
+            const groupCalories = items.reduce(
+              (acc, it) => acc + (it.calcCalories || 0),
+              0,
+            )
+            const groupProtein =
+              Math.round(
+                items.reduce(
+                  (acc, it) => acc + Number(it.calcProtein || 0),
+                  0,
+                ) * 10,
+              ) / 10
+            const groupCarbs =
+              Math.round(
+                items.reduce((acc, it) => acc + Number(it.calcCarbs || 0), 0) *
+                  10,
+              ) / 10
+            const groupFat =
+              Math.round(
+                items.reduce((acc, it) => acc + Number(it.calcFat || 0), 0) *
+                  10,
+              ) / 10
 
             return (
               <Card key={key} variant="glass" className="flex flex-col">
@@ -234,15 +264,24 @@ export function MealLogsView({
                         <div className="flex gap-3 text-xs">
                           <span className="text-muted-foreground">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 mr-1 align-middle" />
-                            <span className="tabular-nums font-medium text-foreground">{groupProtein}g</span> prot
+                            <span className="tabular-nums font-medium text-foreground">
+                              {groupProtein}g
+                            </span>{' '}
+                            prot
                           </span>
                           <span className="text-muted-foreground">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 mr-1 align-middle" />
-                            <span className="tabular-nums font-medium text-foreground">{groupCarbs}g</span> carbs
+                            <span className="tabular-nums font-medium text-foreground">
+                              {groupCarbs}g
+                            </span>{' '}
+                            carbs
                           </span>
                           <span className="text-muted-foreground">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-rose-500 mr-1 align-middle" />
-                            <span className="tabular-nums font-medium text-foreground">{groupFat}g</span> gord
+                            <span className="tabular-nums font-medium text-foreground">
+                              {groupFat}g
+                            </span>{' '}
+                            gord
                           </span>
                         </div>
                       </div>
