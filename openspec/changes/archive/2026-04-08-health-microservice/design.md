@@ -7,6 +7,7 @@ O `finance` é a referência canônica de arquitetura. O `health` será estrutur
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Criar `apps/health` seguindo 100% o padrão do `finance` (sem inovações arquiteturais)
 - Schema Prisma isolado no schema `health` do PostgreSQL existente
 - 6 módulos de domínio: goals, foods, meal-logs, measurements, water-logs, summary
@@ -14,6 +15,7 @@ O `finance` é a referência canônica de arquitetura. O `health` será estrutur
 - Sem frontend nesta fase
 
 **Non-Goals:**
+
 - Frontend / MFE
 - Notificações ou jobs recorrentes (sem BullMQ)
 - Integração com APIs externas de tabela nutricional (TACO, USDA)
@@ -23,32 +25,38 @@ O `finance` é a referência canônica de arquitetura. O `health` será estrutur
 ## Decisions
 
 ### 1. Reusar infra existente (PostgreSQL + Redis)
+
 **Decisão**: O `health` usará o PostgreSQL existente com um novo schema `health`, sem banco separado.  
 **Alternativa descartada**: Banco PostgreSQL dedicado — adiciona complexidade operacional sem benefício real neste estágio.  
 **Rationale**: Todos os serviços já compartilham o mesmo banco com schemas isolados.
 
 ### 2. Sem BullMQ
+
 **Decisão**: O `health` não usará filas Redis nesta versão.  
 **Alternativa descartada**: Jobs para cálculo de médias diárias / notificações de metas.  
 **Rationale**: Nenhum requisito de processamento assíncrono identificado no escopo atual.
 
 ### 3. Snapshot nutricional no meal-log
+
 **Decisão**: Ao registrar uma refeição, calcular e persistir `calc_calories`, `calc_protein`, `calc_carbs`, `calc_fat` no próprio `MealLog`.  
 **Fórmula**: `valor = (nutrientPerServing / servingSizeValue) * amountConsumed`  
 **Alternativa descartada**: Calcular on-the-fly via JOIN com `Food` a cada consulta.  
 **Rationale**: Se o alimento for editado ou deletado (ON DELETE SET NULL), o histórico permanece fiel.
 
 ### 4. Alimentos públicos vs. custom
+
 **Decisão**: `Food.userId = NULL` indica alimento público (visível a todos). `Food.userId = <id>` indica alimento custom privado. Queries de listagem filtram `WHERE userId = ? OR userId IS NULL`.  
 **Alternativa descartada**: Tabela separada `public_foods` / `custom_foods`.  
 **Rationale**: Simples, sem duplicação de schema. O campo `isCustom` deixa a intenção explícita.
 
 ### 5. Goal ativo por data
+
 **Decisão**: `Goal.activeFrom` com `@@unique([userId, activeFrom])`. Goal ativo = `findFirst WHERE userId AND activeFrom <= hoje ORDER BY activeFrom DESC`.  
 **Alternativa descartada**: Uma única goal por usuário (unique em userId).  
 **Rationale**: Permite histórico de metas, útil para análise retrospectiva.
 
 ### 6. Porta 56083
+
 **Decisão**: Próxima porta disponível após `finance` (56082).  
 Sem conflito com serviços existentes.
 

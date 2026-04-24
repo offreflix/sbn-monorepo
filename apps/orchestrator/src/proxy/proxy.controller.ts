@@ -113,7 +113,12 @@ export class ProxyController {
       'x-user-id': user.userId,
     };
 
-    return this.proxyService.forwardRequest(url, req.method, body, finalHeaders);
+    return this.proxyService.forwardRequest(
+      url,
+      req.method,
+      body,
+      finalHeaders,
+    );
   }
 
   @UseGuards(CompositeAuthGuard)

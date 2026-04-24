@@ -8,4 +8,3 @@ export function FoodsPage(props: FoodsProps) {
 }
 
 export default FoodsPage;
-

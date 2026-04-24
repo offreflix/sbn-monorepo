@@ -16,8 +16,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui'
-import type { MealLogsModelOutput } from './meal-logs.model'
+} from "@repo/ui";
+import type { MealLogsModelOutput } from "./meal-logs.model";
 import {
   Plus,
   RefreshCcw,
@@ -28,25 +28,25 @@ import {
   Apple,
   Utensils,
   Search,
-} from 'lucide-react'
-import { Controller } from 'react-hook-form'
-import { MacronutrientsBadge } from '../../components/macro-badge'
+} from "lucide-react";
+import { Controller } from "react-hook-form";
+import { MacronutrientsBadge } from "../../components/macro-badge";
 
 // Utilitário para mapear ícones por tipo de refeição
 const getMealIcon = (key: string) => {
   switch (key) {
-    case 'breakfast':
-      return <Coffee className="h-4 w-4 text-orange-500" />
-    case 'lunch':
-      return <Sun className="h-4 w-4 text-yellow-500" />
-    case 'dinner':
-      return <Moon className="h-4 w-4 text-indigo-500" />
-    case 'snack':
-      return <Apple className="h-4 w-4 text-green-500" />
+    case "breakfast":
+      return <Coffee className="h-4 w-4 text-orange-500" />;
+    case "lunch":
+      return <Sun className="h-4 w-4 text-yellow-500" />;
+    case "dinner":
+      return <Moon className="h-4 w-4 text-indigo-500" />;
+    case "snack":
+      return <Apple className="h-4 w-4 text-green-500" />;
     default:
-      return <Utensils className="h-4 w-4 text-muted-foreground" />
+      return <Utensils className="h-4 w-4 text-muted-foreground" />;
   }
-}
+};
 
 export function MealLogsView({
   data: { logs, foods, selectedFood, servingPreview, groupedTotal, groups },
@@ -54,7 +54,7 @@ export function MealLogsView({
   setters: { setIsCreateOpen, setFoodSearch },
   actions: { reload, openCreate, submitCreateMealLog, deleteMealLog },
 }: MealLogsModelOutput) {
-  const { errors } = form.formState
+  const { errors } = form.formState;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -78,7 +78,7 @@ export function MealLogsView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
           <Button
@@ -118,8 +118,8 @@ export function MealLogsView({
                   </span>
                 </div>
                 <div className="text-sm font-medium text-muted-foreground bg-background px-3 py-1 rounded-full shadow-sm">
-                  {groupedTotal.count}{' '}
-                  {groupedTotal.count === 1 ? 'item' : 'itens'}
+                  {groupedTotal.count}{" "}
+                  {groupedTotal.count === 1 ? "item" : "itens"}
                 </div>
               </div>
 
@@ -138,7 +138,7 @@ export function MealLogsView({
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-blue-500" />
                   <span className="text-muted-foreground">
-                    Proteína:{' '}
+                    Proteína:{" "}
                     <span className="tabular-nums font-medium text-foreground">
                       {groupedTotal.protein}g
                     </span>
@@ -147,7 +147,7 @@ export function MealLogsView({
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-amber-500" />
                   <span className="text-muted-foreground">
-                    Carbs:{' '}
+                    Carbs:{" "}
                     <span className="tabular-nums font-medium text-foreground">
                       {groupedTotal.carbs}g
                     </span>
@@ -156,7 +156,7 @@ export function MealLogsView({
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-rose-500" />
                   <span className="text-muted-foreground">
-                    Gordura:{' '}
+                    Gordura:{" "}
                     <span className="tabular-nums font-medium text-foreground">
                       {groupedTotal.fat}g
                     </span>
@@ -173,28 +173,28 @@ export function MealLogsView({
         <h3 className="text-xl font-semibold">Suas Refeições</h3>
         <div className="grid gap-6 lg:grid-cols-2">
           {groups.map(([key, label]) => {
-            const items = logs[key] ?? []
+            const items = logs[key] ?? [];
             const groupCalories = items.reduce(
               (acc, it) => acc + (it.calcCalories || 0),
               0,
-            )
+            );
             const groupProtein =
               Math.round(
                 items.reduce(
                   (acc, it) => acc + Number(it.calcProtein || 0),
                   0,
                 ) * 10,
-              ) / 10
+              ) / 10;
             const groupCarbs =
               Math.round(
                 items.reduce((acc, it) => acc + Number(it.calcCarbs || 0), 0) *
                   10,
-              ) / 10
+              ) / 10;
             const groupFat =
               Math.round(
                 items.reduce((acc, it) => acc + Number(it.calcFat || 0), 0) *
                   10,
-              ) / 10
+              ) / 10;
 
             return (
               <Card key={key} variant="glass" className="flex flex-col">
@@ -204,8 +204,8 @@ export function MealLogsView({
                     <span>{label}</span>
                     <span className="ml-auto text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {loading
-                        ? '—'
-                        : `${items.length} ${items.length === 1 ? 'item' : 'itens'}`}
+                        ? "—"
+                        : `${items.length} ${items.length === 1 ? "item" : "itens"}`}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -232,7 +232,7 @@ export function MealLogsView({
                           >
                             <div className="min-w-0 flex-1">
                               <p className="truncate font-medium text-sm text-foreground">
-                                {it.food?.name ?? 'Alimento não encontrado'}
+                                {it.food?.name ?? "Alimento não encontrado"}
                               </p>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 {it.amountConsumed} {it.unitConsumed}
@@ -266,21 +266,21 @@ export function MealLogsView({
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 mr-1 align-middle" />
                             <span className="tabular-nums font-medium text-foreground">
                               {groupProtein}g
-                            </span>{' '}
+                            </span>{" "}
                             prot
                           </span>
                           <span className="text-muted-foreground">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 mr-1 align-middle" />
                             <span className="tabular-nums font-medium text-foreground">
                               {groupCarbs}g
-                            </span>{' '}
+                            </span>{" "}
                             carbs
                           </span>
                           <span className="text-muted-foreground">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-rose-500 mr-1 align-middle" />
                             <span className="tabular-nums font-medium text-foreground">
                               {groupFat}g
-                            </span>{' '}
+                            </span>{" "}
                             gord
                           </span>
                         </div>
@@ -289,7 +289,7 @@ export function MealLogsView({
                   )}
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
       </section>
@@ -342,13 +342,13 @@ export function MealLogsView({
                       disabled={saving || foods.length === 0}
                     >
                       <SelectTrigger
-                        className={errors.foodId ? 'border-destructive' : ''}
+                        className={errors.foodId ? "border-destructive" : ""}
                       >
                         <SelectValue
                           placeholder={
                             foods.length === 0
-                              ? 'Busque primeiro...'
-                              : 'Selecione o alimento...'
+                              ? "Busque primeiro..."
+                              : "Selecione o alimento..."
                           }
                         />
                       </SelectTrigger>
@@ -371,7 +371,7 @@ export function MealLogsView({
                 {/* Metadados do Alimento Selecionado */}
                 {selectedFood && (
                   <div className="mt-2 text-xs text-primary/80 bg-primary/10 px-2 py-1.5 rounded-md inline-block">
-                    Informação base: 1 porção = {selectedFood.servingSizeValue}{' '}
+                    Informação base: 1 porção = {selectedFood.servingSizeValue}{" "}
                     {selectedFood.servingSizeUnit} (
                     {selectedFood.caloriesPerServing} kcal)
                   </div>
@@ -393,7 +393,7 @@ export function MealLogsView({
                       disabled={saving}
                     >
                       <SelectTrigger
-                        className={errors.mealType ? 'border-destructive' : ''}
+                        className={errors.mealType ? "border-destructive" : ""}
                       >
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
@@ -418,8 +418,8 @@ export function MealLogsView({
                 <Label>Quantidade</Label>
                 <div className="flex gap-2">
                   <Input
-                    className={`w-20 ${errors.quantity ? 'border-destructive' : ''}`}
-                    {...form.register('quantity')}
+                    className={`w-20 ${errors.quantity ? "border-destructive" : ""}`}
+                    {...form.register("quantity")}
                     inputMode="decimal"
                     placeholder="1"
                     disabled={saving}
@@ -438,13 +438,13 @@ export function MealLogsView({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="serving">
-                            Porção{' '}
+                            Porção{" "}
                             {selectedFood
                               ? `(${selectedFood.servingSizeValue}${selectedFood.servingSizeUnit})`
-                              : ''}
+                              : ""}
                           </SelectItem>
                           <SelectItem value="unit">
-                            {selectedFood?.servingSizeUnit ?? 'Unidade'}
+                            {selectedFood?.servingSizeUnit ?? "Unidade"}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -478,19 +478,19 @@ export function MealLogsView({
                   <div className="flex justify-between text-xs font-medium tabular-nums pt-1">
                     {servingPreview.protein != null && (
                       <div className="flex flex-col items-center">
-                        <span className="text-muted-foreground">Proteína</span>{' '}
+                        <span className="text-muted-foreground">Proteína</span>{" "}
                         <span>{servingPreview.protein}g</span>
                       </div>
                     )}
                     {servingPreview.carbs != null && (
                       <div className="flex flex-col items-center">
-                        <span className="text-muted-foreground">Carbo</span>{' '}
+                        <span className="text-muted-foreground">Carbo</span>{" "}
                         <span>{servingPreview.carbs}g</span>
                       </div>
                     )}
                     {servingPreview.fat != null && (
                       <div className="flex flex-col items-center">
-                        <span className="text-muted-foreground">Gordura</span>{' '}
+                        <span className="text-muted-foreground">Gordura</span>{" "}
                         <span>{servingPreview.fat}g</span>
                       </div>
                     )}
@@ -510,12 +510,12 @@ export function MealLogsView({
                 Cancelar
               </Button>
               <Button type="submit" disabled={saving} className="min-w-[120px]">
-                {saving ? 'Salvando...' : 'Adicionar Registro'}
+                {saving ? "Salvando..." : "Adicionar Registro"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

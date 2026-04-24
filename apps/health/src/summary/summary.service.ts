@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { GoalsService } from '../goals/goals.service';
-import { MealLogsService } from '../meal-logs/meal-logs.service';
-import { WaterLogsService } from '../water-logs/water-logs.service';
+import { Injectable } from "@nestjs/common";
+import { GoalsService } from "../goals/goals.service";
+import { MealLogsService } from "../meal-logs/meal-logs.service";
+import { WaterLogsService } from "../water-logs/water-logs.service";
 
 @Injectable()
 export class SummaryService {
@@ -12,10 +12,12 @@ export class SummaryService {
   ) {}
 
   async getSummary(userId: string, dateStr?: string) {
-    const dateIso = dateStr ?? new Date().toISOString().split('T')[0];
+    const dateIso = dateStr ?? new Date().toISOString().split("T")[0];
 
     const [goal, meals, water] = await Promise.all([
-      this.goalsService.findForDate(userId, new Date(dateIso)).catch(() => null),
+      this.goalsService
+        .findForDate(userId, new Date(dateIso))
+        .catch(() => null),
       this.mealLogsService.findByDate(userId, dateIso),
       this.waterLogsService.findByDate(userId, dateIso),
     ]);

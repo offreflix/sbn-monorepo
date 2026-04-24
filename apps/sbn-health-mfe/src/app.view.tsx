@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { Button, Input } from '@repo/ui'
-import { Toaster } from 'sonner'
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Button, Input } from "@repo/ui";
+import { Toaster } from "sonner";
 import {
   Activity,
   Droplets,
@@ -9,14 +9,14 @@ import {
   Utensils,
   NotebookPen,
   RefreshCcw,
-} from 'lucide-react'
-import type { AppModelOutput } from './app.model'
-import { SummaryPage } from './pages/summary/page'
-import { FoodsPage } from './pages/foods/page'
-import { MealLogsPage } from './pages/meal-logs/page'
-import { WaterLogsPage } from './pages/water-logs/page'
-import { MeasurementsPage } from './pages/measurements/page'
-import { GoalsPage } from './pages/goals/page'
+} from "lucide-react";
+import type { AppModelOutput } from "./app.model";
+import { SummaryPage } from "./pages/summary/page";
+import { FoodsPage } from "./pages/foods/page";
+import { MealLogsPage } from "./pages/meal-logs/page";
+import { WaterLogsPage } from "./pages/water-logs/page";
+import { MeasurementsPage } from "./pages/measurements/page";
+import { GoalsPage } from "./pages/goals/page";
 
 export function AppView({
   state: { selectedDate },
@@ -35,54 +35,54 @@ export function AppView({
 
               <div className="flex items-center gap-2">
                 <Button
-                  variant={isTabActive('') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('.')}
+                  onClick={() => handleNavigate(".")}
                   className="gap-2"
                 >
                   <Activity className="h-4 w-4" />
                   Resumo
                 </Button>
                 <Button
-                  variant={isTabActive('foods') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("foods") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('foods')}
+                  onClick={() => handleNavigate("foods")}
                   className="gap-2"
                 >
                   <Utensils className="h-4 w-4" />
                   Alimentos
                 </Button>
                 <Button
-                  variant={isTabActive('meal-logs') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("meal-logs") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('meal-logs')}
+                  onClick={() => handleNavigate("meal-logs")}
                   className="gap-2"
                 >
                   <NotebookPen className="h-4 w-4" />
                   Refeições
                 </Button>
                 <Button
-                  variant={isTabActive('water-logs') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("water-logs") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('water-logs')}
+                  onClick={() => handleNavigate("water-logs")}
                   className="gap-2"
                 >
                   <Droplets className="h-4 w-4" />
                   Água
                 </Button>
                 <Button
-                  variant={isTabActive('measurements') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("measurements") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('measurements')}
+                  onClick={() => handleNavigate("measurements")}
                   className="gap-2"
                 >
                   <Ruler className="h-4 w-4" />
                   Medidas
                 </Button>
                 <Button
-                  variant={isTabActive('goals') ? 'secondary' : 'ghost'}
+                  variant={isTabActive("goals") ? "secondary" : "ghost"}
                   size="sm"
-                  onClick={() => handleNavigate('goals')}
+                  onClick={() => handleNavigate("goals")}
                   className="gap-2"
                 >
                   <Target className="h-4 w-4" />
@@ -102,7 +102,7 @@ export function AppView({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  setSelectedDate(new Date().toISOString().split('T')[0])
+                  setSelectedDate(new Date().toISOString().split("T")[0])
                 }
                 className="h-8 w-8"
                 title="Ir para hoje"
@@ -145,8 +145,8 @@ export function AppView({
 
       <div
         className="hidden md:flex lg:flex xl:flex"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </>
-  )
+  );
 }

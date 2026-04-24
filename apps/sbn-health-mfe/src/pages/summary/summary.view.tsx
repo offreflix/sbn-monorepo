@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@repo/ui";
 import {
   RefreshCcw,
   Flame,
@@ -10,19 +10,19 @@ import {
   Moon,
   Apple,
   Utensils,
-} from 'lucide-react'
-import { formatNumber } from '../../lib/utils'
-import type { SummaryModelOutput } from './summary.model'
+} from "lucide-react";
+import { formatNumber } from "../../lib/utils";
+import type { SummaryModelOutput } from "./summary.model";
 
 // Proteção adicionada: garante que o valor não seja NaN caso a meta seja 0
 const SimpleProgress = ({
   value,
   colorClass,
 }: {
-  value: number
-  colorClass: string
+  value: number;
+  colorClass: string;
 }) => {
-  const safeValue = isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
+  const safeValue = isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100);
   return (
     <div className="h-2 w-full bg-secondary/60 rounded-full overflow-hidden">
       <div
@@ -30,55 +30,55 @@ const SimpleProgress = ({
         style={{ width: `${safeValue}%` }}
       />
     </div>
-  )
-}
+  );
+};
 
 // Utilitários para os ícones e rótulos das refeições
 const mealConfig = {
   breakfast: {
-    label: 'Café da manhã',
+    label: "Café da manhã",
     icon: <Coffee className="h-4 w-4 text-orange-500" />,
   },
-  lunch: { label: 'Almoço', icon: <Sun className="h-4 w-4 text-yellow-500" /> },
+  lunch: { label: "Almoço", icon: <Sun className="h-4 w-4 text-yellow-500" /> },
   dinner: {
-    label: 'Jantar',
+    label: "Jantar",
     icon: <Moon className="h-4 w-4 text-indigo-500" />,
   },
   snack: {
-    label: 'Lanche',
+    label: "Lanche",
     icon: <Apple className="h-4 w-4 text-green-500" />,
   },
-} as const
+} as const;
 
 export function SummaryView({
   data: { summary },
   state: { loading },
   actions: { reload },
 }: SummaryModelOutput) {
-  const goal = summary?.goal ?? null
-  const consumed = summary?.consumed ?? null
-  const water = summary?.water ?? null
+  const goal = summary?.goal ?? null;
+  const consumed = summary?.consumed ?? null;
+  const water = summary?.water ?? null;
 
   // Cálculos de porcentagem
   const caloriesPct =
-    goal && consumed ? (consumed.calories / goal.dailyCalorieGoal) * 100 : 0
+    goal && consumed ? (consumed.calories / goal.dailyCalorieGoal) * 100 : 0;
   const proteinPct =
-    goal && consumed ? (consumed.protein / goal.proteinGoalG) * 100 : 0
+    goal && consumed ? (consumed.protein / goal.proteinGoalG) * 100 : 0;
   const carbsPct =
-    goal && consumed ? (consumed.carbs / goal.carbsGoalG) * 100 : 0
-  const fatPct = goal && consumed ? (consumed.fat / goal.fatGoalG) * 100 : 0
-  const waterPct = water?.goalMl ? (water.totalMl / water.goalMl) * 100 : 0
+    goal && consumed ? (consumed.carbs / goal.carbsGoalG) * 100 : 0;
+  const fatPct = goal && consumed ? (consumed.fat / goal.fatGoalG) * 100 : 0;
+  const waterPct = water?.goalMl ? (water.totalMl / water.goalMl) * 100 : 0;
 
   // Componente auxiliar para os Skeletons de texto
-  const renderValue = (val: React.ReactNode, skeletonWidth = 'w-24') => {
+  const renderValue = (val: React.ReactNode, skeletonWidth = "w-24") => {
     if (loading)
       return (
         <div
           className={`h-6 ${skeletonWidth} bg-muted animate-pulse rounded`}
         />
-      )
-    return val
-  }
+      );
+    return val;
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -100,7 +100,7 @@ export function SummaryView({
           className="h-10 w-10 shrink-0"
           title="Atualizar dados"
         >
-          <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
         </Button>
       </header>
 
@@ -120,13 +120,13 @@ export function SummaryView({
                 <div className="text-2xl font-bold text-foreground">
                   {renderValue(
                     `${formatNumber(consumed?.calories ?? 0)} kcal`,
-                    'w-28',
+                    "w-28",
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {renderValue(
-                    `Meta: ${goal ? formatNumber(goal.dailyCalorieGoal) : '—'} kcal`,
-                    'w-24',
+                    `Meta: ${goal ? formatNumber(goal.dailyCalorieGoal) : "—"} kcal`,
+                    "w-24",
                   )}
                 </div>
               </div>
@@ -151,13 +151,13 @@ export function SummaryView({
                 <div className="text-2xl font-bold text-foreground">
                   {renderValue(
                     `${formatNumber(Math.round(consumed?.protein ?? 0))} g`,
-                    'w-20',
+                    "w-20",
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {renderValue(
-                    `Meta: ${goal ? goal.proteinGoalG : '—'} g`,
-                    'w-16',
+                    `Meta: ${goal ? goal.proteinGoalG : "—"} g`,
+                    "w-16",
                   )}
                 </div>
               </div>
@@ -182,13 +182,13 @@ export function SummaryView({
                 <div className="text-lg font-bold text-foreground leading-tight">
                   {renderValue(
                     `${formatNumber(Math.round(consumed?.carbs ?? 0))}g / ${formatNumber(Math.round(consumed?.fat ?? 0))}g`,
-                    'w-24',
+                    "w-24",
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {renderValue(
-                    `Meta: ${goal ? `${goal.carbsGoalG}g / ${goal.fatGoalG}g` : '—'}`,
-                    'w-28',
+                    `Meta: ${goal ? `${goal.carbsGoalG}g / ${goal.fatGoalG}g` : "—"}`,
+                    "w-28",
                   )}
                 </div>
               </div>
@@ -225,13 +225,13 @@ export function SummaryView({
                 <div className="text-2xl font-bold text-foreground">
                   {renderValue(
                     `${formatNumber(water?.totalMl ?? 0)} ml`,
-                    'w-24',
+                    "w-24",
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {renderValue(
-                    `Meta: ${water?.goalMl ? formatNumber(water.goalMl) : '—'} ml`,
-                    'w-20',
+                    `Meta: ${water?.goalMl ? formatNumber(water.goalMl) : "—"} ml`,
+                    "w-20",
                   )}
                 </div>
               </div>
@@ -247,9 +247,9 @@ export function SummaryView({
       <section className="space-y-4">
         <h3 className="text-xl font-semibold">Refeições do dia</h3>
         <div className="grid gap-6 lg:grid-cols-2">
-          {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((key) => {
-            const items = summary?.meals?.[key] ?? []
-            const { label, icon } = mealConfig[key]
+          {(["breakfast", "lunch", "dinner", "snack"] as const).map((key) => {
+            const items = summary?.meals?.[key] ?? [];
+            const { label, icon } = mealConfig[key];
 
             return (
               <Card key={key} variant="glass" className="flex flex-col">
@@ -259,8 +259,8 @@ export function SummaryView({
                     <span>{label}</span>
                     <span className="ml-auto text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {loading
-                        ? '—'
-                        : `${items.length} ${items.length === 1 ? 'item' : 'itens'}`}
+                        ? "—"
+                        : `${items.length} ${items.length === 1 ? "item" : "itens"}`}
                     </span>
                   </CardTitle>
                 </CardHeader>
@@ -284,7 +284,7 @@ export function SummaryView({
                         >
                           <div className="min-w-0 flex-1 pr-3">
                             <p className="truncate text-sm font-medium text-foreground">
-                              {it.food?.name ?? 'Alimento'}
+                              {it.food?.name ?? "Alimento"}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               {it.amountConsumed} {it.unitConsumed}
@@ -305,10 +305,10 @@ export function SummaryView({
                   )}
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
       </section>
     </div>
-  )
+  );
 }

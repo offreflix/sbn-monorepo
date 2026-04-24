@@ -8,4 +8,3 @@ export function SummaryPage(props: SummaryProps) {
 }
 
 export default SummaryPage;
-

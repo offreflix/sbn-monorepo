@@ -31,7 +31,10 @@ export function useMeasurementsModel({ selectedDate }: MeasurementsProps) {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const list = await healthApi.measurements.list(selectedDate, selectedDate);
+      const list = await healthApi.measurements.list(
+        selectedDate,
+        selectedDate,
+      );
       setItems(list);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao carregar medidas");
@@ -84,7 +87,12 @@ export function useMeasurementsModel({ selectedDate }: MeasurementsProps) {
     data: { items },
     state: { loading, isCreateOpen, saving, deletingId, form },
     setters: { setIsCreateOpen },
-    actions: { reload: load, openCreate, submitCreateMeasurement, deleteMeasurement },
+    actions: {
+      reload: load,
+      openCreate,
+      submitCreateMeasurement,
+      deleteMeasurement,
+    },
   };
 }
 

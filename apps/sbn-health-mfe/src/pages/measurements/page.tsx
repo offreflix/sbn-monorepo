@@ -8,4 +8,3 @@ export function MeasurementsPage(props: MeasurementsProps) {
 }
 
 export default MeasurementsPage;
-

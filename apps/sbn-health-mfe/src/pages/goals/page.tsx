@@ -8,4 +8,3 @@ export function GoalsPage(props: GoalsProps) {
 }
 
 export default GoalsPage;
-

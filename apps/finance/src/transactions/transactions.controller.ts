@@ -12,17 +12,41 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeader,
+  ApiParam,
+  ApiQuery,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import type { NubankFile } from './nubank/nubank-file-parser.interface';
+import {
+  TransactionResponseDto,
+  TransactionSummaryResponseDto,
+} from './dto/transaction-response.dto';
 
+@ApiTags('Transactions')
+@ApiHeader({
+  name: 'x-user-id',
+  required: true,
+  description: 'ID do usuário (definido pelo orchestrator)',
+})
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Get('summary')
+  @ApiOperation({ summary: 'Resumo de transações do mês' })
+  @ApiQuery({ name: 'month', required: false, example: 1 })
+  @ApiQuery({ name: 'year', required: false, example: 2024 })
+  @ApiResponse({ status: 200, description: 'Totais de receitas e despesas', type: TransactionSummaryResponseDto })
   getSummary(
     @Headers('x-user-id') userId: string,
     @Query('month') month?: number,
@@ -42,20 +66,23 @@ export class TransactionsController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Criar transação' })
+  @ApiResponse({ status: 201, description: 'Transação criada', type: TransactionResponseDto })
   create(
     @Body() body: CreateTransactionDto,
     @Headers('x-user-id') userId: string,
   ) {
     if (!userId) {
-      // Should be handled by guard or pipe, but validation pipe might not validate headers directly easily without custom decorators.
-      // User requirement says "Validar headers obrigatórios".
-      // For now, explicit check or rely on logic.
       throw new BadRequestException('x-user-id header is required');
     }
     return this.transactionsService.create(userId, body);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar transações do usuário' })
+  @ApiQuery({ name: 'month', required: false, example: 1 })
+  @ApiQuery({ name: 'year', required: false, example: 2024 })
+  @ApiResponse({ status: 200, description: 'Lista de transações', type: [TransactionResponseDto] })
   findAll(
     @Headers('x-user-id') userId: string,
     @Query('month') month?: number,
@@ -72,6 +99,10 @@ export class TransactionsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar transação por ID' })
+  @ApiParam({ name: 'id', description: 'ID da transação' })
+  @ApiResponse({ status: 200, description: 'Transação encontrada', type: TransactionResponseDto })
+  @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
@@ -80,6 +111,10 @@ export class TransactionsController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar transação' })
+  @ApiParam({ name: 'id', description: 'ID da transação' })
+  @ApiResponse({ status: 200, description: 'Transação atualizada', type: TransactionResponseDto })
+  @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   update(
     @Param('id') id: string,
     @Body() body: UpdateTransactionDto,
@@ -92,6 +127,10 @@ export class TransactionsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Excluir transação' })
+  @ApiParam({ name: 'id', description: 'ID da transação' })
+  @ApiResponse({ status: 200, description: 'Transação excluída' })
+  @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   remove(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
@@ -101,6 +140,26 @@ export class TransactionsController {
 
   @Post('import/nubank')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Importar transações via CSV do Nubank' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Arquivo CSV exportado do Nubank',
+        },
+        walletId: { type: 'string', description: 'ID da carteira destino' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Transações importadas com sucesso',
+    type: [TransactionResponseDto],
+  })
   importNubank(
     @UploadedFile() file: NubankFile,
     @Body('walletId') walletId: string,

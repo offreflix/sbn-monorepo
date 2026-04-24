@@ -12,8 +12,8 @@ import {
   DialogTitle,
   Input,
   Label,
-} from '@repo/ui'
-import type { FoodsModelOutput } from './foods.model'
+} from "@repo/ui";
+import type { FoodsModelOutput } from "./foods.model";
 import {
   Plus,
   RefreshCcw,
@@ -22,7 +22,7 @@ import {
   Flame,
   SearchX,
   Apple,
-} from 'lucide-react'
+} from "lucide-react";
 
 export function FoodsView({
   data: { foods },
@@ -30,7 +30,7 @@ export function FoodsView({
   setters: { setSearch, setIsCreateOpen },
   actions: { reload, openCreate, submitCreateFood },
 }: FoodsModelOutput) {
-  const { errors } = form.formState
+  const { errors } = form.formState;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -54,7 +54,7 @@ export function FoodsView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
           <Button
@@ -86,7 +86,7 @@ export function FoodsView({
           <CardTitle className="text-base flex items-center justify-between">
             <span>Resultados</span>
             <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              {loading ? '—' : `${foods.length} itens`}
+              {loading ? "—" : `${foods.length} itens`}
             </span>
           </CardTitle>
         </CardHeader>
@@ -224,10 +224,10 @@ export function FoodsView({
                 <Label htmlFor="food-name">Nome do Alimento *</Label>
                 <Input
                   id="food-name"
-                  {...form.register('name')}
+                  {...form.register("name")}
                   placeholder="Ex: Peito de Frango Grelhado"
                   disabled={saving}
-                  className={errors.name ? 'border-destructive' : ''}
+                  className={errors.name ? "border-destructive" : ""}
                 />
                 {errors.name && (
                   <span className="text-xs text-destructive">
@@ -240,7 +240,7 @@ export function FoodsView({
                 <Label htmlFor="food-brand">Marca (Opcional)</Label>
                 <Input
                   id="food-brand"
-                  {...form.register('brand')}
+                  {...form.register("brand")}
                   placeholder="Ex: Seara, Nestlé..."
                   disabled={saving}
                 />
@@ -257,12 +257,12 @@ export function FoodsView({
                   <Label htmlFor="food-serving">Quantidade *</Label>
                   <Input
                     id="food-serving"
-                    {...form.register('servingSizeValue')}
+                    {...form.register("servingSizeValue")}
                     inputMode="decimal"
                     placeholder="100"
                     disabled={saving}
                     className={
-                      errors.servingSizeValue ? 'border-destructive' : ''
+                      errors.servingSizeValue ? "border-destructive" : ""
                     }
                   />
                 </div>
@@ -271,11 +271,11 @@ export function FoodsView({
                   <Label htmlFor="food-unit">Unidade *</Label>
                   <Input
                     id="food-unit"
-                    {...form.register('servingSizeUnit')}
+                    {...form.register("servingSizeUnit")}
                     placeholder="g, ml, un"
                     disabled={saving}
                     className={
-                      errors.servingSizeUnit ? 'border-destructive' : ''
+                      errors.servingSizeUnit ? "border-destructive" : ""
                     }
                   />
                 </div>
@@ -289,14 +289,14 @@ export function FoodsView({
                   </Label>
                   <Input
                     id="food-calories"
-                    {...form.register('caloriesPerServing')}
+                    {...form.register("caloriesPerServing")}
                     inputMode="decimal"
                     placeholder="0"
                     disabled={saving}
                     className={
                       errors.caloriesPerServing
-                        ? 'border-destructive'
-                        : 'border-primary/30'
+                        ? "border-destructive"
+                        : "border-primary/30"
                     }
                   />
                 </div>
@@ -318,7 +318,7 @@ export function FoodsView({
                   </Label>
                   <Input
                     id="food-protein"
-                    {...form.register('proteinPerServing')}
+                    {...form.register("proteinPerServing")}
                     inputMode="decimal"
                     placeholder="0"
                     disabled={saving}
@@ -330,7 +330,7 @@ export function FoodsView({
                   </Label>
                   <Input
                     id="food-carbs"
-                    {...form.register('carbsPerServing')}
+                    {...form.register("carbsPerServing")}
                     inputMode="decimal"
                     placeholder="0"
                     disabled={saving}
@@ -342,7 +342,7 @@ export function FoodsView({
                   </Label>
                   <Input
                     id="food-fat"
-                    {...form.register('fatPerServing')}
+                    {...form.register("fatPerServing")}
                     inputMode="decimal"
                     placeholder="0"
                     disabled={saving}
@@ -362,12 +362,12 @@ export function FoodsView({
                 Cancelar
               </Button>
               <Button type="submit" disabled={saving} className="min-w-[120px]">
-                {saving ? 'Salvando...' : 'Salvar Alimento'}
+                {saving ? "Salvando..." : "Salvar Alimento"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

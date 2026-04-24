@@ -11,9 +11,9 @@ import {
   DialogTitle,
   Input,
   Label,
-} from '@repo/ui'
-import type { MeasurementsModelOutput } from './measurements.model'
-import { Plus, RefreshCcw, Trash2, Scale, CalendarDays } from 'lucide-react'
+} from "@repo/ui";
+import type { MeasurementsModelOutput } from "./measurements.model";
+import { Plus, RefreshCcw, Trash2, Scale, CalendarDays } from "lucide-react";
 
 export function MeasurementsView({
   data: { items },
@@ -21,7 +21,7 @@ export function MeasurementsView({
   setters: { setIsCreateOpen },
   actions: { reload, openCreate, submitCreateMeasurement, deleteMeasurement },
 }: MeasurementsModelOutput) {
-  const { errors } = form.formState
+  const { errors } = form.formState;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -45,7 +45,7 @@ export function MeasurementsView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
           <Button
@@ -70,8 +70,8 @@ export function MeasurementsView({
             </div>
             <span className="text-xs font-normal text-muted-foreground bg-background border px-2 py-0.5 rounded-full">
               {loading
-                ? '—'
-                : `${items.length} ${items.length === 1 ? 'registro' : 'registros'}`}
+                ? "—"
+                : `${items.length} ${items.length === 1 ? "registro" : "registros"}`}
             </span>
           </CardTitle>
         </CardHeader>
@@ -118,13 +118,13 @@ export function MeasurementsView({
                     <div className="tabular-nums font-bold text-lg text-foreground">
                       {m.weightKg ? (
                         <>
-                          {m.weightKg}{' '}
+                          {m.weightKg}{" "}
                           <span className="text-sm text-muted-foreground font-medium">
                             kg
                           </span>
                         </>
                       ) : (
-                        '—'
+                        "—"
                       )}
                     </div>
                     <Button
@@ -169,11 +169,11 @@ export function MeasurementsView({
               <div className="relative mt-2">
                 <Input
                   id="weight-kg"
-                  {...form.register('weightKg')}
+                  {...form.register("weightKg")}
                   inputMode="decimal"
                   placeholder="Ex: 70.5"
                   disabled={saving}
-                  className={`pl-4 pr-12 text-xl font-medium h-14 ${errors.weightKg ? 'border-destructive focus-visible:ring-destructive' : 'border-primary/30 focus-visible:ring-primary'}`}
+                  className={`pl-4 pr-12 text-xl font-medium h-14 ${errors.weightKg ? "border-destructive focus-visible:ring-destructive" : "border-primary/30 focus-visible:ring-primary"}`}
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
                   kg
@@ -196,12 +196,12 @@ export function MeasurementsView({
                 Cancelar
               </Button>
               <Button type="submit" disabled={saving} className="min-w-[120px]">
-                {saving ? 'Salvando...' : 'Salvar Registro'}
+                {saving ? "Salvando..." : "Salvar Registro"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

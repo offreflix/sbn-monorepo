@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, Button } from '@repo/ui'
+import { Card, CardContent, CardHeader, CardTitle, Button } from "@repo/ui";
 import {
   Wallet,
   TrendingUp,
@@ -11,15 +11,15 @@ import {
   ArrowRightLeft,
   Repeat,
   LayoutGrid,
-} from 'lucide-react'
-import { WalletCards } from '../../components/wallet-cards'
-import { CategoryGrid } from '../../pages/categories/page'
-import { TransactionList } from '../../pages/transactions/page'
-import type { DashboardModelOutput } from './dashboard.model'
-import { RecurrenceList } from '../../components/recurrences-list'
-import { SimpleProgress } from '../../components/simple-progress'
-import { renderValue } from '../../lib/render-value'
-import { formatCurrency } from '../../lib/utils'
+} from "lucide-react";
+import { WalletCards } from "../../components/wallet-cards";
+import { CategoryGrid } from "../../pages/categories/page";
+import { TransactionList } from "../../pages/transactions/page";
+import type { DashboardModelOutput } from "./dashboard.model";
+import { RecurrenceList } from "../../components/recurrences-list";
+import { SimpleProgress } from "../../components/simple-progress";
+import { renderValue } from "../../lib/render-value";
+import { formatCurrency } from "../../lib/utils";
 
 export function DashboardView({
   data: {
@@ -55,7 +55,7 @@ export function DashboardView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
         </div>
@@ -157,8 +157,8 @@ export function DashboardView({
                 {renderValue(
                   summary.overview.income,
                   loading,
-                  'currency',
-                  'w-32',
+                  "currency",
+                  "w-32",
                 )}
               </div>
             </CardContent>
@@ -178,8 +178,8 @@ export function DashboardView({
                 {renderValue(
                   summary.overview.expense,
                   loading,
-                  'currency',
-                  'w-32',
+                  "currency",
+                  "w-32",
                 )}
               </div>
             </CardContent>
@@ -189,15 +189,15 @@ export function DashboardView({
             variant="glass"
             className={
               !loading && summary.overview.balance < 0
-                ? 'bg-red-500/5 border-red-500/20'
-                : 'bg-primary/5 border-primary/20'
+                ? "bg-red-500/5 border-red-500/20"
+                : "bg-primary/5 border-primary/20"
             }
           >
             <CardContent className="p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-background p-2.5 rounded-lg shadow-sm">
                   <DollarSign
-                    className={`h-5 w-5 ${!loading && summary.overview.balance < 0 ? 'text-red-500' : 'text-primary'}`}
+                    className={`h-5 w-5 ${!loading && summary.overview.balance < 0 ? "text-red-500" : "text-primary"}`}
                   />
                 </div>
                 <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -205,13 +205,13 @@ export function DashboardView({
                 </span>
               </div>
               <div
-                className={`text-3xl font-extrabold tabular-nums ${!loading && summary.overview.balance < 0 ? 'text-red-500' : 'text-primary'}`}
+                className={`text-3xl font-extrabold tabular-nums ${!loading && summary.overview.balance < 0 ? "text-red-500" : "text-primary"}`}
               >
                 {renderValue(
                   summary.overview.balance,
                   loading,
-                  'currency',
-                  'w-32',
+                  "currency",
+                  "w-32",
                 )}
               </div>
             </CardContent>
@@ -408,5 +408,5 @@ export function DashboardView({
         </div>
       </section>
     </div>
-  )
+  );
 }

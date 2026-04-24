@@ -8,7 +8,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@repo/ui'
+} from "@repo/ui";
 import {
   Plus,
   TrendingUp,
@@ -16,9 +16,9 @@ import {
   Pencil,
   Trash2,
   LayoutGrid,
-} from 'lucide-react'
-import { CreateCategoryModal } from '../../components/create-category-modal'
-import type { CategoriesModelOutput } from './categories.model'
+} from "lucide-react";
+import { CreateCategoryModal } from "../../components/create-category-modal";
+import type { CategoriesModelOutput } from "./categories.model";
 
 export function CategoriesView({
   data: { categories, totalCount, incomeCount, expenseCount },
@@ -67,36 +67,36 @@ export function CategoriesView({
       {/* Barra de Filtros */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar border-b border-border/50">
         <Button
-          variant={filter === 'all' ? 'secondary' : 'ghost'}
+          variant={filter === "all" ? "secondary" : "ghost"}
           size="sm"
-          onClick={() => setFilter('all')}
+          onClick={() => setFilter("all")}
           className="rounded-b-none border-b-2 border-transparent data-[active=true]:border-primary transition-all"
-          data-active={filter === 'all'}
+          data-active={filter === "all"}
         >
           <LayoutGrid className="h-4 w-4 mr-2 opacity-70" />
           Todas ({totalCount})
         </Button>
         <Button
-          variant={filter === 'Receita' ? 'secondary' : 'ghost'}
+          variant={filter === "Receita" ? "secondary" : "ghost"}
           size="sm"
-          onClick={() => setFilter('Receita')}
+          onClick={() => setFilter("Receita")}
           className="rounded-b-none border-b-2 border-transparent data-[active=true]:border-emerald-500 transition-all"
-          data-active={filter === 'Receita'}
+          data-active={filter === "Receita"}
         >
           <TrendingUp
-            className={`h-4 w-4 mr-2 ${filter === 'Receita' ? 'text-emerald-500' : 'text-emerald-500/70'}`}
+            className={`h-4 w-4 mr-2 ${filter === "Receita" ? "text-emerald-500" : "text-emerald-500/70"}`}
           />
           Receitas ({incomeCount})
         </Button>
         <Button
-          variant={filter === 'Despesa' ? 'secondary' : 'ghost'}
+          variant={filter === "Despesa" ? "secondary" : "ghost"}
           size="sm"
-          onClick={() => setFilter('Despesa')}
+          onClick={() => setFilter("Despesa")}
           className="rounded-b-none border-b-2 border-transparent data-[active=true]:border-red-500 transition-all"
-          data-active={filter === 'Despesa'}
+          data-active={filter === "Despesa"}
         >
           <TrendingDown
-            className={`h-4 w-4 mr-2 ${filter === 'Despesa' ? 'text-red-500' : 'text-red-500/70'}`}
+            className={`h-4 w-4 mr-2 ${filter === "Despesa" ? "text-red-500" : "text-red-500/70"}`}
           />
           Despesas ({expenseCount})
         </Button>
@@ -113,8 +113,8 @@ export function CategoriesView({
               Nenhuma categoria encontrada
             </h4>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              {filter === 'all'
-                ? 'Crie sua primeira categoria para começar a organizar suas finanças.'
+              {filter === "all"
+                ? "Crie sua primeira categoria para começar a organizar suas finanças."
                 : `Você ainda não possui categorias do tipo "${filter.toLowerCase()}".`}
             </p>
             <Button
@@ -160,11 +160,11 @@ export function CategoriesView({
               <div
                 className="flex h-14 w-14 mt-2 mb-3 items-center justify-center rounded-2xl text-2xl shadow-sm transition-transform group-hover:scale-110"
                 style={{
-                  backgroundColor: `${category.color || '#3b82f6'}20`,
-                  color: category.color || '#3b82f6',
+                  backgroundColor: `${category.color || "#3b82f6"}20`,
+                  color: category.color || "#3b82f6",
                 }}
               >
-                {category.icon || '🏷️'}
+                {category.icon || "🏷️"}
               </div>
 
               {/* Informações Textuais */}
@@ -180,12 +180,12 @@ export function CategoriesView({
                   {/* Badge de Tipo */}
                   <div
                     className={`flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                      category.type === 'Receita'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                      category.type === "Receita"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-red-500/10 text-red-600 dark:text-red-400"
                     }`}
                   >
-                    {category.type === 'Receita' ? (
+                    {category.type === "Receita" ? (
                       <TrendingUp className="h-3 w-3" />
                     ) : (
                       <TrendingDown className="h-3 w-3" />
@@ -211,8 +211,8 @@ export function CategoriesView({
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onSuccess={() => {
-          setIsCreateModalOpen(false)
-          onRefresh()
+          setIsCreateModalOpen(false);
+          onRefresh();
         }}
       />
 
@@ -221,8 +221,8 @@ export function CategoriesView({
         onOpenChange={(open) => !open && setEditingCategory(null)}
         initialData={editingCategory ?? undefined}
         onSuccess={() => {
-          setEditingCategory(null)
-          onRefresh()
+          setEditingCategory(null);
+          onRefresh();
         }}
       />
 
@@ -238,11 +238,11 @@ export function CategoriesView({
               Excluir Categoria
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir a categoria{' '}
+              Tem certeza que deseja excluir a categoria{" "}
               <strong className="text-foreground">
                 {deletingCategory?.name}
               </strong>
-              ? As transações que já utilizam essa categoria{' '}
+              ? As transações que já utilizam essa categoria{" "}
               <strong>não</strong> serão excluídas.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -255,11 +255,11 @@ export function CategoriesView({
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 min-w-[100px]"
             >
-              {isDeleting ? 'Excluindo...' : 'Sim, excluir'}
+              {isDeleting ? "Excluindo..." : "Sim, excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

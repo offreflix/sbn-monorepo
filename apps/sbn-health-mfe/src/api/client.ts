@@ -49,7 +49,9 @@ async function handle<T>(res: Response): Promise<T> {
 
   if (!res.ok) {
     const dataObj =
-      data && typeof data === "object" ? (data as Record<string, unknown>) : null;
+      data && typeof data === "object"
+        ? (data as Record<string, unknown>)
+        : null;
     const rawMessage = dataObj?.message ?? dataObj?.error ?? res.statusText;
     const message = Array.isArray(rawMessage)
       ? rawMessage.join(", ")
@@ -62,8 +64,10 @@ async function handle<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-let refreshPromise: Promise<{ accessToken: string; refreshToken: string }> | null =
-  null;
+let refreshPromise: Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> | null = null;
 
 async function handlerRefresh(): Promise<{
   accessToken: string;
@@ -87,7 +91,8 @@ async function handlerRefresh(): Promise<{
 
 export async function request<T>(path: string, init: RequestInit): Promise<T> {
   const token = getAccessToken();
-  const isFormData = typeof FormData !== "undefined" && init.body instanceof FormData;
+  const isFormData =
+    typeof FormData !== "undefined" && init.body instanceof FormData;
   const headers: Record<string, string> = {
     ...(init.headers as Record<string, string>),
   };
@@ -136,4 +141,3 @@ export async function request<T>(path: string, init: RequestInit): Promise<T> {
 }
 
 export { API_BASE };
-

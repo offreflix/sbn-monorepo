@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { MealType } from '@prisma/client-health';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { MealType } from "@prisma/client-health";
 
 @Injectable()
 export class MealLogsRepository {
@@ -33,7 +33,7 @@ export class MealLogsRepository {
         loggedAtDate: { gte: start, lte: end },
       },
       include: { food: true },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
   }
 

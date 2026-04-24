@@ -1,1 +1,1 @@
-export type HealthRemoteProps = Record<string, never>
+export type HealthRemoteProps = Record<string, never>;

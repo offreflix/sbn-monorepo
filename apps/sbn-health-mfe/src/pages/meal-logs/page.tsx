@@ -8,4 +8,3 @@ export function MealLogsPage(props: MealLogsProps) {
 }
 
 export default MealLogsPage;
-

@@ -14,7 +14,8 @@ export function useSummaryModel({ selectedDate }: SummaryProps) {
       const data = await healthApi.summary.get(selectedDate);
       setSummary(data);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erro ao carregar resumo";
+      const message =
+        error instanceof Error ? error.message : "Erro ao carregar resumo";
       toast.error(message);
       setSummary(null);
     } finally {
@@ -40,4 +41,3 @@ export function useSummaryModel({ selectedDate }: SummaryProps) {
 }
 
 export type SummaryModelOutput = ReturnType<typeof useSummaryModel>;
-

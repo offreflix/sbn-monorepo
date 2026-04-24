@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class MeasurementsRepository {
@@ -22,7 +22,7 @@ export class MeasurementsRepository {
             }
           : {}),
       },
-      orderBy: { measuredAt: 'asc' },
+      orderBy: { measuredAt: "asc" },
     });
   }
 

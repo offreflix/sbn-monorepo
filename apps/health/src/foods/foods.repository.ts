@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class FoodsRepository {
@@ -13,11 +13,9 @@ export class FoodsRepository {
     return this.prisma.food.findMany({
       where: {
         OR: [{ userId: null }, { userId }],
-        ...(search
-          ? { name: { contains: search, mode: 'insensitive' } }
-          : {}),
+        ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
       },
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
   }
 
@@ -36,7 +34,19 @@ export class FoodsRepository {
     return this.prisma.food.create({ data });
   }
 
-  update(id: string, data: Partial<{ name: string; brand: string; servingSizeValue: number; servingSizeUnit: string; caloriesPerServing: number; proteinPerServing: number; carbsPerServing: number; fatPerServing: number }>) {
+  update(
+    id: string,
+    data: Partial<{
+      name: string;
+      brand: string;
+      servingSizeValue: number;
+      servingSizeUnit: string;
+      caloriesPerServing: number;
+      proteinPerServing: number;
+      carbsPerServing: number;
+      fatPerServing: number;
+    }>,
+  ) {
     return this.prisma.food.update({ where: { id }, data });
   }
 

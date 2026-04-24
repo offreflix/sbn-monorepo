@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { MealLogsRepository } from './meal-logs.repository';
-import { FoodsService } from '../foods/foods.service';
-import { CreateMealLogDto, MealType } from './dto/create-meal-log.dto';
-import { MealType as PrismaMealType } from '@prisma/client-health';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { MealLogsRepository } from "./meal-logs.repository";
+import { FoodsService } from "../foods/foods.service";
+import { CreateMealLogDto, MealType } from "./dto/create-meal-log.dto";
+import { MealType as PrismaMealType } from "@prisma/client-health";
 
 @Injectable()
 export class MealLogsService {
@@ -28,7 +28,9 @@ export class MealLogsService {
       ? Number(food.fatPerServing) * ratio
       : undefined;
 
-    const loggedAtDate = dto.loggedAtDate ? new Date(dto.loggedAtDate) : new Date();
+    const loggedAtDate = dto.loggedAtDate
+      ? new Date(dto.loggedAtDate)
+      : new Date();
     loggedAtDate.setUTCHours(0, 0, 0, 0);
 
     return this.mealLogsRepository.create({
@@ -64,7 +66,7 @@ export class MealLogsService {
   async remove(id: string, userId: string) {
     const log = await this.mealLogsRepository.findById(id);
     if (!log || log.userId !== userId) {
-      throw new NotFoundException('Meal log not found');
+      throw new NotFoundException("Meal log not found");
     }
     return this.mealLogsRepository.remove(id);
   }

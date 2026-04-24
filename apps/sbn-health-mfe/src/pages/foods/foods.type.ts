@@ -1,1 +1,1 @@
-export type FoodsProps = Record<string, never>
+export type FoodsProps = Record<string, never>;

@@ -12,4 +12,3 @@ export function useHealthRemoteModel(_props: HealthRemoteProps) {
 }
 
 export type HealthRemoteModelOutput = ReturnType<typeof useHealthRemoteModel>;
-

@@ -20,7 +20,14 @@ export function useAppModel() {
   }, []);
 
   const knownRoutes = useMemo(
-    () => ["summary", "foods", "meal-logs", "water-logs", "measurements", "goals"],
+    () => [
+      "summary",
+      "foods",
+      "meal-logs",
+      "water-logs",
+      "measurements",
+      "goals",
+    ],
     [],
   );
 
@@ -77,4 +84,3 @@ export function useAppModel() {
 }
 
 export type AppModelOutput = ReturnType<typeof useAppModel>;
-

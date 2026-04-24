@@ -138,9 +138,12 @@ export const healthApi = {
       const params = new URLSearchParams();
       if (date) params.set("date", date);
       const qs = params.toString();
-      return request<SummaryResponse>(`/api/health/summary${qs ? `?${qs}` : ""}`, {
-        method: "GET",
-      });
+      return request<SummaryResponse>(
+        `/api/health/summary${qs ? `?${qs}` : ""}`,
+        {
+          method: "GET",
+        },
+      );
     },
   },
 
@@ -173,7 +176,8 @@ export const healthApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }),
-    current: () => request<HealthGoal>("/api/health/goals/current", { method: "GET" }),
+    current: () =>
+      request<HealthGoal>("/api/health/goals/current", { method: "GET" }),
     list: () => request<HealthGoal[]>("/api/health/goals", { method: "GET" }),
     update: (id: string, payload: UpdateGoalRequest) =>
       request<HealthGoal>(`/api/health/goals/${id}`, {
@@ -244,4 +248,3 @@ export const healthApi = {
       request<void>(`/api/health/measurements/${id}`, { method: "DELETE" }),
   },
 };
-

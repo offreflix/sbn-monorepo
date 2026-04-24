@@ -8,4 +8,3 @@ export function HealthRemotePage(props: HealthRemoteProps) {
 }
 
 export default HealthRemotePage;
-

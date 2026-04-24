@@ -12,8 +12,8 @@ import {
   Input,
   Label,
   Switch,
-} from '@repo/ui'
-import { calcMacroGramsFromPct, type GoalsModelOutput } from './goals.model'
+} from "@repo/ui";
+import { calcMacroGramsFromPct, type GoalsModelOutput } from "./goals.model";
 import {
   Plus,
   RefreshCcw,
@@ -24,15 +24,15 @@ import {
   Wheat,
   Droplets,
   Calendar,
-} from 'lucide-react'
+} from "lucide-react";
 
 // Barra de progresso atualizada para aceitar cores dinâmicas
 const SimpleProgress = ({
   value,
-  colorClass = 'bg-primary',
+  colorClass = "bg-primary",
 }: {
-  value: number
-  colorClass?: string
+  value: number;
+  colorClass?: string;
 }) => (
   <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
     <div
@@ -40,7 +40,7 @@ const SimpleProgress = ({
       style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
     />
   </div>
-)
+);
 
 export function GoalsView({
   data: { current, history },
@@ -68,7 +68,7 @@ export function GoalsView({
     onFatChange,
   },
 }: GoalsModelOutput) {
-  const { errors } = form.formState
+  const { errors } = form.formState;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -92,7 +92,7 @@ export function GoalsView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
           <Button
@@ -102,9 +102,9 @@ export function GoalsView({
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">
-              {isEditing ? 'Editar Meta' : 'Nova Meta'}
+              {isEditing ? "Editar Meta" : "Nova Meta"}
             </span>
-            <span className="sm:hidden">{isEditing ? 'Editar' : 'Nova'}</span>
+            <span className="sm:hidden">{isEditing ? "Editar" : "Nova"}</span>
           </Button>
         </div>
       </header>
@@ -154,7 +154,7 @@ export function GoalsView({
                         Calorias Diárias
                       </p>
                       <div className="text-3xl font-extrabold text-foreground tabular-nums tracking-tight">
-                        {current.dailyCalorieGoal}{' '}
+                        {current.dailyCalorieGoal}{" "}
                         <span className="text-lg font-medium text-muted-foreground">
                           kcal
                         </span>
@@ -272,7 +272,7 @@ export function GoalsView({
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditing ? 'Editar Meta' : 'Nova Meta'}</DialogTitle>
+            <DialogTitle>{isEditing ? "Editar Meta" : "Nova Meta"}</DialogTitle>
             <DialogDescription>
               Defina suas metas diárias. Você pode informar os macros em gramas
               ou em porcentagem (%).
@@ -295,14 +295,14 @@ export function GoalsView({
                   </Label>
                   <Input
                     id="goal-calories"
-                    {...form.register('dailyCalorieGoal')}
+                    {...form.register("dailyCalorieGoal")}
                     inputMode="decimal"
                     placeholder="Ex: 2000"
                     disabled={saving}
                     className={
                       errors.dailyCalorieGoal
-                        ? 'border-destructive'
-                        : 'border-orange-500/30 focus-visible:ring-orange-500'
+                        ? "border-destructive"
+                        : "border-orange-500/30 focus-visible:ring-orange-500"
                     }
                   />
                   {errors.dailyCalorieGoal && (
@@ -320,7 +320,7 @@ export function GoalsView({
                   </Label>
                   <Input
                     id="goal-water"
-                    {...form.register('waterGoalMl')}
+                    {...form.register("waterGoalMl")}
                     inputMode="decimal"
                     placeholder="Ex: 2500"
                     disabled={saving}
@@ -349,7 +349,7 @@ export function GoalsView({
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-background border px-1.5 py-0.5 rounded-full">
                         <span
                           className={
-                            !proteinAsPct ? 'text-foreground' : 'opacity-50'
+                            !proteinAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           G
@@ -362,7 +362,7 @@ export function GoalsView({
                         />
                         <span
                           className={
-                            proteinAsPct ? 'text-foreground' : 'opacity-50'
+                            proteinAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           %
@@ -374,7 +374,7 @@ export function GoalsView({
                     id="goal-protein"
                     {...proteinReg}
                     inputMode="decimal"
-                    type={proteinAsPct ? 'number' : undefined}
+                    type={proteinAsPct ? "number" : undefined}
                     min={proteinAsPct ? 0 : undefined}
                     max={
                       proteinAsPct
@@ -383,12 +383,12 @@ export function GoalsView({
                     }
                     step={proteinAsPct ? 0.1 : undefined}
                     onChange={onProteinChange}
-                    placeholder={proteinAsPct ? '30' : '150'}
+                    placeholder={proteinAsPct ? "30" : "150"}
                     disabled={saving}
                     className={
                       errors.proteinGoalG
-                        ? 'border-destructive'
-                        : 'border-blue-500/30'
+                        ? "border-destructive"
+                        : "border-blue-500/30"
                     }
                   />
                   {proteinAsPct && (
@@ -398,9 +398,9 @@ export function GoalsView({
                         colorClass="bg-blue-500"
                       />
                       <div className="text-[11px] text-muted-foreground tabular-nums text-right font-medium">
-                        ≈{' '}
+                        ≈{" "}
                         {calcMacroGramsFromPct(dailyCalories, proteinPct, 4) ??
-                          '0'}
+                          "0"}
                         g
                       </div>
                     </div>
@@ -420,7 +420,7 @@ export function GoalsView({
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-background border px-1.5 py-0.5 rounded-full">
                         <span
                           className={
-                            !carbsAsPct ? 'text-foreground' : 'opacity-50'
+                            !carbsAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           G
@@ -433,7 +433,7 @@ export function GoalsView({
                         />
                         <span
                           className={
-                            carbsAsPct ? 'text-foreground' : 'opacity-50'
+                            carbsAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           %
@@ -445,7 +445,7 @@ export function GoalsView({
                     id="goal-carbs"
                     {...carbsReg}
                     inputMode="decimal"
-                    type={carbsAsPct ? 'number' : undefined}
+                    type={carbsAsPct ? "number" : undefined}
                     min={carbsAsPct ? 0 : undefined}
                     max={
                       carbsAsPct
@@ -454,12 +454,12 @@ export function GoalsView({
                     }
                     step={carbsAsPct ? 0.1 : undefined}
                     onChange={onCarbsChange}
-                    placeholder={carbsAsPct ? '45' : '250'}
+                    placeholder={carbsAsPct ? "45" : "250"}
                     disabled={saving}
                     className={
                       errors.carbsGoalG
-                        ? 'border-destructive'
-                        : 'border-amber-500/30'
+                        ? "border-destructive"
+                        : "border-amber-500/30"
                     }
                   />
                   {carbsAsPct && (
@@ -469,9 +469,9 @@ export function GoalsView({
                         colorClass="bg-amber-500"
                       />
                       <div className="text-[11px] text-muted-foreground tabular-nums text-right font-medium">
-                        ≈{' '}
+                        ≈{" "}
                         {calcMacroGramsFromPct(dailyCalories, carbsPct, 4) ??
-                          '0'}
+                          "0"}
                         g
                       </div>
                     </div>
@@ -491,7 +491,7 @@ export function GoalsView({
                       <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-background border px-1.5 py-0.5 rounded-full">
                         <span
                           className={
-                            !fatAsPct ? 'text-foreground' : 'opacity-50'
+                            !fatAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           G
@@ -504,7 +504,7 @@ export function GoalsView({
                         />
                         <span
                           className={
-                            fatAsPct ? 'text-foreground' : 'opacity-50'
+                            fatAsPct ? "text-foreground" : "opacity-50"
                           }
                         >
                           %
@@ -516,7 +516,7 @@ export function GoalsView({
                     id="goal-fat"
                     {...fatReg}
                     inputMode="decimal"
-                    type={fatAsPct ? 'number' : undefined}
+                    type={fatAsPct ? "number" : undefined}
                     min={fatAsPct ? 0 : undefined}
                     max={
                       fatAsPct
@@ -525,20 +525,20 @@ export function GoalsView({
                     }
                     step={fatAsPct ? 0.1 : undefined}
                     onChange={onFatChange}
-                    placeholder={fatAsPct ? '25' : '65'}
+                    placeholder={fatAsPct ? "25" : "65"}
                     disabled={saving}
                     className={
                       errors.fatGoalG
-                        ? 'border-destructive'
-                        : 'border-rose-500/30'
+                        ? "border-destructive"
+                        : "border-rose-500/30"
                     }
                   />
                   {fatAsPct && (
                     <div className="space-y-1.5 animate-in fade-in">
                       <SimpleProgress value={fatPct} colorClass="bg-rose-500" />
                       <div className="text-[11px] text-muted-foreground tabular-nums text-right font-medium">
-                        ≈{' '}
-                        {calcMacroGramsFromPct(dailyCalories, fatPct, 9) ?? '0'}
+                        ≈{" "}
+                        {calcMacroGramsFromPct(dailyCalories, fatPct, 9) ?? "0"}
                         g
                       </div>
                     </div>
@@ -550,7 +550,7 @@ export function GoalsView({
               {anyPct && (
                 <div className="pt-2 animate-in fade-in">
                   <div
-                    className={`p-3 rounded-lg border ${totalPct === 100 ? 'bg-emerald-500/10 border-emerald-500/30' : totalPct > 100 ? 'bg-destructive/10 border-destructive/30' : 'bg-background'}`}
+                    className={`p-3 rounded-lg border ${totalPct === 100 ? "bg-emerald-500/10 border-emerald-500/30" : totalPct > 100 ? "bg-destructive/10 border-destructive/30" : "bg-background"}`}
                   >
                     <div className="flex items-center justify-between text-xs font-semibold tabular-nums mb-2">
                       <span className="text-muted-foreground uppercase tracking-wider">
@@ -559,10 +559,10 @@ export function GoalsView({
                       <span
                         className={
                           totalPct === 100
-                            ? 'text-emerald-600 dark:text-emerald-400'
+                            ? "text-emerald-600 dark:text-emerald-400"
                             : totalPct > 100
-                              ? 'text-destructive'
-                              : 'text-foreground'
+                              ? "text-destructive"
+                              : "text-foreground"
                         }
                       >
                         {Math.min(Math.max(totalPct, 0), 100)}%
@@ -572,10 +572,10 @@ export function GoalsView({
                       value={totalPct}
                       colorClass={
                         totalPct > 100
-                          ? 'bg-destructive'
+                          ? "bg-destructive"
                           : totalPct === 100
-                            ? 'bg-emerald-500'
-                            : 'bg-primary'
+                            ? "bg-emerald-500"
+                            : "bg-primary"
                       }
                     />
                     {totalPct !== 100 && (
@@ -603,12 +603,12 @@ export function GoalsView({
                 disabled={saving || (anyPct && totalPct !== 100)}
                 className="min-w-[120px]"
               >
-                {saving ? 'Salvando...' : 'Salvar Meta'}
+                {saving ? "Salvando..." : "Salvar Meta"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

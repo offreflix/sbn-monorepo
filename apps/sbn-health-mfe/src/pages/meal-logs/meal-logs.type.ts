@@ -1,3 +1,3 @@
 export type MealLogsProps = {
-  selectedDate: string
-}
+  selectedDate: string;
+};

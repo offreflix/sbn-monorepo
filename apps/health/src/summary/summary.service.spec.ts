@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { SummaryService } from './summary.service';
-import { GoalsService } from '../goals/goals.service';
-import { MealLogsService } from '../meal-logs/meal-logs.service';
-import { WaterLogsService } from '../water-logs/water-logs.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { SummaryService } from "./summary.service";
+import { GoalsService } from "../goals/goals.service";
+import { MealLogsService } from "../meal-logs/meal-logs.service";
+import { WaterLogsService } from "../water-logs/water-logs.service";
 
 const mockGoalsService = { findCurrent: jest.fn() };
 const mockMealLogsService = { findByDate: jest.fn() };
@@ -17,7 +17,7 @@ const mockGoal = {
   waterGoalMl: 2000,
 };
 
-describe('SummaryService', () => {
+describe("SummaryService", () => {
   let service: SummaryService;
 
   beforeEach(async () => {
@@ -34,24 +34,31 @@ describe('SummaryService', () => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('getSummary', () => {
-    it('should return summary with goal and data', async () => {
+  describe("getSummary", () => {
+    it("should return summary with goal and data", async () => {
       mockGoalsService.findCurrent.mockResolvedValue(mockGoal);
       mockMealLogsService.findByDate.mockResolvedValue({
-        breakfast: [{ calcCalories: 300, calcProtein: 20, calcCarbs: 40, calcFat: 5 }],
-        lunch: [{ calcCalories: 500, calcProtein: 40, calcCarbs: 60, calcFat: 15 }],
+        breakfast: [
+          { calcCalories: 300, calcProtein: 20, calcCarbs: 40, calcFat: 5 },
+        ],
+        lunch: [
+          { calcCalories: 500, calcProtein: 40, calcCarbs: 60, calcFat: 15 },
+        ],
         dinner: [],
         snack: [],
       });
-      mockWaterLogsService.findByDate.mockResolvedValue({ entries: [], totalMl: 1500 });
+      mockWaterLogsService.findByDate.mockResolvedValue({
+        entries: [],
+        totalMl: 1500,
+      });
 
-      const result = await service.getSummary('u1', '2024-03-15');
+      const result = await service.getSummary("u1", "2024-03-15");
 
-      expect(result.date).toBe('2024-03-15');
+      expect(result.date).toBe("2024-03-15");
       expect(result.goal).toEqual(mockGoal);
       expect(result.consumed.calories).toBe(800);
       expect(result.consumed.protein).toBeCloseTo(60);
@@ -59,12 +66,15 @@ describe('SummaryService', () => {
       expect(result.water.goalMl).toBe(2000);
     });
 
-    it('should return null goal and zero consumed when no data', async () => {
-      mockGoalsService.findCurrent.mockRejectedValue(new Error('not found'));
+    it("should return null goal and zero consumed when no data", async () => {
+      mockGoalsService.findCurrent.mockRejectedValue(new Error("not found"));
       mockMealLogsService.findByDate.mockResolvedValue(emptyMeals);
-      mockWaterLogsService.findByDate.mockResolvedValue({ entries: [], totalMl: 0 });
+      mockWaterLogsService.findByDate.mockResolvedValue({
+        entries: [],
+        totalMl: 0,
+      });
 
-      const result = await service.getSummary('u1', '2024-03-15');
+      const result = await service.getSummary("u1", "2024-03-15");
 
       expect(result.goal).toBeNull();
       expect(result.consumed.calories).toBe(0);

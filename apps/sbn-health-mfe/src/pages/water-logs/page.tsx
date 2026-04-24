@@ -8,4 +8,3 @@ export function WaterLogsPage(props: WaterLogsProps) {
 }
 
 export default WaterLogsPage;
-

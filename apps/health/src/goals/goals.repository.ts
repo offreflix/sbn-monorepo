@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class GoalsRepository {
@@ -12,7 +12,7 @@ export class GoalsRepository {
   findAllByUser(userId: string) {
     return this.prisma.goal.findMany({
       where: { userId },
-      orderBy: { activeFrom: 'desc' },
+      orderBy: { activeFrom: "desc" },
     });
   }
 
@@ -21,7 +21,7 @@ export class GoalsRepository {
     d.setUTCHours(0, 0, 0, 0);
     return this.prisma.goal.findFirst({
       where: { userId, activeFrom: { lte: d } },
-      orderBy: { activeFrom: 'desc' },
+      orderBy: { activeFrom: "desc" },
     });
   }
 
@@ -37,7 +37,17 @@ export class GoalsRepository {
     return this.prisma.goal.create({ data });
   }
 
-  update(id: string, data: Partial<{ dailyCalorieGoal: number; proteinGoalG: number; carbsGoalG: number; fatGoalG: number; waterGoalMl: number; activeFrom: Date }>) {
+  update(
+    id: string,
+    data: Partial<{
+      dailyCalorieGoal: number;
+      proteinGoalG: number;
+      carbsGoalG: number;
+      fatGoalG: number;
+      waterGoalMl: number;
+      activeFrom: Date;
+    }>,
+  ) {
     return this.prisma.goal.update({ where: { id }, data });
   }
 

@@ -11,10 +11,10 @@ import {
   DialogTitle,
   Input,
   Label,
-} from '@repo/ui'
-import type { WaterLogsModelOutput } from './water-logs.model'
-import { Plus, RefreshCcw, Trash2, Droplets, GlassWater } from 'lucide-react'
-import { formatNumber } from '../../lib/utils'
+} from "@repo/ui";
+import type { WaterLogsModelOutput } from "./water-logs.model";
+import { Plus, RefreshCcw, Trash2, Droplets, GlassWater } from "lucide-react";
+import { formatNumber } from "../../lib/utils";
 
 export function WaterLogsView({
   data: { entries, totalMl },
@@ -22,7 +22,7 @@ export function WaterLogsView({
   setters: { setIsCreateOpen },
   actions: { reload, openCreate, submitCreateWaterLog, deleteWaterLog },
 }: WaterLogsModelOutput) {
-  const { errors } = form.formState
+  const { errors } = form.formState;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -46,7 +46,7 @@ export function WaterLogsView({
             title="Atualizar dados"
           >
             <RefreshCcw
-              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
             />
           </Button>
           <Button
@@ -99,8 +99,8 @@ export function WaterLogsView({
                 <span>Histórico do dia</span>
                 <span className="text-xs font-normal text-muted-foreground bg-background px-2 py-0.5 rounded-full border">
                   {loading
-                    ? '—'
-                    : `${entries.length} ${entries.length === 1 ? 'registro' : 'registros'}`}
+                    ? "—"
+                    : `${entries.length} ${entries.length === 1 ? "registro" : "registros"}`}
                 </span>
               </CardTitle>
             </CardHeader>
@@ -181,11 +181,11 @@ export function WaterLogsView({
                 <div className="relative">
                   <Input
                     id="water-volume"
-                    {...form.register('volumeMl')}
+                    {...form.register("volumeMl")}
                     inputMode="decimal"
                     placeholder="Ex: 250"
                     disabled={saving}
-                    className={`pl-4 pr-12 text-lg h-12 ${errors.volumeMl ? 'border-destructive' : 'border-cyan-500/30 focus-visible:ring-cyan-500'}`}
+                    className={`pl-4 pr-12 text-lg h-12 ${errors.volumeMl ? "border-destructive" : "border-cyan-500/30 focus-visible:ring-cyan-500"}`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
                     ml
@@ -209,7 +209,7 @@ export function WaterLogsView({
                     variant="outline"
                     className="text-xs h-10 border-cyan-500/20 hover:bg-cyan-500/10 hover:text-cyan-600"
                     onClick={() =>
-                      form.setValue('volumeMl', '200', { shouldValidate: true })
+                      form.setValue("volumeMl", "200", { shouldValidate: true })
                     }
                   >
                     Copo (200)
@@ -219,7 +219,7 @@ export function WaterLogsView({
                     variant="outline"
                     className="text-xs h-10 border-cyan-500/20 hover:bg-cyan-500/10 hover:text-cyan-600"
                     onClick={() =>
-                      form.setValue('volumeMl', '350', { shouldValidate: true })
+                      form.setValue("volumeMl", "350", { shouldValidate: true })
                     }
                   >
                     Caneca (350)
@@ -229,7 +229,7 @@ export function WaterLogsView({
                     variant="outline"
                     className="text-xs h-10 border-cyan-500/20 hover:bg-cyan-500/10 hover:text-cyan-600"
                     onClick={() =>
-                      form.setValue('volumeMl', '500', { shouldValidate: true })
+                      form.setValue("volumeMl", "500", { shouldValidate: true })
                     }
                   >
                     Garrafa (500)
@@ -252,12 +252,12 @@ export function WaterLogsView({
                 disabled={saving}
                 className="min-w-[120px] bg-cyan-600 hover:bg-cyan-700 text-white"
               >
-                {saving ? 'Salvando...' : 'Registrar'}
+                {saving ? "Salvando..." : "Registrar"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

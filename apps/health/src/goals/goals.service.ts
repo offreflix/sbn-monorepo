@@ -2,10 +2,10 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { GoalsRepository } from './goals.repository';
-import { CreateGoalDto } from './dto/create-goal.dto';
-import { UpdateGoalDto } from './dto/update-goal.dto';
+} from "@nestjs/common";
+import { GoalsRepository } from "./goals.repository";
+import { CreateGoalDto } from "./dto/create-goal.dto";
+import { UpdateGoalDto } from "./dto/update-goal.dto";
 
 @Injectable()
 export class GoalsService {
@@ -26,9 +26,9 @@ export class GoalsService {
         activeFrom,
       });
     } catch (error: any) {
-      if (error?.code === 'P2002') {
+      if (error?.code === "P2002") {
         throw new ConflictException(
-          'A goal already exists for this date. Use PATCH to update it.',
+          "A goal already exists for this date. Use PATCH to update it.",
         );
       }
       throw error;
@@ -42,7 +42,7 @@ export class GoalsService {
   async findCurrent(userId: string) {
     const goal = await this.goalsRepository.findCurrent(userId);
     if (!goal) {
-      throw new NotFoundException('No active goal found for today');
+      throw new NotFoundException("No active goal found for today");
     }
     return goal;
   }
@@ -54,7 +54,7 @@ export class GoalsService {
   async update(id: string, userId: string, dto: UpdateGoalDto) {
     const goal = await this.goalsRepository.findById(id);
     if (!goal || goal.userId !== userId) {
-      throw new NotFoundException('Goal not found');
+      throw new NotFoundException("Goal not found");
     }
 
     const data: any = { ...dto };
@@ -69,7 +69,7 @@ export class GoalsService {
   async remove(id: string, userId: string) {
     const goal = await this.goalsRepository.findById(id);
     if (!goal || goal.userId !== userId) {
-      throw new NotFoundException('Goal not found');
+      throw new NotFoundException("Goal not found");
     }
     return this.goalsRepository.remove(id);
   }
