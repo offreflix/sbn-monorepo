@@ -9,7 +9,7 @@ import { OfxNubankParser } from './nubank/ofx-nubank-parser';
 import { PdfNubankParser } from './nubank/pdf-nubank-parser';
 import { TransactionType } from './dto/create-transaction.dto';
 
-jest.mock('pdf-parse', () => jest.fn());
+jest.mock('pdf-parse', () => ({ default: jest.fn() }));
 
 const mockTxRepo = {
   findFirst: jest.fn(),
@@ -158,7 +158,7 @@ describe('NubankImportService', () => {
     });
 
     it('should parse PDF and create transactions', async () => {
-      const pdfParse = require('pdf-parse');
+      const pdfParse = require('pdf-parse').default;
       const pdfText =
         '10/01/2024 Mercado 1.500,00\n15/01/2024 Salário -3.000,00';
       (pdfParse as jest.Mock).mockResolvedValue({ text: pdfText });
@@ -180,7 +180,7 @@ describe('NubankImportService', () => {
         file,
       });
 
-      expect(pdfParse).toHaveBeenCalledWith(file.buffer);
+      expect(require('pdf-parse').default).toHaveBeenCalledWith(file.buffer);
       expect(result.length).toBeGreaterThan(0);
     });
 

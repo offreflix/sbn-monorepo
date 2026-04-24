@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecurrencesService } from './recurrences.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { TransactionsRepository } from '../transactions/transactions.repository';
+import { WalletsRepository } from '../wallets/wallets.repository';
+import { BalanceService } from '../transactions/balance.service';
+import { RecurrenceQueueService } from './recurrence-queue.service';
 import { RecurrenceFrequency } from './dto/create-recurrence.dto';
 
 const mockPrismaService = {
@@ -12,6 +16,22 @@ const mockPrismaService = {
   },
 };
 
+const mockTransactionsRepository = {
+  create: jest.fn(),
+};
+
+const mockWalletsRepository = {};
+
+const mockBalanceService = {
+  isCreditCard: jest.fn(),
+  applyBalance: jest.fn(),
+};
+
+const mockRecurrenceQueueService = {
+  scheduleNext: jest.fn(),
+  cancel: jest.fn(),
+};
+
 describe('RecurrencesService', () => {
   let service: RecurrencesService;
 
@@ -20,6 +40,16 @@ describe('RecurrencesService', () => {
       providers: [
         RecurrencesService,
         { provide: PrismaService, useValue: mockPrismaService },
+        {
+          provide: TransactionsRepository,
+          useValue: mockTransactionsRepository,
+        },
+        { provide: WalletsRepository, useValue: mockWalletsRepository },
+        { provide: BalanceService, useValue: mockBalanceService },
+        {
+          provide: RecurrenceQueueService,
+          useValue: mockRecurrenceQueueService,
+        },
       ],
     }).compile();
 
@@ -122,7 +152,13 @@ describe('RecurrencesService', () => {
 
   describe('update', () => {
     it('should convert startDate and endDate strings to Date objects', async () => {
-      const mockRec = { id: 'r1', userId: 'u1' };
+      const mockRec = {
+        id: 'r1',
+        userId: 'u1',
+        startDate: new Date('2024-01-01'),
+        frequency: 'MONTHLY',
+        timezone: 'America/Sao_Paulo',
+      };
       const updated = { ...mockRec, frequency: 'WEEKLY' };
       mockPrismaService.recurrence.findFirst.mockResolvedValue(mockRec);
       mockPrismaService.recurrence.update.mockResolvedValue(updated);
@@ -152,7 +188,7 @@ describe('RecurrencesService', () => {
 
       expect(mockPrismaService.recurrence.update).toHaveBeenCalledWith({
         where: { id: 'r1' },
-        data: { deletedAt: expect.any(Date) },
+        data: { deletedAt: expect.any(Date), active: false },
       });
     });
   });
