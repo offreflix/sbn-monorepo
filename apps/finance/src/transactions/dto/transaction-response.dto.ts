@@ -13,7 +13,7 @@ export class TransactionResponseDto {
   @ApiProperty({ example: 'uuid-category' })
   categoryId: string;
 
-  @ApiProperty({ example: 50.00 })
+  @ApiProperty({ example: 50.0 })
   amount: number;
 
   @ApiProperty({ example: 'BRL' })
@@ -54,12 +54,15 @@ export class TransactionResponseDto {
 }
 
 export class TransactionSummaryResponseDto {
-  @ApiProperty({ example: 3500.00, description: 'Saldo total em todas as carteiras' })
+  @ApiProperty({
+    example: 3500.0,
+    description: 'Saldo total em todas as carteiras',
+  })
   totalBalance: number;
 
-  @ApiProperty({ example: 5000.00 })
+  @ApiProperty({ example: 5000.0 })
   totalIncome: number;
 
-  @ApiProperty({ example: 1500.00 })
+  @ApiProperty({ example: 1500.0 })
   totalExpenses: number;
 }

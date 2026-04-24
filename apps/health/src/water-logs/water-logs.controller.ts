@@ -33,7 +33,11 @@ export class WaterLogsController {
 
   @Post()
   @ApiOperation({ summary: "Registrar consumo de água" })
-  @ApiResponse({ status: 201, description: "Consumo registrado", type: WaterLogResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Consumo registrado",
+    type: WaterLogResponseDto,
+  })
   create(@Body() dto: CreateWaterLogDto, @Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
     return this.waterLogsService.create(userId, dto);

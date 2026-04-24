@@ -24,6 +24,9 @@ export class ApiKeyResponseDto {
 }
 
 export class CreateApiKeyResponseDto extends ApiKeyResponseDto {
-  @ApiProperty({ example: 'sbn_abc123_xxxxxxxxxxxxxx', description: 'Chave completa — exibida apenas na criação' })
+  @ApiProperty({
+    example: 'sbn_abc123_xxxxxxxxxxxxxx',
+    description: 'Chave completa — exibida apenas na criação',
+  })
   key: string;
 }

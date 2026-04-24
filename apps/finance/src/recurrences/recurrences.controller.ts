@@ -37,7 +37,11 @@ export class RecurrencesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar recorrências do usuário' })
-  @ApiResponse({ status: 200, description: 'Lista de recorrências', type: [RecurrenceResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de recorrências',
+    type: [RecurrenceResponseDto],
+  })
   findAll(@Headers('x-user-id') userId: string) {
     if (!userId) throw new BadRequestException('x-user-id header is required');
     return this.recurrencesService.findAll(userId);
@@ -45,7 +49,11 @@ export class RecurrencesController {
 
   @Post()
   @ApiOperation({ summary: 'Criar recorrência' })
-  @ApiResponse({ status: 201, description: 'Recorrência criada', type: RecurrenceResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Recorrência criada',
+    type: RecurrenceResponseDto,
+  })
   create(
     @Body() body: CreateRecurrenceDto,
     @Headers('x-user-id') userId: string,
@@ -57,7 +65,11 @@ export class RecurrencesController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar recorrência por ID' })
   @ApiParam({ name: 'id', description: 'ID da recorrência' })
-  @ApiResponse({ status: 200, description: 'Recorrência encontrada', type: RecurrenceResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Recorrência encontrada',
+    type: RecurrenceResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Recorrência não encontrada' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) throw new BadRequestException('x-user-id header is required');
@@ -67,7 +79,11 @@ export class RecurrencesController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar recorrência' })
   @ApiParam({ name: 'id', description: 'ID da recorrência' })
-  @ApiResponse({ status: 200, description: 'Recorrência atualizada', type: RecurrenceResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Recorrência atualizada',
+    type: RecurrenceResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Recorrência não encontrada' })
   update(
     @Param('id') id: string,
@@ -98,7 +114,11 @@ export class RecurrencesController {
     description: 'Chave interna — uso exclusivo do Jobs worker',
   })
   @ApiParam({ name: 'id', description: 'ID da recorrência' })
-  @ApiResponse({ status: 201, description: 'Transação gerada', type: TransactionResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Transação gerada',
+    type: TransactionResponseDto,
+  })
   @ApiResponse({ status: 403, description: 'Acesso negado' })
   trigger(
     @Param('id') id: string,

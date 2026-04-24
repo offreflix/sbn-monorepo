@@ -1,19 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class FoodResponseDto {
-  @ApiProperty({ example: '3fa85f64-5717-4562-b3fc-2c963f66afa6' })
+  @ApiProperty({ example: "3fa85f64-5717-4562-b3fc-2c963f66afa6" })
   id: string;
 
-  @ApiProperty({ example: 'Arroz branco cozido' })
+  @ApiProperty({ example: "Arroz branco cozido" })
   name: string;
 
-  @ApiProperty({ example: 'Tio João', nullable: true })
+  @ApiProperty({ example: "Tio João", nullable: true })
   brand: string | null;
 
   @ApiProperty({ example: 100 })
   servingSizeValue: number;
 
-  @ApiProperty({ example: 'g' })
+  @ApiProperty({ example: "g" })
   servingSizeUnit: string;
 
   @ApiProperty({ example: 130 })
@@ -31,12 +31,12 @@ export class FoodResponseDto {
   @ApiProperty({ example: true })
   isCustom: boolean;
 
-  @ApiProperty({ example: 'uuid-user', nullable: true })
+  @ApiProperty({ example: "uuid-user", nullable: true })
   userId: string | null;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
+  @ApiProperty({ example: "2024-01-01T00:00:00Z" })
   createdAt: string;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
+  @ApiProperty({ example: "2024-01-01T00:00:00Z" })
   updatedAt: string;
 }

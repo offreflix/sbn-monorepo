@@ -33,7 +33,11 @@ export class GoalsController {
 
   @Post()
   @ApiOperation({ summary: "Criar meta nutricional" })
-  @ApiResponse({ status: 201, description: "Meta criada", type: GoalResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Meta criada",
+    type: GoalResponseDto,
+  })
   create(@Body() dto: CreateGoalDto, @Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
     return this.goalsService.create(userId, dto);
@@ -41,7 +45,11 @@ export class GoalsController {
 
   @Get("current")
   @ApiOperation({ summary: "Obter meta nutricional ativa" })
-  @ApiResponse({ status: 200, description: "Meta ativa do usuário", type: GoalResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Meta ativa do usuário",
+    type: GoalResponseDto,
+  })
   @ApiResponse({ status: 404, description: "Nenhuma meta ativa encontrada" })
   findCurrent(@Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
@@ -50,7 +58,11 @@ export class GoalsController {
 
   @Get()
   @ApiOperation({ summary: "Listar todas as metas do usuário" })
-  @ApiResponse({ status: 200, description: "Lista de metas", type: [GoalResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de metas",
+    type: [GoalResponseDto],
+  })
   findAll(@Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
     return this.goalsService.findAll(userId);
@@ -59,7 +71,11 @@ export class GoalsController {
   @Patch(":id")
   @ApiOperation({ summary: "Atualizar meta" })
   @ApiParam({ name: "id", description: "ID da meta" })
-  @ApiResponse({ status: 200, description: "Meta atualizada", type: GoalResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Meta atualizada",
+    type: GoalResponseDto,
+  })
   update(
     @Param("id") id: string,
     @Body() dto: UpdateGoalDto,

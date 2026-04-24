@@ -33,7 +33,11 @@ export class CategoriesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar categorias do usuário' })
-  @ApiResponse({ status: 200, description: 'Lista de categorias', type: [CategoryResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorias',
+    type: [CategoryResponseDto],
+  })
   findAll(@Headers('x-user-id') userId: string) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
@@ -43,7 +47,11 @@ export class CategoriesController {
 
   @Post()
   @ApiOperation({ summary: 'Criar categoria' })
-  @ApiResponse({ status: 201, description: 'Categoria criada', type: CategoryResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Categoria criada',
+    type: CategoryResponseDto,
+  })
   create(
     @Body() body: CreateCategoryDto,
     @Headers('x-user-id') userId: string,
@@ -57,7 +65,11 @@ export class CategoriesController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar categoria por ID' })
   @ApiParam({ name: 'id', description: 'ID da categoria' })
-  @ApiResponse({ status: 200, description: 'Categoria encontrada', type: CategoryResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Categoria encontrada',
+    type: CategoryResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
@@ -69,7 +81,11 @@ export class CategoriesController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar categoria' })
   @ApiParam({ name: 'id', description: 'ID da categoria' })
-  @ApiResponse({ status: 200, description: 'Categoria atualizada', type: CategoryResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Categoria atualizada',
+    type: CategoryResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Categoria não encontrada' })
   update(
     @Param('id') id: string,

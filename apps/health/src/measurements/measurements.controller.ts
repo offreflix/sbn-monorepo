@@ -33,7 +33,11 @@ export class MeasurementsController {
 
   @Post()
   @ApiOperation({ summary: "Registrar medição de peso" })
-  @ApiResponse({ status: 201, description: "Medição registrada", type: MeasurementResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Medição registrada",
+    type: MeasurementResponseDto,
+  })
   create(
     @Body() dto: CreateMeasurementDto,
     @Headers("x-user-id") userId: string,
@@ -56,7 +60,11 @@ export class MeasurementsController {
     description: "Data final (YYYY-MM-DD)",
     example: "2024-01-31",
   })
-  @ApiResponse({ status: 200, description: "Lista de medições", type: [MeasurementResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de medições",
+    type: [MeasurementResponseDto],
+  })
   findAll(
     @Headers("x-user-id") userId: string,
     @Query("startDate") startDate?: string,

@@ -36,7 +36,11 @@ export class MealLogsController {
 
   @Post()
   @ApiOperation({ summary: "Registrar refeição" })
-  @ApiResponse({ status: 201, description: "Refeição registrada", type: MealLogResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Refeição registrada",
+    type: MealLogResponseDto,
+  })
   create(@Body() dto: CreateMealLogDto, @Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
     return this.mealLogsService.create(userId, dto);
@@ -50,7 +54,11 @@ export class MealLogsController {
     description: "Data no formato YYYY-MM-DD (padrão: hoje)",
     example: "2024-01-15",
   })
-  @ApiResponse({ status: 200, description: "Lista de refeições do dia", type: MealLogsGroupedResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de refeições do dia",
+    type: MealLogsGroupedResponseDto,
+  })
   findByDate(
     @Headers("x-user-id") userId: string,
     @Query("date") date?: string,

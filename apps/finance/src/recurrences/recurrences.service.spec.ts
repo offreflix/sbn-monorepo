@@ -63,7 +63,11 @@ describe('RecurrencesService', () => {
 
   describe('create', () => {
     it('should create a recurrence without endDate', async () => {
-      const mockRec = { id: 'r1', userId: 'u1', frequency: RecurrenceFrequency.MONTHLY };
+      const mockRec = {
+        id: 'r1',
+        userId: 'u1',
+        frequency: RecurrenceFrequency.MONTHLY,
+      };
       mockPrismaService.recurrence.create.mockResolvedValue(mockRec);
 
       const result = await service.create({

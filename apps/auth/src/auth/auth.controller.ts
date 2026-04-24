@@ -43,7 +43,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar usuário' })
-  @ApiResponse({ status: 200, description: 'Login realizado com sucesso', type: LoginResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login realizado com sucesso',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() loginDto: LoginDto) {
     const user = await this.authService.validateUser(
@@ -65,7 +69,11 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
-  @ApiResponse({ status: 201, description: 'Usuário criado com sucesso', type: UserResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuário criado com sucesso',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 409, description: 'Email já cadastrado' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
@@ -74,7 +82,11 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renovar access token' })
-  @ApiResponse({ status: 200, description: 'Tokens renovados com sucesso', type: TokenResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens renovados com sucesso',
+    type: TokenResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Refresh token inválido ou expirado',
@@ -108,7 +120,11 @@ export class AuthController {
   @Post('validate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Validar token JWT (uso interno do orchestrator)' })
-  @ApiResponse({ status: 200, description: 'Token válido', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Token válido',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Token inválido ou expirado' })
   async validate(@Body() validateTokenDto: ValidateTokenDto) {
     return this.authService.validateToken(validateTokenDto.token);
@@ -119,7 +135,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obter dados do usuário autenticado' })
-  @ApiResponse({ status: 200, description: 'Dados do usuário', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do usuário',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
   async getMe(@Req() req: AuthenticatedRequest) {
     const user = await this.authService.getCurrentUser(req.user.userId);

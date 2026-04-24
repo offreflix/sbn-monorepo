@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 class NutritionGoalDto {
   @ApiProperty({ example: 2000 })
@@ -40,7 +40,7 @@ class WaterSummaryDto {
 }
 
 export class HealthSummaryResponseDto {
-  @ApiProperty({ example: '2024-01-15' })
+  @ApiProperty({ example: "2024-01-15" })
   date: string;
 
   @ApiProperty({ type: NutritionGoalDto, nullable: true })
@@ -52,6 +52,9 @@ export class HealthSummaryResponseDto {
   @ApiProperty({ type: WaterSummaryDto })
   water: WaterSummaryDto;
 
-  @ApiProperty({ description: 'Refeições agrupadas por tipo (breakfast, lunch, dinner, snack)' })
+  @ApiProperty({
+    description:
+      "Refeições agrupadas por tipo (breakfast, lunch, dinner, snack)",
+  })
   meals: object;
 }

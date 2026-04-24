@@ -13,7 +13,7 @@ export class WalletResponseDto {
   @ApiProperty({ example: 'credit' })
   type: string;
 
-  @ApiProperty({ example: 1500.00 })
+  @ApiProperty({ example: 1500.0 })
   balance: number;
 
   @ApiProperty({ example: 'BRL' })
@@ -28,7 +28,7 @@ export class WalletResponseDto {
   @ApiProperty({ example: 10, nullable: true })
   invoiceDueDay: number | null;
 
-  @ApiProperty({ example: 5000.00, nullable: true })
+  @ApiProperty({ example: 5000.0, nullable: true })
   limit: number | null;
 
   @ApiProperty({ example: '2024-01-01T00:00:00Z' })

@@ -43,7 +43,11 @@ export class WishlistController {
 
   @Post()
   @ApiOperation({ summary: 'Criar item na wishlist' })
-  @ApiResponse({ status: 201, description: 'Item criado', type: WishlistItemResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Item criado',
+    type: WishlistItemResponseDto,
+  })
   create(
     @Body() body: CreateWishlistItemDto,
     @Headers('x-user-id') userId: string,
@@ -66,7 +70,11 @@ export class WishlistController {
     required: false,
     description: 'Filtrar por prioridade (LOW, MEDIUM, HIGH)',
   })
-  @ApiResponse({ status: 200, description: 'Lista de itens', type: [WishlistItemResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de itens',
+    type: [WishlistItemResponseDto],
+  })
   findAll(
     @Headers('x-user-id') userId: string,
     @Query('status') status?: string,
@@ -81,7 +89,11 @@ export class WishlistController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar item por ID' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 200, description: 'Item encontrado', type: WishlistItemResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Item encontrado',
+    type: WishlistItemResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Item não encontrado' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
@@ -93,7 +105,11 @@ export class WishlistController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar item da wishlist' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 200, description: 'Item atualizado', type: WishlistItemResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Item atualizado',
+    type: WishlistItemResponseDto,
+  })
   update(
     @Param('id') id: string,
     @Body() body: UpdateWishlistItemDto,
@@ -108,7 +124,11 @@ export class WishlistController {
   @Patch(':id/purchase')
   @ApiOperation({ summary: 'Marcar item como comprado' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 200, description: 'Item marcado como comprado', type: WishlistItemResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Item marcado como comprado',
+    type: WishlistItemResponseDto,
+  })
   markAsPurchased(
     @Param('id') id: string,
     @Headers('x-user-id') userId: string,
@@ -135,7 +155,11 @@ export class WishlistController {
   @Post(':id/prices')
   @ApiOperation({ summary: 'Registrar entrada de preço para o item' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 201, description: 'Entrada de preço registrada', type: WishlistPriceEntryResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Entrada de preço registrada',
+    type: WishlistPriceEntryResponseDto,
+  })
   createPriceEntry(
     @Param('id') id: string,
     @Body() body: CreatePriceEntryDto,
@@ -150,7 +174,11 @@ export class WishlistController {
   @Get(':id/prices')
   @ApiOperation({ summary: 'Listar histórico de preços do item' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 200, description: 'Histórico de preços', type: [WishlistPriceEntryResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Histórico de preços',
+    type: [WishlistPriceEntryResponseDto],
+  })
   findPriceEntries(
     @Param('id') id: string,
     @Headers('x-user-id') userId: string,
@@ -183,7 +211,11 @@ export class WishlistController {
   @Post(':id/priorities')
   @ApiOperation({ summary: 'Registrar entrada de prioridade para o item' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 201, description: 'Entrada de prioridade registrada', type: WishlistPriorityEntryResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Entrada de prioridade registrada',
+    type: WishlistPriorityEntryResponseDto,
+  })
   createPriorityEntry(
     @Param('id') id: string,
     @Body() body: CreatePriorityEntryDto,
@@ -198,7 +230,11 @@ export class WishlistController {
   @Get(':id/priorities')
   @ApiOperation({ summary: 'Listar histórico de prioridades do item' })
   @ApiParam({ name: 'id', description: 'ID do item' })
-  @ApiResponse({ status: 200, description: 'Histórico de prioridades', type: [WishlistPriorityEntryResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Histórico de prioridades',
+    type: [WishlistPriorityEntryResponseDto],
+  })
   findPriorityEntries(
     @Param('id') id: string,
     @Headers('x-user-id') userId: string,

@@ -46,7 +46,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Resumo de transações do mês' })
   @ApiQuery({ name: 'month', required: false, example: 1 })
   @ApiQuery({ name: 'year', required: false, example: 2024 })
-  @ApiResponse({ status: 200, description: 'Totais de receitas e despesas', type: TransactionSummaryResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Totais de receitas e despesas',
+    type: TransactionSummaryResponseDto,
+  })
   getSummary(
     @Headers('x-user-id') userId: string,
     @Query('month') month?: number,
@@ -67,7 +71,11 @@ export class TransactionsController {
 
   @Post()
   @ApiOperation({ summary: 'Criar transação' })
-  @ApiResponse({ status: 201, description: 'Transação criada', type: TransactionResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Transação criada',
+    type: TransactionResponseDto,
+  })
   create(
     @Body() body: CreateTransactionDto,
     @Headers('x-user-id') userId: string,
@@ -82,7 +90,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Listar transações do usuário' })
   @ApiQuery({ name: 'month', required: false, example: 1 })
   @ApiQuery({ name: 'year', required: false, example: 2024 })
-  @ApiResponse({ status: 200, description: 'Lista de transações', type: [TransactionResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de transações',
+    type: [TransactionResponseDto],
+  })
   findAll(
     @Headers('x-user-id') userId: string,
     @Query('month') month?: number,
@@ -101,7 +113,11 @@ export class TransactionsController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar transação por ID' })
   @ApiParam({ name: 'id', description: 'ID da transação' })
-  @ApiResponse({ status: 200, description: 'Transação encontrada', type: TransactionResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Transação encontrada',
+    type: TransactionResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
@@ -113,7 +129,11 @@ export class TransactionsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar transação' })
   @ApiParam({ name: 'id', description: 'ID da transação' })
-  @ApiResponse({ status: 200, description: 'Transação atualizada', type: TransactionResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Transação atualizada',
+    type: TransactionResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   update(
     @Param('id') id: string,

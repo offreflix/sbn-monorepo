@@ -13,7 +13,7 @@ export class RecurrenceResponseDto {
   @ApiProperty({ example: 'uuid-category' })
   categoryId: string;
 
-  @ApiProperty({ example: 150.00 })
+  @ApiProperty({ example: 150.0 })
   amount: number;
 
   @ApiProperty({ example: 'BRL' })

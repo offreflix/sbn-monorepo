@@ -22,7 +22,10 @@ import { ApiKeysService } from './api-keys.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
-import { ApiKeyResponseDto, CreateApiKeyResponseDto } from './dto/api-key-response.dto';
+import {
+  ApiKeyResponseDto,
+  CreateApiKeyResponseDto,
+} from './dto/api-key-response.dto';
 import { UserResponseDto } from '../auth/dto/auth-response.dto';
 
 interface AuthenticatedRequest extends Request {
@@ -38,7 +41,11 @@ export class ApiKeysController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Criar nova API key' })
-  @ApiResponse({ status: 201, description: 'API key criada com sucesso', type: CreateApiKeyResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'API key criada com sucesso',
+    type: CreateApiKeyResponseDto,
+  })
   async create(@Req() req: AuthenticatedRequest, @Body() dto: CreateApiKeyDto) {
     return this.apiKeysService.create(req.user.userId, dto);
   }
@@ -46,7 +53,11 @@ export class ApiKeysController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Listar API keys do usuário' })
-  @ApiResponse({ status: 200, description: 'Lista de API keys', type: [ApiKeyResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de API keys',
+    type: [ApiKeyResponseDto],
+  })
   async list(@Req() req: AuthenticatedRequest) {
     return this.apiKeysService.listKeys(req.user.userId);
   }
@@ -71,7 +82,11 @@ export class ValidateApiKeyController {
   @Post('validate-api-key')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Validar API key (uso interno do orchestrator)' })
-  @ApiResponse({ status: 200, description: 'API key válida', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'API key válida',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'API key inválida ou expirada' })
   async validate(@Body() body: { apiKey: string }) {
     return this.apiKeysService.validateKey(body.apiKey);

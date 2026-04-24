@@ -35,7 +35,11 @@ export class FoodsController {
 
   @Post()
   @ApiOperation({ summary: "Criar alimento" })
-  @ApiResponse({ status: 201, description: "Alimento criado", type: FoodResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: "Alimento criado",
+    type: FoodResponseDto,
+  })
   create(@Body() dto: CreateFoodDto, @Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
     return this.foodsService.create(userId, dto);
@@ -48,7 +52,11 @@ export class FoodsController {
     required: false,
     description: "Buscar por nome do alimento",
   })
-  @ApiResponse({ status: 200, description: "Lista de alimentos", type: [FoodResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de alimentos",
+    type: [FoodResponseDto],
+  })
   findAll(
     @Headers("x-user-id") userId: string,
     @Query("search") search?: string,
@@ -60,7 +68,11 @@ export class FoodsController {
   @Get(":id")
   @ApiOperation({ summary: "Buscar alimento por ID" })
   @ApiParam({ name: "id", description: "ID do alimento" })
-  @ApiResponse({ status: 200, description: "Alimento encontrado", type: FoodResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Alimento encontrado",
+    type: FoodResponseDto,
+  })
   @ApiResponse({ status: 404, description: "Alimento não encontrado" })
   findOne(@Param("id") id: string, @Headers("x-user-id") userId: string) {
     if (!userId) throw new BadRequestException("x-user-id header is required");
@@ -70,7 +82,11 @@ export class FoodsController {
   @Patch(":id")
   @ApiOperation({ summary: "Atualizar alimento" })
   @ApiParam({ name: "id", description: "ID do alimento" })
-  @ApiResponse({ status: 200, description: "Alimento atualizado", type: FoodResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: "Alimento atualizado",
+    type: FoodResponseDto,
+  })
   update(
     @Param("id") id: string,
     @Body() dto: UpdateFoodDto,

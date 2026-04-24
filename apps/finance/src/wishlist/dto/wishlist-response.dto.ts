@@ -28,7 +28,10 @@ export class WishlistItemResponseDto {
   @ApiProperty({ example: 'https://apple.com/macbook-pro', nullable: true })
   url: string | null;
 
-  @ApiProperty({ example: 'https://store.storeimages.cdn-apple.com/macbook.jpg', nullable: true })
+  @ApiProperty({
+    example: 'https://store.storeimages.cdn-apple.com/macbook.jpg',
+    nullable: true,
+  })
   imageUrl: string | null;
 
   @ApiProperty({ example: 'HIGH' })
@@ -63,7 +66,7 @@ export class WishlistPriceEntryResponseDto {
   @ApiProperty({ example: 299.99 })
   price: number;
 
-  @ApiProperty({ example: 280.00, nullable: true })
+  @ApiProperty({ example: 280.0, nullable: true })
   cashPrice: number | null;
 
   @ApiProperty({ example: 12, nullable: true })

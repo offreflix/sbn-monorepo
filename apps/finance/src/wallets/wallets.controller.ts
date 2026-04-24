@@ -33,7 +33,11 @@ export class WalletsController {
 
   @Post()
   @ApiOperation({ summary: 'Criar carteira' })
-  @ApiResponse({ status: 201, description: 'Carteira criada', type: WalletResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Carteira criada',
+    type: WalletResponseDto,
+  })
   create(@Body() body: CreateWalletDto, @Headers('x-user-id') userId: string) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
@@ -43,7 +47,11 @@ export class WalletsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar carteiras do usuário' })
-  @ApiResponse({ status: 200, description: 'Lista de carteiras', type: [WalletResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de carteiras',
+    type: [WalletResponseDto],
+  })
   findAll(@Headers('x-user-id') userId: string) {
     if (!userId) {
       throw new BadRequestException('x-user-id header is required');
@@ -54,7 +62,11 @@ export class WalletsController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar carteira por ID' })
   @ApiParam({ name: 'id', description: 'ID da carteira' })
-  @ApiResponse({ status: 200, description: 'Carteira encontrada', type: WalletResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Carteira encontrada',
+    type: WalletResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Carteira não encontrada' })
   findOne(@Param('id') id: string, @Headers('x-user-id') userId: string) {
     if (!userId) {
@@ -66,7 +78,11 @@ export class WalletsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar carteira' })
   @ApiParam({ name: 'id', description: 'ID da carteira' })
-  @ApiResponse({ status: 200, description: 'Carteira atualizada', type: WalletResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Carteira atualizada',
+    type: WalletResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Carteira não encontrada' })
   update(
     @Param('id') id: string,
