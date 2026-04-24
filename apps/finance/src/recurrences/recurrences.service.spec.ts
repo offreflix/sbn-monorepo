@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RecurrencesService } from './recurrences.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RecurrenceFrequency } from './dto/create-recurrence.dto';
 
 const mockPrismaService = {
   recurrence: {
@@ -32,7 +33,7 @@ describe('RecurrencesService', () => {
 
   describe('create', () => {
     it('should create a recurrence without endDate', async () => {
-      const mockRec = { id: 'r1', userId: 'u1', frequency: 'MONTHLY' };
+      const mockRec = { id: 'r1', userId: 'u1', frequency: RecurrenceFrequency.MONTHLY };
       mockPrismaService.recurrence.create.mockResolvedValue(mockRec);
 
       const result = await service.create({
@@ -41,7 +42,7 @@ describe('RecurrencesService', () => {
         categoryId: 'c1',
         amount: 100,
         type: 'Despesa',
-        frequency: 'MONTHLY',
+        frequency: RecurrenceFrequency.MONTHLY,
         startDate: '2024-01-01',
       });
 
@@ -71,7 +72,7 @@ describe('RecurrencesService', () => {
         categoryId: 'c1',
         amount: 100,
         type: 'Despesa',
-        frequency: 'MONTHLY',
+        frequency: RecurrenceFrequency.MONTHLY,
         startDate: '2024-01-01',
         endDate: '2024-12-31',
       });
@@ -129,7 +130,7 @@ describe('RecurrencesService', () => {
       await service.update('r1', 'u1', {
         startDate: '2024-01-01',
         endDate: '2024-06-30',
-        frequency: 'WEEKLY',
+        frequency: RecurrenceFrequency.WEEKLY,
       });
 
       const updateCall = mockPrismaService.recurrence.update.mock.calls[0][0];
