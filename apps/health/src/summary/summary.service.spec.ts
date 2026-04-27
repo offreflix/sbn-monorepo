@@ -4,7 +4,7 @@ import { GoalsService } from "../goals/goals.service";
 import { MealLogsService } from "../meal-logs/meal-logs.service";
 import { WaterLogsService } from "../water-logs/water-logs.service";
 
-const mockGoalsService = { findCurrent: jest.fn() };
+const mockGoalsService = { findForDate: jest.fn() };
 const mockMealLogsService = { findByDate: jest.fn() };
 const mockWaterLogsService = { findByDate: jest.fn() };
 
@@ -40,7 +40,7 @@ describe("SummaryService", () => {
 
   describe("getSummary", () => {
     it("should return summary with goal and data", async () => {
-      mockGoalsService.findCurrent.mockResolvedValue(mockGoal);
+      mockGoalsService.findForDate.mockResolvedValue(mockGoal);
       mockMealLogsService.findByDate.mockResolvedValue({
         breakfast: [
           { calcCalories: 300, calcProtein: 20, calcCarbs: 40, calcFat: 5 },
@@ -67,7 +67,7 @@ describe("SummaryService", () => {
     });
 
     it("should return null goal and zero consumed when no data", async () => {
-      mockGoalsService.findCurrent.mockRejectedValue(new Error("not found"));
+      mockGoalsService.findForDate.mockRejectedValue(new Error("not found"));
       mockMealLogsService.findByDate.mockResolvedValue(emptyMeals);
       mockWaterLogsService.findByDate.mockResolvedValue({
         entries: [],

@@ -170,4 +170,58 @@ describe('AuthService', () => {
       ).rejects.toThrow(ConflictException);
     });
   });
+
+  describe('logout', () => {
+    it('should delete refresh token from redis and return success', async () => {
+      const result = await service.logout('some-token');
+      expect(mockRedis.del).toHaveBeenCalledWith('refreshToken:some-token');
+      expect(result).toEqual({ success: true });
+    });
+  });
+
+  describe('validateToken', () => {
+    it('should return payload for a valid token', async () => {
+      const payload = { sub: '1', email: 'test@example.com' };
+      mockJwtService.verify.mockReturnValue(payload);
+
+      const result = await service.validateToken('valid-token');
+      expect(result).toEqual(payload);
+    });
+
+    it('should throw UnauthorizedException for an invalid token', async () => {
+      mockJwtService.verify.mockImplementation(() => {
+        throw new Error('invalid');
+      });
+
+      await expect(service.validateToken('bad-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('getCurrentUser', () => {
+    it('should return user without password_hash', async () => {
+      const user = {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test',
+        password_hash: 'hash',
+        created_at: new Date(),
+        updated_at: new Date(),
+        deleted_at: null,
+      };
+      mockPrismaService.user.findUnique.mockResolvedValue(user);
+
+      const result = await service.getCurrentUser('1');
+      expect(result).toHaveProperty('id', '1');
+      expect(result).not.toHaveProperty('password_hash');
+    });
+
+    it('should throw UnauthorizedException if user not found', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      await expect(service.getCurrentUser('missing')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
 });
