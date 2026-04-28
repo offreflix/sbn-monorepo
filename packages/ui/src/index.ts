@@ -17,3 +17,4 @@ export * from "./field";
 export * from "./lib/utils";
 export * from "./spinner";
 export * from "./skeleton";
+export * from "./month-year-selector";

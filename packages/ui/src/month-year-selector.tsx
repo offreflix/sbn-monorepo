@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { Button } from "./button";
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Input,
-} from "@repo/ui";
+} from "./dialog";
+import { Input } from "./input";
 import {
   ChevronLeft,
   ChevronRight,
@@ -61,7 +61,6 @@ export function MonthYearSelector({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Ignore if focused on input fields to not conflict with typing
       const activeTag = (document.activeElement?.tagName || "").toLowerCase();
       if (["input", "textarea", "select"].includes(activeTag)) return;
       if (e.key === "ArrowLeft") {
@@ -148,7 +147,6 @@ export function MonthYearSelector({
                 </Button>
               </div>
 
-              {/* Quick year list */}
               <div className="max-h-24 overflow-y-auto custom-scrollbar rounded border p-2">
                 <div className="flex flex-wrap gap-2">
                   {yearsAround.map((y) => (

@@ -19,6 +19,29 @@ export function useAppModel() {
     localStorage.setItem("health-selected-date", date);
   }, []);
 
+  const selectedMonth = useMemo(() => {
+    const [, m] = selectedDate.split("-");
+    return parseInt(m, 10);
+  }, [selectedDate]);
+
+  const selectedYear = useMemo(() => {
+    const [y] = selectedDate.split("-");
+    return parseInt(y, 10);
+  }, [selectedDate]);
+
+  const setSelectedMonthYear = useCallback(
+    (month: number, year: number) => {
+      const now = new Date();
+      const isCurrentMonth =
+        month === now.getMonth() + 1 && year === now.getFullYear();
+      const date = isCurrentMonth
+        ? now.toISOString().split("T")[0]
+        : `${year}-${String(month).padStart(2, "0")}-01`;
+      setDate(date);
+    },
+    [setDate],
+  );
+
   const knownRoutes = useMemo(
     () => [
       "summary",
@@ -72,9 +95,12 @@ export function useAppModel() {
   return {
     state: {
       selectedDate,
+      selectedMonth,
+      selectedYear,
     },
     setters: {
       setSelectedDate: setDate,
+      setSelectedMonthYear,
     },
     actions: {
       isTabActive,

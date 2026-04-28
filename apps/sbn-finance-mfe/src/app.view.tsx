@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Button } from "@repo/ui";
+import { Button, MonthYearSelector } from "@repo/ui";
 import {
   LayoutDashboard,
   RefreshCcw,
@@ -10,7 +10,6 @@ import {
   Repeat,
 } from "lucide-react";
 import { Toaster } from "sonner";
-import { MonthYearSelector } from "./components/month-year-selector";
 import { Dashboard } from "./pages/dashboard/page";
 import { TransactionList } from "./pages/transactions/page";
 import { CategoryGrid } from "./pages/categories/page";

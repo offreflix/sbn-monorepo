@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Button, Input } from "@repo/ui";
+import { Button, MonthYearSelector } from "@repo/ui";
 import { Toaster } from "sonner";
 import {
   Activity,
@@ -8,7 +8,6 @@ import {
   Target,
   Utensils,
   NotebookPen,
-  RefreshCcw,
 } from "lucide-react";
 import type { AppModelOutput } from "./app.model";
 import { SummaryPage } from "./pages/summary/page";
@@ -19,8 +18,8 @@ import { MeasurementsPage } from "./pages/measurements/page";
 import { GoalsPage } from "./pages/goals/page";
 
 export function AppView({
-  state: { selectedDate },
-  setters: { setSelectedDate },
+  state: { selectedDate, selectedMonth, selectedYear },
+  setters: { setSelectedMonthYear },
   actions: { isTabActive, handleNavigate },
 }: AppModelOutput) {
   return (
@@ -92,23 +91,11 @@ export function AppView({
             </div>
 
             <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="h-9 w-[160px]"
+              <MonthYearSelector
+                month={selectedMonth}
+                year={selectedYear}
+                onChange={setSelectedMonthYear}
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  setSelectedDate(new Date().toISOString().split("T")[0])
-                }
-                className="h-8 w-8"
-                title="Ir para hoje"
-              >
-                <RefreshCcw className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </header>
