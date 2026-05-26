@@ -13,7 +13,7 @@ import {
   Label,
 } from "@repo/ui";
 import type { WaterLogsModelOutput } from "./water-logs.model";
-import { Plus, RefreshCcw, Trash2, Droplets, GlassWater } from "lucide-react";
+import { Plus, RefreshCcw, Trash2, Droplets } from "lucide-react";
 import { formatNumber } from "../../lib/utils";
 
 export function WaterLogsView({

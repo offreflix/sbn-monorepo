@@ -1,18 +1,19 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Button } from "./button";
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { Button } from './button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./dialog";
-import { Input } from "./input";
+} from './dialog'
+import { Calendar } from './calendar'
 import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
-} from "lucide-react";
+} from 'lucide-react'
+import { ptBR } from 'date-fns/locale'
 
 export function MonthYearSelector({
   month,
@@ -21,79 +22,69 @@ export function MonthYearSelector({
   className,
   withTodayButton = true,
 }: {
-  month: number; // 1-12
-  year: number;
-  onChange: (month: number, year: number) => void;
-  className?: string;
-  withTodayButton?: boolean;
+  month: number // 1-12
+  year: number
+  onChange: (month: number, year: number) => void
+  className?: string
+  withTodayButton?: boolean
 }) {
-  const [open, setOpen] = useState(false);
-  const [tempYear, setTempYear] = useState(year);
+  const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    setTempYear(year);
-  }, [year]);
+  const selectedDate = useMemo(
+    () => new Date(year, month - 1, 1),
+    [month, year],
+  )
 
   const monthLabel = useMemo(() => {
     return new Date(year, month - 1, 1)
-      .toLocaleString("pt-BR", { month: "long", year: "numeric" })
-      .replace(/^./, (s) => s.toUpperCase());
-  }, [month, year]);
-
-  const months = useMemo(
-    () =>
-      Array.from({ length: 12 }, (_, i) =>
-        new Date(0, i, 1)
-          .toLocaleString("pt-BR", { month: "short" })
-          .replace(".", "")
-          .replace(/^./, (s) => s.toUpperCase()),
-      ),
-    [],
-  );
+      .toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+      .replace(/^./, (s) => s.toUpperCase())
+  }, [month, year])
 
   const shiftMonth = useCallback(
     (delta: number) => {
-      const next = new Date(year, month - 1 + delta, 1);
-      onChange(next.getMonth() + 1, next.getFullYear());
+      const next = new Date(year, month - 1 + delta, 1)
+      onChange(next.getMonth() + 1, next.getFullYear())
     },
     [month, year, onChange],
-  );
+  )
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const activeTag = (document.activeElement?.tagName || "").toLowerCase();
-      if (["input", "textarea", "select"].includes(activeTag)) return;
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        shiftMonth(-1);
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        shiftMonth(1);
-      } else if (e.key.toLowerCase() === "t") {
-        e.preventDefault();
-        const now = new Date();
-        onChange(now.getMonth() + 1, now.getFullYear());
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase()
+      if (['input', 'textarea', 'select'].includes(activeTag)) return
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        shiftMonth(-1)
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        shiftMonth(1)
+      } else if (e.key.toLowerCase() === 't') {
+        e.preventDefault()
+        const now = new Date()
+        onChange(now.getMonth() + 1, now.getFullYear())
       }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [shiftMonth, onChange]);
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [shiftMonth, onChange])
 
-  const handleSelectMonth = (m: number) => {
-    onChange(m + 1, tempYear);
-    setOpen(false);
-  };
+  const handleDaySelect = (date: Date | undefined) => {
+    if (!date) return
+    onChange(date.getMonth() + 1, date.getFullYear())
+    setOpen(false)
+  }
 
-  const yearsAround = useMemo(() => {
-    const current = new Date().getFullYear();
-    const start = current - 10;
-    return Array.from({ length: 21 }, (_, i) => start + i);
-  }, []);
+  const isCurrentMonthYear = useMemo(() => {
+    const now = new Date()
+    return month === now.getMonth() + 1 && year === now.getFullYear()
+  }, [month, year])
 
-  const today = () => {
-    const now = new Date();
-    onChange(now.getMonth() + 1, now.getFullYear());
-  };
+  const goToToday = () => {
+    const now = new Date()
+    onChange(now.getMonth() + 1, now.getFullYear())
+    setOpen(false)
+  }
 
   return (
     <div className={className}>
@@ -103,86 +94,59 @@ export function MonthYearSelector({
           size="icon"
           aria-label="Mês anterior"
           onClick={() => shiftMonth(-1)}
-          className="h-8 w-8"
+          className="h-9 w-9 rounded-lg"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="secondary" size="sm" className="h-8 px-3">
-              <CalendarIcon className="h-4 w-4 mr-2" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-4 gap-2 font-medium rounded-lg"
+            >
+              <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="capitalize">{monthLabel}</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
+
+          <DialogContent className="w-auto p-0 overflow-hidden" showCloseButton={false}>
+            <DialogHeader className="sr-only">
               <DialogTitle>Selecionar período</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  aria-label="Ano anterior"
-                  onClick={() => setTempYear((y) => y - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  value={tempYear}
-                  onChange={(e) => setTempYear(Number(e.target.value))}
-                  className="w-28 h-8 text-center"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  aria-label="Próximo ano"
-                  onClick={() => setTempYear((y) => y + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
 
-              <div className="max-h-24 overflow-y-auto custom-scrollbar rounded border p-2">
-                <div className="flex flex-wrap gap-2">
-                  {yearsAround.map((y) => (
-                    <Button
-                      key={y}
-                      variant={y === tempYear ? "secondary" : "ghost"}
-                      size="sm"
-                      className="h-8"
-                      onClick={() => setTempYear(y)}
-                    >
-                      {y}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {months.map((name, idx) => {
-                  const selected = idx + 1 === month && tempYear === year;
-                  return (
-                    <Button
-                      key={name}
-                      variant={selected ? "default" : "outline"}
-                      size="sm"
-                      className="h-9 capitalize"
-                      onClick={() => handleSelectMonth(idx)}
-                    >
-                      {name}
-                    </Button>
-                  );
-                })}
-              </div>
+            <div className="flex flex-col">
+              <Calendar
+                className="w-full"
+                mode="single"
+                selected={selectedDate}
+                defaultMonth={selectedDate}
+                onSelect={handleDaySelect}
+                captionLayout="dropdown"
+                locale={ptBR}
+                startMonth={new Date(new Date().getFullYear() - 10, 0)}
+                endMonth={new Date(new Date().getFullYear() + 5, 11)}
+              />
 
               {withTodayButton && (
-                <div className="flex justify-end">
-                  <Button variant="ghost" size="sm" onClick={today}>
+                <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/20">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono">
+                      ← →
+                    </kbd>
+                    navegar
+                    <kbd className="px-1.5 py-0.5 rounded bg-muted text-[10px] font-mono ml-1">
+                      T
+                    </kbd>
+                    hoje
+                  </span>
+                  <Button
+                    variant={isCurrentMonthYear ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={goToToday}
+                    className="h-8 text-xs"
+                  >
                     Ir para hoje
                   </Button>
                 </div>
@@ -196,11 +160,11 @@ export function MonthYearSelector({
           size="icon"
           aria-label="Próximo mês"
           onClick={() => shiftMonth(1)}
-          className="h-8 w-8"
+          className="h-9 w-9 rounded-lg"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  );
+  )
 }
