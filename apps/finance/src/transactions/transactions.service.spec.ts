@@ -11,6 +11,7 @@ import {
   TransactionStatus,
 } from './dto/create-transaction.dto';
 import { NotFoundException } from '@nestjs/common';
+import { RecurrenceQueueService } from '../recurrences/recurrence-queue.service';
 
 const mockTxRepo = {
   findMany: jest.fn(),
@@ -38,6 +39,11 @@ const mockNubankImportSvc = {
   import: jest.fn(),
 };
 
+const mockRecurrenceQueueService = {
+  scheduleNext: jest.fn(),
+  cancel: jest.fn(),
+};
+
 describe('TransactionsService', () => {
   let service: TransactionsService;
 
@@ -50,6 +56,10 @@ describe('TransactionsService', () => {
         { provide: WalletsRepository, useValue: mockWalletsRepo },
         { provide: InstallmentService, useValue: mockInstallmentSvc },
         { provide: NubankImportService, useValue: mockNubankImportSvc },
+        {
+          provide: RecurrenceQueueService,
+          useValue: mockRecurrenceQueueService,
+        },
       ],
     }).compile();
 

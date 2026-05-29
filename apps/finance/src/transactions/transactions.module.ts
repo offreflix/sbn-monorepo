@@ -11,9 +11,10 @@ import { CsvNubankParser } from './nubank/csv-nubank-parser';
 import { OfxNubankParser } from './nubank/ofx-nubank-parser';
 import { PdfNubankParser } from './nubank/pdf-nubank-parser';
 import { PrismaModule } from '../prisma/prisma.module';
+import { RecurrencesModule } from '../recurrences/recurrences.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, RecurrencesModule],
   controllers: [TransactionsController],
   providers: [
     TransactionsService,

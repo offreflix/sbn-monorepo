@@ -19,5 +19,6 @@ import { RECURRENCE_QUEUE } from './recurrence-queue.service';
     BalanceService,
   ],
   controllers: [RecurrencesController],
+  exports: [RecurrenceQueueService],
 })
 export class RecurrencesModule {}

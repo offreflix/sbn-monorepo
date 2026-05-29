@@ -11,6 +11,7 @@ import {
 } from './installment.service';
 import { NubankImportService } from './nubank-import.service';
 import { NubankFile } from './nubank/nubank-file-parser.interface';
+import { RecurrenceQueueService } from '../recurrences/recurrence-queue.service';
 
 @Injectable()
 export class TransactionsService {
@@ -20,6 +21,7 @@ export class TransactionsService {
     private balanceService: BalanceService,
     private installmentService: InstallmentService,
     private nubankImportService: NubankImportService,
+    private recurrenceQueueService: RecurrenceQueueService,
   ) {}
 
   async create(userId: string, data: CreateTransactionDto) {
@@ -54,6 +56,12 @@ export class TransactionsService {
         active: true,
       });
       newRecurrenceId = recurrence.id;
+      await this.recurrenceQueueService.scheduleNext(
+        recurrence.id,
+        recurrence.frequency,
+        recurrence.startDate,
+        recurrence.timezone,
+      );
     }
 
     if (installments > 1) {
