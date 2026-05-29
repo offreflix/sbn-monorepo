@@ -8,6 +8,8 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { HeadersDictionary } from '../common/types';
 
+export type ProxyResponseHeaders = Record<string, string | string[] | undefined>;
+
 @Injectable()
 export class ProxyService {
   constructor(private readonly httpService: HttpService) {}
@@ -17,6 +19,7 @@ export class ProxyService {
     method: string,
     data?: unknown,
     headers?: HeadersDictionary,
+    onResponseHeaders?: (headers: ProxyResponseHeaders) => void,
   ): Promise<TResponse> {
     const config: AxiosRequestConfig = {
       method,
@@ -29,6 +32,7 @@ export class ProxyService {
       const response = await firstValueFrom(
         this.httpService.request<TResponse>(config),
       );
+      onResponseHeaders?.(response.headers as ProxyResponseHeaders);
       return response.data;
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response) {

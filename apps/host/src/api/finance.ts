@@ -1,17 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:56080";
 
 function getAccessToken(): string | null {
-  try {
-    const raw = localStorage.getItem("sbn-auth-session");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      user?: unknown;
-      tokens?: { accessToken?: string; refreshToken?: string };
-    };
-    return parsed.tokens?.accessToken ?? null;
-  } catch {
-    return null;
-  }
+  return window.__SBN_AUTH__?.getAccessToken() ?? null;
 }
 
 async function handle<T>(res: Response): Promise<T> {
@@ -46,6 +36,7 @@ async function request<T>(path: string, init: RequestInit) {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers,
+    credentials: "include",
   });
 
   return handle<T>(res);

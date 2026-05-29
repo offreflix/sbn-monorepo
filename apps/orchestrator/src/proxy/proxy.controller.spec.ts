@@ -180,6 +180,30 @@ describe('ProxyController', () => {
       );
       expect(forwardedHeaders).toHaveProperty('accept', 'application/json');
     });
+
+    it('relays set-cookie headers from the auth service', async () => {
+      const req = {
+        headers: {
+          'content-type': 'application/json',
+        },
+        method: 'POST',
+        originalUrl: '/api/auth/login',
+      } as unknown as Request;
+      const res = { setHeader: jest.fn() } as any;
+
+      mockProxyService.forwardRequest.mockImplementationOnce(
+        (_url, _method, _body, _headers, onResponseHeaders) => {
+          onResponseHeaders({ 'set-cookie': ['refresh_token=abc; HttpOnly'] });
+          return Promise.resolve({});
+        },
+      );
+
+      await controller.handleAuthRequest(req, undefined, res);
+
+      expect(res.setHeader).toHaveBeenCalledWith('Set-Cookie', [
+        'refresh_token=abc; HttpOnly',
+      ]);
+    });
   });
 
   describe('handleFinanceRequest', () => {

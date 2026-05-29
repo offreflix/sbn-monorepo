@@ -11,7 +11,6 @@ describe("authApi", () => {
       new Response(
         JSON.stringify({
           accessToken: "a",
-          refreshToken: "r",
           user: { id: "1" },
         }),
         {
@@ -27,6 +26,7 @@ describe("authApi", () => {
     const [url, init] = fetchSpy.mock.calls[0];
     expect(url).toContain("/api/auth/login");
     expect(init?.method).toBe("POST");
+    expect(init?.credentials).toBe("include");
   });
 
   it("propaga erro amigável ao receber status de erro", async () => {

@@ -47,7 +47,7 @@ export class AuthService {
 
     return {
       accessToken: this.jwtService.sign(payload),
-      refreshToken: refreshToken, // Will be sent as cookie, but still returned for internal use
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -86,6 +86,11 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken: newRefreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 

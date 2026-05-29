@@ -1,45 +1,19 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:56080";
 
-type AuthSession = {
-  user?: unknown;
-  tokens?: { accessToken?: string; refreshToken?: string };
-};
-
-function getSession(): AuthSession | null {
-  try {
-    const raw = localStorage.getItem("sbn-auth-session");
-    if (!raw) return null;
-    return JSON.parse(raw) as AuthSession;
-  } catch {
-    return null;
-  }
-}
+let fallbackAccessToken: string | null = null;
 
 function getAccessToken(): string | null {
-  return getSession()?.tokens?.accessToken ?? null;
+  return window.__SBN_AUTH__?.getAccessToken() ?? fallbackAccessToken;
 }
 
-function getRefreshToken(): string | null {
-  return getSession()?.tokens?.refreshToken ?? null;
-}
-
-function updateTokens(newAccessToken: string, newRefreshToken: string) {
-  try {
-    const raw = localStorage.getItem("sbn-auth-session");
-    if (!raw) return;
-    const parsed = JSON.parse(raw) as AuthSession;
-    if (parsed.tokens) {
-      parsed.tokens.accessToken = newAccessToken;
-      parsed.tokens.refreshToken = newRefreshToken;
-      localStorage.setItem("sbn-auth-session", JSON.stringify(parsed));
-    }
-  } catch {
-    return;
-  }
+function updateAccessToken(newAccessToken: string) {
+  fallbackAccessToken = newAccessToken;
+  window.__SBN_AUTH__?.setAccessToken(newAccessToken);
 }
 
 function clearSession() {
-  localStorage.removeItem("sbn-auth-session");
+  fallbackAccessToken = null;
+  window.__SBN_AUTH__?.clear();
 }
 
 async function handle<T>(res: Response): Promise<T> {
@@ -64,29 +38,20 @@ async function handle<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-let refreshPromise: Promise<{
-  accessToken: string;
-  refreshToken: string;
-}> | null = null;
+let refreshPromise: Promise<{ accessToken: string }> | null = null;
 
-async function handlerRefresh(): Promise<{
-  accessToken: string;
-  refreshToken: string;
-}> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) throw new Error("No refresh token available");
-
+async function handlerRefresh(): Promise<{ accessToken: string }> {
   const response = await fetch(`${API_BASE}/api/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+    credentials: "include",
   });
 
   if (!response.ok) throw new Error("Refresh failed");
 
-  const data = await response.json();
-  updateTokens(data.accessToken, data.refreshToken);
-  return data;
+  const data = (await response.json()) as { accessToken: string };
+  updateAccessToken(data.accessToken);
+  return { accessToken: data.accessToken };
 }
 
 export async function request<T>(path: string, init: RequestInit): Promise<T> {
@@ -100,7 +65,11 @@ export async function request<T>(path: string, init: RequestInit): Promise<T> {
   if (!isFormData) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: "include",
+  });
 
   if (res.status === 401) {
     const currentToken = getAccessToken();
@@ -109,6 +78,7 @@ export async function request<T>(path: string, init: RequestInit): Promise<T> {
         await fetch(`${API_BASE}${path}`, {
           ...init,
           headers: { ...headers, Authorization: `Bearer ${currentToken}` },
+          credentials: "include",
         }),
       );
     }
@@ -128,12 +98,13 @@ export async function request<T>(path: string, init: RequestInit): Promise<T> {
             ...headers,
             Authorization: `Bearer ${tokens.accessToken}`,
           },
+          credentials: "include",
         }),
       );
     } catch {
       clearSession();
       window.location.href = "/login";
-      throw new Error("Sessão expirada. Redirecionando para login...");
+      throw new Error("Sessao expirada. Redirecionando para login...");
     }
   }
 

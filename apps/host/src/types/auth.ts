@@ -6,7 +6,6 @@ export type User = {
 
 export type AuthTokens = {
   accessToken: string;
-  refreshToken: string;
 };
 
 export type LoginRequest = {
@@ -24,4 +23,4 @@ export type AuthResponse = AuthTokens & {
   user: User;
 };
 
-export type RefreshResponse = AuthTokens;
+export type RefreshResponse = AuthResponse;

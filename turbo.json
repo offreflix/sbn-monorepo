@@ -10,7 +10,11 @@
     "REDIS_PORT",
     "AUTH_SERVICE_URL",
     "FINANCE_SERVICE_URL",
-    "HEALTH_SERVICE_URL"
+    "HEALTH_SERVICE_URL",
+    "CORS_ORIGINS",
+    "INTERNAL_SERVICE_KEY",
+    "REFRESH_COOKIE_NAME",
+    "REFRESH_COOKIE_PATH"
   ],
   "tasks": {
     "build": {

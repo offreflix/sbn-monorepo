@@ -113,7 +113,7 @@ export class RecurrencesService {
    */
   async triggerTransaction(
     recurrenceId: string,
-  ): Promise<{ transactionId: string }> {
+  ): Promise<{ transactionId?: string; skipped?: boolean }> {
     const recurrence = await this.prisma.recurrence.findFirst({
       where: { id: recurrenceId, deletedAt: null, active: true },
       include: { wallet: true },
@@ -123,6 +123,18 @@ export class RecurrencesService {
       throw new NotFoundException(
         `Recurrence ${recurrenceId} not found or inactive`,
       );
+    }
+
+    if (recurrence.endDate && recurrence.endDate <= new Date()) {
+      await this.queueService.cancel(recurrenceId);
+      await this.prisma.recurrence.update({
+        where: { id: recurrenceId },
+        data: { active: false },
+      });
+      this.logger.log(
+        `Recurrence ${recurrenceId} reached its end date and was deactivated`,
+      );
+      return { skipped: true };
     }
 
     const walletIsCredit = this.balanceService.isCreditCard(
@@ -157,6 +169,13 @@ export class RecurrencesService {
       where: { id: recurrenceId },
       data: { lastGenerated: new Date() },
     });
+
+    await this.queueService.scheduleNext(
+      recurrence.id,
+      recurrence.frequency,
+      recurrence.startDate,
+      recurrence.timezone,
+    );
 
     this.logger.log(
       `Generated transaction ${transaction.id} for recurrence ${recurrenceId} (${recurrence.description})`,

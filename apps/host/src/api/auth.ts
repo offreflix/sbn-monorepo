@@ -26,11 +26,12 @@ async function handle<T>(res: Response): Promise<T> {
 
 async function request<T>(path: string, init: RequestInit) {
   const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
     headers: {
       "Content-Type": "application/json",
       ...init.headers,
     },
-    ...init,
+    credentials: "include",
   });
   return handle<T>(res);
 }
@@ -46,14 +47,12 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  refresh: (refreshToken: string) =>
+  refresh: () =>
     request<RefreshResponse>("/refresh", {
       method: "POST",
-      body: JSON.stringify({ refreshToken }),
     }),
-  logout: (refreshToken?: string) =>
+  logout: () =>
     request<{ success: boolean }>("/logout", {
       method: "POST",
-      body: JSON.stringify({ refreshToken }),
     }),
 };

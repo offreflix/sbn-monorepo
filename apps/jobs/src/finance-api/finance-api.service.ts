@@ -12,10 +12,13 @@ export class FinanceApiService {
       'FINANCE_SERVICE_URL',
       'http://localhost:56082',
     );
-    this.internalKey = config.get<string>(
-      'INTERNAL_SERVICE_KEY',
-      'internal-secret',
-    );
+    const internalKey =
+      config.get<string>('INTERNAL_SERVICE_KEY') ??
+      (process.env.NODE_ENV === 'production' ? undefined : 'internal-secret');
+    if (!internalKey) {
+      throw new Error('INTERNAL_SERVICE_KEY is required in production');
+    }
+    this.internalKey = internalKey;
   }
 
   async triggerRecurrence(recurrenceId: string): Promise<void> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { createHash, randomBytes } from 'crypto';
@@ -89,10 +89,13 @@ export class ApiKeysService {
   }
 
   async revokeKey(id: string, userId: string) {
-    await this.prisma.apiKey.updateMany({
+    const result = await this.prisma.apiKey.updateMany({
       where: { id, userId },
       data: { isActive: false },
     });
+    if (result.count === 0) {
+      throw new NotFoundException('API key not found');
+    }
 
     return { success: true };
   }

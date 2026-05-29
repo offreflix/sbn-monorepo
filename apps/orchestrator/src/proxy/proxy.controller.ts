@@ -1,7 +1,7 @@
-import { All, Body, Controller, Req, UseGuards } from '@nestjs/common';
+import { All, Body, Controller, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ProxyService } from './proxy.service';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { CompositeAuthGuard } from '../auth/composite-auth.guard';
 import { JsonValue, HeadersDictionary } from '../common/types';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -78,16 +78,26 @@ export class ProxyController {
   async handleAuthRequest(
     @Req() req: Request,
     @Body() body: JsonValue | undefined,
+    @Res({ passthrough: true }) res?: Response,
   ) {
     const authUrl = this.configService.get<string>(
       'AUTH_SERVICE_URL',
       'http://localhost:56081',
     );
     const url = `${authUrl}${req.originalUrl.replace('/api', '')}`;
-    console.log(`[Proxy] Forwarding auth request to: ${url}`);
-
     const headers = this.sanitizeClientHeaders(req.headers);
-    return this.proxyService.forwardRequest(url, req.method, body, headers);
+    return this.proxyService.forwardRequest(
+      url,
+      req.method,
+      body,
+      headers,
+      (responseHeaders) => {
+        const setCookie = responseHeaders['set-cookie'];
+        if (setCookie && res) {
+          res.setHeader('Set-Cookie', setCookie);
+        }
+      },
+    );
   }
 
   @UseGuards(CompositeAuthGuard)

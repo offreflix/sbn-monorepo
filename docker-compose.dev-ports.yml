@@ -1,0 +1,16 @@
+services:
+  sbn-orchestrator:
+    ports:
+      - '127.0.0.1:56080:56080'
+
+  sbn-auth:
+    ports:
+      - '127.0.0.1:56081:56081'
+
+  sbn-finance:
+    ports:
+      - '127.0.0.1:56082:56082'
+
+  sbn-health:
+    ports:
+      - '127.0.0.1:56083:56083'

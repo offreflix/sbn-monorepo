@@ -6,12 +6,14 @@ import { AuthProvider, useAuth } from "./AuthProvider";
 const mockLogin = vi.fn();
 const mockRegister = vi.fn();
 const mockRefresh = vi.fn();
+const mockLogout = vi.fn();
 
 vi.mock("../api/auth", () => ({
   authApi: {
     login: (...args: unknown[]) => mockLogin(...args),
     register: (...args: unknown[]) => mockRegister(...args),
     refresh: (...args: unknown[]) => mockRefresh(...args),
+    logout: (...args: unknown[]) => mockLogout(...args),
   },
 }));
 
@@ -26,7 +28,7 @@ const TestLoginComponent = () => {
       <button
         onClick={() =>
           login({ email: "test@email.com", password: "123456" }).catch(() => {
-            /* swallow for test */
+            return;
           })
         }
       >
@@ -52,17 +54,18 @@ const TestFetchComponent = () => {
 describe("AuthProvider", () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.restoreAllMocks();
+    window.__SBN_AUTH__ = undefined;
+    mockRefresh.mockRejectedValue(new Error("no session"));
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.resetAllMocks();
   });
 
-  it("realiza login e persiste sessão", async () => {
+  it("realiza login e persiste somente usuario", async () => {
     mockLogin.mockResolvedValueOnce({
       accessToken: "access-1",
-      refreshToken: "refresh-1",
       user: { id: "u1", email: "test@email.com", name: "Test" },
     });
 
@@ -79,22 +82,21 @@ describe("AuthProvider", () => {
     );
 
     const stored = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
-    expect(stored.tokens.accessToken).toBe("access-1");
     expect(stored.user.email).toBe("test@email.com");
+    expect(stored.tokens).toBeUndefined();
+    expect(window.__SBN_AUTH__?.getAccessToken()).toBe("access-1");
   });
 
-  it("renova token ao receber 401 e refaz requisição", async () => {
-    localStorage.setItem(
-      SESSION_KEY,
-      JSON.stringify({
-        user: { id: "u1", email: "demo@email.com" },
-        tokens: { accessToken: "expired", refreshToken: "refresh-old" },
-      }),
-    );
+  it("renova token ao receber 401 e refaz requisicao", async () => {
+    window.__SBN_AUTH__ = {
+      getAccessToken: () => "expired",
+      setAccessToken: vi.fn(),
+      clear: vi.fn(),
+    };
 
     mockRefresh.mockResolvedValueOnce({
       accessToken: "access-new",
-      refreshToken: "refresh-new",
+      user: { id: "u1", email: "demo@email.com" },
     });
 
     const firstResponse = new Response(null, { status: 401 });
@@ -113,7 +115,7 @@ describe("AuthProvider", () => {
     await userEvent.click(screen.getByText("fetch"));
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2));
-    expect(mockRefresh).toHaveBeenCalledWith("refresh-old");
+    expect(mockRefresh).toHaveBeenCalledWith();
 
     const secondCall = fetchSpy.mock.calls[1];
     const headers = secondCall?.[1]?.headers as Headers;

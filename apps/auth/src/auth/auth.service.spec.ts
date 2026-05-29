@@ -130,6 +130,7 @@ describe('AuthService', () => {
       expect(mockRedis.set).toHaveBeenCalled();
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
+      expect(result).toHaveProperty('user');
       expect(result.refreshToken).not.toBe(oldToken);
     });
 

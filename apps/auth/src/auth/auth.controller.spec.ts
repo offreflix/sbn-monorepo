@@ -19,6 +19,15 @@ const mockAuthService = {
 
 describe('AuthController', () => {
   let controller: AuthController;
+  const mockRes = () =>
+    ({
+      cookie: jest.fn(),
+      clearCookie: jest.fn(),
+    }) as any;
+  const mockReq = (refreshToken?: string) =>
+    ({
+      cookies: refreshToken ? { refresh_token: refreshToken } : {},
+    }) as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,8 +44,9 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
-    it('should return tokens and user on valid credentials', async () => {
+    it('should set refresh cookie and return access token and user on valid credentials', async () => {
       const user = { id: '1', email: 'a@b.com', name: 'A' };
+      const res = mockRes();
       mockAuthService.validateUser.mockResolvedValue(user);
       mockAuthService.login.mockResolvedValue({
         accessToken: 'at',
@@ -47,9 +57,14 @@ describe('AuthController', () => {
       const result = await controller.login({
         email: 'a@b.com',
         password: 'pass',
-      });
+      }, res);
 
-      expect(result).toEqual({ accessToken: 'at', refreshToken: 'rt', user });
+      expect(res.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        'rt',
+        expect.objectContaining({ httpOnly: true, path: '/api/auth' }),
+      );
+      expect(result).toEqual({ accessToken: 'at', user });
     });
 
     it('should throw UnauthorizedException on invalid credentials', async () => {
@@ -75,19 +90,28 @@ describe('AuthController', () => {
   });
 
   describe('refresh', () => {
-    it('should return new tokens', async () => {
+    it('should rotate refresh cookie and return access token and user', async () => {
+      const res = mockRes();
+      const user = { id: '1', email: 'a@b.com', name: 'A' };
       mockAuthService.refresh.mockResolvedValue({
         accessToken: 'new-at',
         refreshToken: 'new-rt',
+        user,
       });
 
-      const result = await controller.refresh({ refreshToken: 'old-rt' });
-      expect(result).toEqual({ accessToken: 'new-at', refreshToken: 'new-rt' });
+      const result = await controller.refresh(mockReq('old-rt'), {}, res);
+      expect(mockAuthService.refresh).toHaveBeenCalledWith('old-rt');
+      expect(res.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        'new-rt',
+        expect.objectContaining({ httpOnly: true, path: '/api/auth' }),
+      );
+      expect(result).toEqual({ accessToken: 'new-at', user });
     });
 
     it('should throw UnauthorizedException if refreshToken is missing', async () => {
       await expect(
-        controller.refresh({ refreshToken: '' }),
+        controller.refresh(mockReq(), {}, mockRes()),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -95,13 +119,18 @@ describe('AuthController', () => {
   describe('logout', () => {
     it('should call logout service and return success when token provided', async () => {
       mockAuthService.logout.mockResolvedValue({ success: true });
-      const result = await controller.logout({ refreshToken: 'rt' });
+      const res = mockRes();
+      const result = await controller.logout(mockReq('rt'), {}, res);
       expect(mockAuthService.logout).toHaveBeenCalledWith('rt');
+      expect(res.clearCookie).toHaveBeenCalledWith(
+        'refresh_token',
+        expect.objectContaining({ path: '/api/auth' }),
+      );
       expect(result).toEqual({ success: true });
     });
 
     it('should return success without calling logout when no token', async () => {
-      const result = await controller.logout({});
+      const result = await controller.logout(mockReq(), {}, mockRes());
       expect(mockAuthService.logout).not.toHaveBeenCalled();
       expect(result).toEqual({ success: true });
     });

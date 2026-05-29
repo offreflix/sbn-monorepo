@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,7 +16,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   LoginDto,
@@ -35,6 +36,34 @@ interface AuthenticatedRequest extends Request {
   user: AuthenticatedUser;
 }
 
+const REFRESH_COOKIE_NAME =
+  process.env.REFRESH_COOKIE_NAME ?? 'refresh_token';
+const REFRESH_COOKIE_PATH = process.env.REFRESH_COOKIE_PATH ?? '/api/auth';
+const REFRESH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 * 1000;
+
+function setRefreshCookie(res: Response, refreshToken: string) {
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: REFRESH_COOKIE_PATH,
+    maxAge: REFRESH_COOKIE_MAX_AGE,
+  });
+}
+
+function clearRefreshCookie(res: Response) {
+  res.clearCookie(REFRESH_COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: REFRESH_COOKIE_PATH,
+  });
+}
+
+function getRefreshToken(req: Request, body?: { refreshToken?: string }) {
+  return req.cookies?.[REFRESH_COOKIE_NAME] ?? body?.refreshToken;
+}
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -49,7 +78,11 @@ export class AuthController {
     type: LoginResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
-  async login(@Body() loginDto: LoginDto) {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
     const user = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
@@ -58,11 +91,10 @@ export class AuthController {
       throw new UnauthorizedException('Credenciais inválidas');
     }
     const result = await this.authService.login(user);
+    setRefreshCookie(res, result.refreshToken);
 
-    // Return all tokens in body (needed for cross-origin with proxy)
     return {
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
       user: result.user,
     };
   }
@@ -91,17 +123,23 @@ export class AuthController {
     status: 401,
     description: 'Refresh token inválido ou expirado',
   })
-  async refresh(@Body() body: RefreshTokenDto) {
-    if (!body.refreshToken) {
+  async refresh(
+    @Req() req: Request,
+    @Body() body: Partial<RefreshTokenDto> = {},
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
+    const refreshToken = getRefreshToken(req, body);
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
     }
 
-    const result = await this.authService.refresh(body.refreshToken);
+    const result = await this.authService.refresh(refreshToken);
+    setRefreshCookie(res, result.refreshToken);
 
-    // Return all tokens in body (needed for cross-origin with proxy)
     return {
       accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      user: result.user,
     };
   }
 
@@ -109,10 +147,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Encerrar sessão' })
   @ApiResponse({ status: 200, description: 'Logout realizado com sucesso' })
-  async logout(@Body() body: { refreshToken?: string }) {
-    if (body.refreshToken) {
-      await this.authService.logout(body.refreshToken);
+  async logout(
+    @Req() req: Request,
+    @Body() body: { refreshToken?: string } = {},
+    @Res({ passthrough: true })
+    res: Response,
+  ) {
+    const refreshToken = getRefreshToken(req, body);
+    if (refreshToken) {
+      await this.authService.logout(refreshToken);
     }
+    clearRefreshCookie(res);
 
     return { success: true };
   }

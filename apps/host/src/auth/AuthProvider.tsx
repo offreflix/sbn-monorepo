@@ -13,10 +13,11 @@ import type {
   RefreshResponse,
   User,
 } from "../types/auth";
+import { getAuthBridge } from "./sessionBridge";
 
 type SessionState = {
   user: User | null;
-  tokens: AuthTokens | null;
+  accessToken: string | null;
 };
 
 type AuthContextValue = {
@@ -45,37 +46,24 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function loadSession(): SessionState {
   try {
     if (typeof window === "undefined" || !localStorage) {
-      return { user: null, tokens: null };
+      return { user: null, accessToken: null };
     }
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { user: null, tokens: null };
-    const parsed = JSON.parse(raw) as SessionState;
-    return parsed;
+    if (!raw) return { user: null, accessToken: null };
+    const parsed = JSON.parse(raw) as Partial<SessionState>;
+    return { user: parsed.user ?? null, accessToken: null };
   } catch (error) {
     console.error("[Auth] Failed to load session:", error);
-    return { user: null, tokens: null };
+    return { user: null, accessToken: null };
   }
 }
 
 function persistSession(session: SessionState) {
   try {
     if (typeof window === "undefined" || !localStorage) {
-      console.warn("[Auth] localStorage not available");
       return;
     }
-    const serialized = JSON.stringify(session);
-    localStorage.setItem(STORAGE_KEY, serialized);
-    // Debug: verificar se foi salvo
-    if (process.env.NODE_ENV === "development") {
-      const verify = localStorage.getItem(STORAGE_KEY);
-      console.log("[Auth] Session saved to localStorage:", {
-        hasUser: !!session.user,
-        hasTokens: !!session.tokens,
-        tokenLength: session.tokens?.accessToken?.length || 0,
-        saved: verify !== null,
-        matches: verify === serialized,
-      });
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: session.user }));
   } catch (error) {
     console.error("[Auth] Failed to persist session:", error);
   }
@@ -84,94 +72,73 @@ function persistSession(session: SessionState) {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<SessionState>({
     user: null,
-    tokens: null,
+    accessToken: null,
   });
   const [loading, setLoading] = useState(true);
   const refreshPromise = useRef<Promise<AuthTokens> | null>(null);
 
-  useEffect(() => {
-    setSession(loadSession());
-    setLoading(false);
-  }, []);
-
   const applyAuthResponse = (resp: AuthResponse) => {
-    // Backend retorna camelCase
-    console.log("[AuthProvider] Auth Response:", resp);
-    const accessToken = resp.accessToken;
-    const refreshToken = resp.refreshToken || null;
-
-    if (!accessToken) {
-      console.error("[Auth] No access token in response:", resp);
-      throw new Error("Token de acesso não recebido do servidor");
+    if (!resp.accessToken) {
+      throw new Error("Token de acesso nao recebido do servidor");
     }
 
-    if (!refreshToken) {
-      console.warn("[Auth] No refresh token in response!", resp);
-    }
-
+    getAuthBridge().setAccessToken(resp.accessToken);
     const nextSession: SessionState = {
       user: resp.user,
-      tokens: {
-        accessToken,
-        refreshToken: refreshToken || "",
-      },
+      accessToken: resp.accessToken,
     };
     setSession(nextSession);
     persistSession(nextSession);
-    // Debug: verificar se foi salvo
-    if (process.env.NODE_ENV === "development") {
-      console.log("[Auth] Login/Register successful, session saved:", {
-        userId: resp.user?.id,
-        email: resp.user?.email,
-        hasAccessToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
-      });
-    }
   };
 
+  useEffect(() => {
+    const stored = loadSession();
+    setSession(stored);
+
+    authApi
+      .refresh()
+      .then(applyAuthResponse)
+      .catch(() => {
+        getAuthBridge().clear();
+        const nextSession = { user: null, accessToken: null };
+        setSession(nextSession);
+        persistSession(nextSession);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   const logout = async () => {
-    // Try to invalidate refresh token on backend
-    const refreshToken = session.tokens?.refreshToken;
-    if (refreshToken) {
-      try {
-        await authApi.logout(refreshToken);
-      } catch (error) {
-        console.warn("[Auth] Failed to invalidate refresh token:", error);
-      }
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.warn("[Auth] Failed to invalidate refresh token:", error);
     }
 
-    const nextSession: SessionState = { user: null, tokens: null };
+    getAuthBridge().clear();
+    const nextSession: SessionState = { user: null, accessToken: null };
     setSession(nextSession);
     persistSession(nextSession);
   };
 
   const refreshTokens = async () => {
-    const stored = session.tokens?.refreshToken;
-    if (!stored || stored === "") {
-      logout();
-      throw new Error("Sessão expirada");
-    }
-
     if (!refreshPromise.current) {
       refreshPromise.current = authApi
-        .refresh(stored)
+        .refresh()
         .then((tokens: RefreshResponse) => {
-          // Backend retorna camelCase
-          const accessToken = tokens.accessToken;
-          const refreshToken = tokens.refreshToken || stored;
+          getAuthBridge().setAccessToken(tokens.accessToken);
 
-          const normalizedTokens: AuthTokens = {
-            accessToken,
-            refreshToken,
-          };
-
-          // Preserva o user ao atualizar os tokens
           setSession((prev) => {
-            const next = { ...prev, tokens: normalizedTokens };
+            const next = {
+              user: tokens.user ?? prev.user,
+              accessToken: tokens.accessToken,
+            };
             persistSession(next);
             return next;
           });
-          return normalizedTokens;
+
+          return { accessToken: tokens.accessToken };
         })
         .finally(() => {
           refreshPromise.current = null;
@@ -191,10 +158,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     email: string;
     password: string;
   }) => {
-    // Register pode não retornar tokens, então fazemos login após registro
     const registerResp = await authApi.register(payload);
 
-    // Se não tiver tokens, faz login automaticamente
     if (!registerResp.accessToken) {
       const loginResp = await authApi.login({
         email: payload.email,
@@ -210,18 +175,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const doFetch = async (token: string | null) => {
       const headers = new Headers(init?.headers || {});
       if (token) headers.set("Authorization", `Bearer ${token}`);
-      return fetch(input, { ...init, headers });
+      return fetch(input, { ...init, headers, credentials: "include" });
     };
 
-    let response = await doFetch(session.tokens?.accessToken ?? null);
+    let response = await doFetch(
+      session.accessToken ?? getAuthBridge().getAccessToken(),
+    );
 
-    if (response.status === 401 && session.tokens?.refreshToken) {
+    if (response.status === 401) {
       try {
         const tokens = await refreshTokens();
         response = await doFetch(tokens.accessToken);
       } catch {
         logout();
-        throw new Error("Sessão expirada. Faça login novamente.");
+        throw new Error("Sessao expirada. Faca login novamente.");
       }
     }
 
@@ -231,8 +198,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session.user,
-      accessToken: session.tokens?.accessToken ?? null,
-      refreshToken: session.tokens?.refreshToken ?? null,
+      accessToken: session.accessToken ?? null,
+      refreshToken: null,
       loading,
       login,
       register,
@@ -240,7 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       refreshTokens,
       authFetch,
     }),
-    [session.user, session.tokens, loading],
+    [session.user, session.accessToken, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

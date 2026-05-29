@@ -9,6 +9,7 @@ import {
   Param,
   BadRequestException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,7 +24,15 @@ import { UpdateRecurrenceDto } from './dto/update-recurrence.dto';
 import { RecurrenceResponseDto } from './dto/recurrence-response.dto';
 import { TransactionResponseDto } from '../transactions/dto/transaction-response.dto';
 
-const INTERNAL_KEY = process.env.INTERNAL_SERVICE_KEY ?? 'internal-secret';
+function getInternalKey() {
+  const key = process.env.INTERNAL_SERVICE_KEY;
+  if (!key && process.env.NODE_ENV === 'production') {
+    throw new InternalServerErrorException(
+      'INTERNAL_SERVICE_KEY is required in production',
+    );
+  }
+  return key ?? 'internal-secret';
+}
 
 @ApiTags('Recurrences')
 @ApiHeader({
@@ -124,7 +133,7 @@ export class RecurrencesController {
     @Param('id') id: string,
     @Headers('x-internal-key') internalKey: string,
   ) {
-    if (internalKey !== INTERNAL_KEY) {
+    if (internalKey !== getInternalKey()) {
       throw new ForbiddenException('Internal access only');
     }
     return this.recurrencesService.triggerTransaction(id);

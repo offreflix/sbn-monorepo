@@ -29,8 +29,6 @@ services:
     build:
       context: .
       dockerfile: apps/auth/Dockerfile
-    ports:
-      - '56081:56081'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
       JWT_SECRET: your_jwt_secret_key
@@ -49,8 +47,6 @@ services:
     build:
       context: .
       dockerfile: apps/finance/Dockerfile
-    ports:
-      - '56082:56082'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
       REDIS_HOST: redis
@@ -69,8 +65,6 @@ services:
     build:
       context: .
       dockerfile: apps/health/Dockerfile
-    ports:
-      - '56083:56083'
     environment:
       DATABASE_URL: postgresql://admin:password@postgres:5432/sbn_db?schema=public
     depends_on:
@@ -85,8 +79,6 @@ services:
     build:
       context: .
       dockerfile: apps/orchestrator/Dockerfile
-    ports:
-      - '56080:56080'
     environment:
       AUTH_SERVICE_URL: http://sbn-auth:56081
       FINANCE_SERVICE_URL: http://sbn-finance:56082

@@ -196,4 +196,80 @@ describe('RecurrencesService', () => {
       });
     });
   });
+
+  describe('triggerTransaction', () => {
+    it('should generate transaction and schedule next recurrence', async () => {
+      const recurrence = {
+        id: 'r1',
+        userId: 'u1',
+        walletId: 'w1',
+        categoryId: 'c1',
+        amount: 100,
+        type: 'Despesa',
+        description: 'Internet',
+        frequency: 'MONTHLY',
+        startDate: new Date('2024-01-01'),
+        endDate: null,
+        timezone: 'America/Sao_Paulo',
+        wallet: { type: 'Conta Corrente' },
+      };
+      const transaction = {
+        id: 't1',
+        walletId: 'w1',
+        isPaid: false,
+        type: 'Despesa',
+        amount: 100,
+      };
+      mockPrismaService.recurrence.findFirst.mockResolvedValue(recurrence);
+      mockTransactionsRepository.create.mockResolvedValue(transaction);
+      mockBalanceService.isCreditCard.mockReturnValue(false);
+      mockPrismaService.recurrence.update.mockResolvedValue(recurrence);
+
+      const result = await service.triggerTransaction('r1');
+
+      expect(result).toEqual({ transactionId: 't1' });
+      expect(mockRecurrenceQueueService.scheduleNext).toHaveBeenCalledWith(
+        'r1',
+        'MONTHLY',
+        recurrence.startDate,
+        'America/Sao_Paulo',
+      );
+    });
+
+    it('should deactivate ended recurrence without scheduling next job', async () => {
+      const recurrence = {
+        id: 'r1',
+        userId: 'u1',
+        walletId: 'w1',
+        categoryId: 'c1',
+        amount: 100,
+        type: 'Despesa',
+        description: 'Internet',
+        frequency: 'MONTHLY',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-02'),
+        timezone: 'America/Sao_Paulo',
+        wallet: { type: 'Conta Corrente' },
+      };
+      mockPrismaService.recurrence.findFirst.mockResolvedValue(recurrence);
+      mockTransactionsRepository.create.mockResolvedValue({
+        id: 't1',
+        walletId: 'w1',
+        isPaid: false,
+        type: 'Despesa',
+        amount: 100,
+      });
+      mockBalanceService.isCreditCard.mockReturnValue(false);
+      mockPrismaService.recurrence.update.mockResolvedValue(recurrence);
+
+      await service.triggerTransaction('r1');
+
+      expect(mockRecurrenceQueueService.cancel).toHaveBeenCalledWith('r1');
+      expect(mockRecurrenceQueueService.scheduleNext).not.toHaveBeenCalled();
+      expect(mockPrismaService.recurrence.update).toHaveBeenCalledWith({
+        where: { id: 'r1' },
+        data: { active: false },
+      });
+    });
+  });
 });
